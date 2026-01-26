@@ -5,30 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Dalton: De Cero a Experto</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
-        header { background: #004a99; color: white; padding: 2rem; border-radius: 8px; text-align: center; }
-        .badge { background: #ffcc00; color: #000; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
-        .card { background: white; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        button { background: #004a99; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        button:hover { background: #003366; }
+        body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f0f2f5; }
+        header { background: #004a99; color: white; padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        nav { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-around; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        nav a { text-decoration: none; color: #004a99; font-weight: bold; }
+        .modulo { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .btn-solucion { background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        .recursos-box { background: #e9ecef; padding: 15px; border-left: 5px solid #004a99; margin-top: 15px; }
+        code { background: #f8f9fa; padding: 2px 5px; border-radius: 4px; color: #d63384; }
     </style>
 </head>
 <body>
+
     <header>
-        <h1>SQL para Análisis Automotriz</h1>
-        <p>Curso Dalton: <span class="badge">Nivel 0 - Introducción</span></p>
+        <h1>Plataforma SQL Dalton</h1>
+        <p>De Cero a Experto | Panel de Control</p>
     </header>
 
-    <div class="card">
-        <h2>🚀 ¡Bienvenido, Toño!</h2>
-        <p>Este es el inicio de tu plataforma educativa. Aquí aprenderás a dominar las bases de datos de ventas y servicios.</p>
-        <h3>Lo que veremos hoy:</h3>
-        <ul>
-            <li>Estructura de bases de datos Dalton (GDL, SLP, etc.)</li>
-            <li>¿Qué es SQL Server?</li>
-            <li>Tu primer SELECT.</li>
-        </ul>
-        <button onclick="alert('¡Conexión exitosa! La página está viva.')">Probar interactividad</button>
-    </div>
+    <nav>
+        <a href="#">Inicio</a>
+        <a href="#basico">Nivel Básico</a>
+        <a href="#recursos">Recursos</a>
+    </nav>
+
+    <section id="basico" class="modulo">
+        <h2>📍 Nivel Básico: Filtrado de Datos</h2>
+        <p>Aprende a extraer información específica de las agencias Toyota y Honda.</p>
+        
+        <div class="recursos-box">
+            <strong>📂 Archivos de Práctica:</strong><br>
+            <ul>
+                <li><a href="../database/01_creacion_tablas_dalton.sql" target="_blank">1. Estructura de Tablas (SQL)</a></li>
+                <li><a href="../database/02_insertar_datos_dalton.sql" target="_blank">2. Carga de Datos (SQL)</a></li>
+            </ul>
+        </div>
+
+        <h3>Ejercicio de hoy:</h3>
+        <p>Escribe una consulta para obtener todas las ventas mayores a <code>500,000</code> pesos.</p>
+        
+        <button class="btn-solucion" onclick="mostrarSolucion()">Mostrar Solución Sugerida</button>
+        
+        <div id="solucion" style="display:none; margin-top:15px; background: #f8f9fa; padding: 10px; border: 1px dashed #28a745;">
+            <pre>SELECT * FROM Ventas_Dalton WHERE MontoTotal > 500000;</pre>
+            <small>Pista: Revisa el archivo <code>04_respuestas_nivel_basico.sql</code> en la carpeta database.</small>
+        </div>
+    </section>
+
+    <script>
+        function mostrarSolucion() {
+            var x = document.getElementById("solucion");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
