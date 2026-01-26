@@ -5,61 +5,234 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Dalton: De Cero a Experto</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f0f2f5; }
-        header { background: #004a99; color: white; padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 20px; }
-        nav { background: #fff; padding: 10px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-around; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        nav a { text-decoration: none; color: #004a99; font-weight: bold; }
-        .modulo { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .btn-solucion { background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
-        .recursos-box { background: #e9ecef; padding: 15px; border-left: 5px solid #004a99; margin-top: 15px; }
-        code { background: #f8f9fa; padding: 2px 5px; border-radius: 4px; color: #d63384; }
+        :root {
+            --azul-dalton: #004a99;
+            --gris-fondo: #f4f7f6;
+            --blanco: #ffffff;
+            --exito: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            background-color: var(--gris-fondo);
+        }
+
+        header {
+            background: var(--azul-dalton);
+            color: var(--blanco);
+            padding: 3rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            background: #fff;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--azul-dalton);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            background: var(--blanco);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--azul-dalton);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* Tabla de Información General */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .info-table td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+        }
+
+        .info-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            background: #ffcc00;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* Botones y Recursos */
+        .recursos-box {
+            background: #eef2f7;
+            padding: 20px;
+            border-left: 6px solid var(--azul-dalton);
+            border-radius: 4px;
+        }
+
+        .btn-solucion {
+            background: var(--exito);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-solucion:hover {
+            background: #218838;
+        }
+
+        #solucion-box {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f1f1f1;
+            border-radius: 8px;
+            font-family: monospace;
+            border: 1px dashed #ccc;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #777;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Plataforma SQL Dalton</h1>
-        <p>De Cero a Experto | Panel de Control</p>
+        <h1>SQL para Análisis Automotriz</h1>
+        <p>De Cero a Experto | Dalton 2026</p>
     </header>
 
     <nav>
-        <a href="#">Inicio</a>
-        <a href="#basico">Nivel Básico</a>
-        <a href="#recursos">Recursos</a>
+        <a href="#inicio">Inicio</a>
+        <a href="#informacion">Información</a>
+        <a href="#modulos">Módulos</a>
+        <a href="#contacto">Contacto</a>
     </nav>
 
-    <section id="basico" class="modulo">
-        <h2>📍 Nivel Básico: Filtrado de Datos</h2>
-        <p>Aprende a extraer información específica de las agencias Toyota y Honda.</p>
-        
-        <div class="recursos-box">
-            <strong>📂 Archivos de Práctica:</strong><br>
-            <ul>
-                <li><a href="../database/01_creacion_tablas_dalton.sql" target="_blank">1. Estructura de Tablas (SQL)</a></li>
-                <li><a href="../database/02_insertar_datos_dalton.sql" target="_blank">2. Carga de Datos (SQL)</a></li>
-            </ul>
-        </div>
+    <div class="container">
 
-        <h3>Ejercicio de hoy:</h3>
-        <p>Escribe una consulta para obtener todas las ventas mayores a <code>500,000</code> pesos.</p>
-        
-        <button class="btn-solucion" onclick="mostrarSolucion()">Mostrar Solución Sugerida</button>
-        
-        <div id="solucion" style="display:none; margin-top:15px; background: #f8f9fa; padding: 10px; border: 1px dashed #28a745;">
-            <pre>SELECT * FROM Ventas_Dalton WHERE MontoTotal > 500000;</pre>
-            <small>Pista: Revisa el archivo <code>04_respuestas_nivel_basico.sql</code> en la carpeta database.</small>
-        </div>
-    </section>
+        <section id="inicio">
+            <h2>🚀 Bienvenidos al Curso</h2>
+            <p>Este programa está diseñado para transformar tu carrera en el área de TI de Dalton, llevándote de nivel 0 a un analista de datos capaz de generar reportes estratégicos para todas las marcas del grupo.</p>
+        </section>
+
+        <section id="informacion">
+            <h2>📋 Información General</h2>
+            <table class="info-table">
+                <tr>
+                    <td><strong>⏱️ Duración Total</strong></td>
+                    <td>10 semanas (A tu propio ritmo)</td>
+                </tr>
+                <tr>
+                    <td><strong>🎯 Objetivo</strong></td>
+                    <td>Escribir consultas SQL avanzadas con confianza para reportes reales.</td>
+                </tr>
+                <tr>
+                    <td><strong>👤 Perfil Ideal</strong></td>
+                    <td>Personal de TI o Analistas del Sector Automotriz.</td>
+                </tr>
+                <tr>
+                    <td><strong>✅ Requisito</strong></td>
+                    <td>Dedicación mínima de 30 minutos diarios.</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="modulos">
+            <h2>📍 Módulo Actual: <span class="badge">Nivel Básico</span></h2>
+            <p>Estamos aprendiendo a filtrar datos de ventas en agencias Toyota y Honda.</p>
+
+            <div class="recursos-box">
+                <strong>📂 Descarga de Recursos SQL:</strong>
+                <p>Haz clic para abrir los scripts en una nueva pestaña:</p>
+                <ul>
+                    <li><a href="database/01_creacion_tablas_dalton.sql" target="_blank">1. Estructura de Tablas (DDL)</a></li>
+                    <li><a href="database/02_insertar_datos_dalton.sql" target="_blank">2. Carga de Datos Iniciales (DML)</a></li>
+                    <li><a href="database/03_ejercicios_nivel_basico.sql" target="_blank">3. Hoja de Ejercicios</a></li>
+                </ul>
+            </div>
+
+            <h3>💡 Práctica Interactiva</h3>
+            <p>¿Cómo obtendrías las ventas realizadas solo en la agencia de <strong>Guadalajara (AgenciaID = 1)</strong>?</p>
+            
+            <button class="btn-solucion" onclick="toggleSolucion()">Mostrar Solución Sugerida</button>
+
+            <div id="solucion-box">
+                <p>-- Consulta sugerida:<br>
+                <code>SELECT * FROM Ventas_Dalton WHERE AgenciaID = 1;</code></p>
+            </div>
+        </section>
+
+        <section id="contacto">
+            <h2>📧 Soporte Técnico</h2>
+            <form id="contactForm" onsubmit="validarForm(event)">
+                <input type="text" id="nombre" placeholder="Tu nombre" style="width:100%; padding:10px; margin-bottom:10px;" required><br>
+                <input type="email" id="email" placeholder="Tu correo corporativo" style="width:100%; padding:10px; margin-bottom:10px;" required><br>
+                <textarea placeholder="Duda o comentario sobre el código SQL" style="width:100%; padding:10px; margin-bottom:10px;" rows="4"></textarea><br>
+                <button type="submit" style="background:#004a99; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Enviar Mensaje</button>
+            </form>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>© 2026 Dalton TI Educación | <em>"Lo que no se mide, no se puede mejorar."</em></p>
+    </footer>
 
     <script>
-        function mostrarSolucion() {
-            var x = document.getElementById("solucion");
-            if (x.style.display === "none") {
-                x.style.display = "block";
+        function toggleSolucion() {
+            var box = document.getElementById("solucion-box");
+            if (box.style.display === "none" || box.style.display === "") {
+                box.style.display = "block";
             } else {
-                x.style.display = "none";
+                box.style.display = "none";
             }
         }
+
+        function validarForm(event) {
+            event.preventDefault();
+            alert("¡Gracias Toño! Tu mensaje ha sido enviado al equipo de soporte.");
+            document.getElementById("contactForm").reset();
+        }
     </script>
+
 </body>
 </html>
