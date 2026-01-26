@@ -10,78 +10,69 @@
 </head>
 <body data-theme="dark">
 
-    <header class="header">
-        <div class="header-info">
-            <span class="logo">📜</span>
-            <div>
-                <h1>Dalton Data Quest</h1>
-                <p>Estatus: <span id="db-status">Cargando Terminal...</span></p>
-            </div>
-        </div>
-        <div class="stats">
-            <div class="stat-item">⭐ <span id="playerXP">0</span> XP</div>
-            <div class="stat-item">🪙 <span id="playerCoins">0</span> Bonos</div>
-            <div class="stat-item">👤 <span id="playerRank">Practicante</span></div>
-        </div>
-    </header>
-
-    <div class="main-layout">
+    <div class="game-container">
         <aside class="sidebar">
-            <h3>📍 Mapa de Agencias</h3>
-            <nav id="challengeList">
-                <div class="module-item active" onclick="loadModule(1)">
-                    <span class="icon">🏢</span>
-                    <div class="text">
-                        <strong>GDL: El Origen</strong>
-                        <small>Módulo 1: Restauración</small>
-                    </div>
+            <div class="profile-section">
+                <div class="avatar-circle" id="playerAvatar">👨‍💻</div>
+                <h2 id="playerNameDisplay">Analista Toño</h2>
+                <div class="rank-badge" id="playerRank">Practicante de TI</div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-row"><span>XP:</span> <strong id="playerXP">0</strong></div>
+                <div class="stat-row"><span>Bonos:</span> <strong id="playerCoins">0</strong></div>
+                <div class="progress-box">
+                    <p>Progreso Global</p>
+                    <div class="bar-bg"><div class="bar-fill" style="width: 5%">5%</div></div>
                 </div>
-                <div class="module-item locked">
-                    <span class="icon">🔒</span>
-                    <div class="text">
-                        <strong>SLP: El Almacén</strong>
-                        <small>Bloqueado</small>
-                    </div>
-                </div>
-                <div class="module-item locked">
-                    <span class="icon">🔒</span>
-                    <div class="text">
-                        <strong>CDMX: El Hub</strong>
-                        <small>Bloqueado</small>
-                    </div>
-                </div>
+            </div>
+
+            <nav class="module-nav">
+                <h3>📍 RUTA DE RESTAURACIÓN</h3>
+                <div class="nav-item active">🏢 GDL: El Inicio</div>
+                <div class="nav-item locked">🌵 SLP: El Almacén</div>
+                <div class="nav-item locked">🏙️ CDMX: La Central</div>
             </nav>
 
-            <div class="data-dictionary">
-                <h4>📊 Diccionario SQL</h4>
-                <ul id="table-info">
-                    <li><strong>Fact_Ventas</strong> (VentaID, Fecha, Monto...)</li>
-                    <li><strong>Dim_Modelos</strong> (ModeloID, Marca, Nombre...)</li>
-                </ul>
+            <div class="data-helper">
+                <h3>📊 DICCIONARIO ACTIVO</h3>
+                <div id="table-schema">
+                    </div>
             </div>
         </aside>
 
-        <main class="workspace">
-            <section class="story-box">
-                <div class="ana-avatar">👩‍💻</div>
-                <div class="dialogue">
-                    <h3 id="challengeTitle">Conexión con Ana...</h3>
-                    <p id="npcDialogue">Cargando instrucciones de emergencia de Dalton...</p>
+        <main class="main-content">
+            <section class="story-panel">
+                <div class="ana-header">
+                    <span class="ana-icon">👩‍💻</span>
+                    <div class="ana-title">
+                        <h3>MENSAJE DE ANA (Jefa de TI)</h3>
+                        <small>Transmisión Encriptada...</small>
+                    </div>
+                </div>
+                <div class="story-content">
+                    <p id="npcStory">Cargando crónica del Gran Apagón...</p>
+                    <div class="theory-box" id="theorySection">
+                        <strong>💡 LECCIÓN TÉCNICA:</strong>
+                        <p id="sqlTheory">Selecciona un módulo para ver la teoría.</p>
+                    </div>
                 </div>
             </section>
 
-            <div class="terminal">
-                <div class="terminal-header">Terminal de Recuperación SQL - Grupo Dalton 2026</div>
-                <textarea id="sqlEditor" placeholder="-- Escribe tu consulta aquí..."></textarea>
-                <div class="controls">
-                    <button class="btn btn-run" onclick="executeQuery()">▶ EJECUTAR SQL</button>
-                    <button class="btn btn-hint" onclick="showHints()">💡 PEDIR PISTA</button>
+            <section class="terminal-section">
+                <div class="terminal-header">TERMINAL SQL - DALTON CORE v1.0</div>
+                <textarea id="sqlEditor" spellcheck="false" placeholder="-- Escribe tu consulta con comentarios..."></textarea>
+                <div class="terminal-footer">
+                    <button class="btn btn-primary" onclick="executeQuery()">▶ EJECUTAR RESTAURACIÓN</button>
+                    <button class="btn btn-outline" onclick="showHint()">🔍 AYUDA DE ANA</button>
                 </div>
-            </div>
+            </section>
 
-            <div id="results" class="results-table">
-                <p class="placeholder">Esperando datos de la base central...</p>
-            </div>
+            <section class="results-panel">
+                <div id="results">
+                    <p class="placeholder-text">Esperando señal de la base de datos...</p>
+                </div>
+            </section>
         </main>
     </div>
 
