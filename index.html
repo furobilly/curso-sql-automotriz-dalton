@@ -3,91 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Dalton - Módulo 1</title>
+    <title>Plataforma SQL Dalton - Nivel 0 a Experto</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
     <style>
-        :root { --azul: #004a99; --gris: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--gris); }
-        header { background: var(--azul); color: white; padding: 2rem; text-align: center; }
-        .container { max-width: 900px; margin: 20px auto; padding: 20px; }
-        section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2 { color: var(--azul); margin-top: 0; }
-        .badge { background: #ffcc00; color: black; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
-        
-        /* Consola Interactiva */
-        .console { background: #2d2d2d; padding: 20px; border-radius: 8px; margin-top: 15px; }
-        textarea { width: 100%; background: transparent; color: #a6e22e; border: none; font-family: monospace; font-size: 1.1rem; outline: none; }
-        .btn-run { background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        
-        #result-table { margin-top: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #eee; padding: 10px; border: 1px solid #ddd; }
-        td { padding: 8px; border: 1px solid #ddd; }
+        :root { --azul: #004a99; --gris-f: #f8f9fa; --blanco: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--gris-f); color: #333; line-height: 1.6; }
+        header { background: var(--azul); color: white; padding: 3rem 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        nav { background: white; padding: 1rem; position: sticky; top: 0; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 1000; }
+        nav a { text-decoration: none; color: var(--azul); font-weight: bold; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        section { background: var(--blanco); padding: 30px; margin-bottom: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        h2 { color: var(--azul); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .info-table td { padding: 12px; border: 1px solid #dee2e6; }
+        .info-table tr:nth-child(even) { background: #f9f9f9; }
+        .console-box { background: #2d2d2d; border-radius: 10px; padding: 20px; margin-top: 20px; }
+        textarea { width: 100%; background: transparent; color: #a6e22e; border: 1px solid #444; font-family: 'Courier New', monospace; font-size: 1.1rem; padding: 10px; box-sizing: border-box; outline: none; }
+        .btn-run { background: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; transition: 0.3s; }
+        .btn-run:hover { background: #218838; transform: translateY(-2px); }
+        #output { margin-top: 20px; overflow-x: auto; background: white; border-radius: 8px; }
+        table.sql-res { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        table.sql-res th { background: #eee; padding: 10px; border: 1px solid #ddd; }
+        table.sql-res td { padding: 8px; border: 1px solid #ddd; }
+        .status { padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .online { background: #d4edda; color: #155724; }
+        footer { text-align: center; padding: 40px; color: #888; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>SQL Dalton: Módulo 1</h1>
-    <p>Filtrado Estratégico de Datos <span id="status" style="font-size: 0.8rem; opacity: 0.8;">(Cargando...)</span></p>
+    <h1>Plataforma Educativa Dalton</h1>
+    <p>SQL para Análisis Automotriz | <span id="db-status" class="status" style="background:#ffcc00">Cargando Motor...</span></p>
 </header>
 
+<nav>
+    <a href="#inicio">Información</a>
+    <a href="#modulo1">Módulo 1: Filtrado</a>
+    <a href="#recursos">Recursos</a>
+</nav>
+
 <div class="container">
-    <section>
-        <h2>📍 Retos del Módulo 1 <span class="badge">Nivel Básico</span></h2>
-        <p>Usa la consola de abajo para resolver los retos de tu archivo <code>05_modulo_1_ejercicios.sql</code>:</p>
-        <ol>
-            <li><strong>Reto 1:</strong> Listar solo modelos de la marca 'Toyota'.</li>
-            <li><strong>Reto 2:</strong> Autos con precio mayor a 500,000.</li>
-        </ol>
-
-        <div class="console">
-            <textarea id="sql-code" rows="4">SELECT * FROM Catalogo_Modelos WHERE Marca = 'Toyota';</textarea>
-        </div>
-        <button class="btn-run" onclick="runSQL()">▶ EJECUTAR RETO</button>
-
-        <div id="result-table"></div>
+    <section id="inicio">
+        <h2>📋 Ficha Técnica del Curso</h2>
+        <p>Este curso utiliza el <strong>Método Interactivo Dalton</strong>, donde practicas directamente sobre datos reales de nuestras agencias.</p>
+        <table class="info-table">
+            <tr><td><strong>⏱️ Duración</strong></td><td>10 Semanas (A tu propio ritmo)</td></tr>
+            <tr><td><strong>🎯 Objetivo</strong></td><td>Extraer KPI's de ventas y modelos con SQL Server.</td></tr>
+            <tr><td><strong>👤 Perfil</strong></td><td>Analistas y personal de TI Dalton.</td></tr>
+        </table>
     </section>
 
-    <section>
-        <h2>📂 Mis Archivos</h2>
-        <p>Puedes consultar tus scripts aquí:</p>
-        <a href="database/05_modulo_1_ejercicios.sql" target="_blank">📄 Ver archivo de Ejercicios Módulo 1</a>
+    <section id="modulo1">
+        <h2>📍 Módulo 1: Filtrado Estratégico</h2>
+        <p><strong>Reto del día:</strong> ¿Puedes mostrar todos los modelos de la marca <em>Toyota</em>? Escribe tu código abajo.</p>
+        
+        <div class="console-box">
+            <textarea id="sql-in" rows="4">SELECT * FROM Catalogo_Modelos WHERE Marca = 'Toyota';</textarea>
+            <button class="btn-run" onclick="exec()">▶ EJECUTAR CONSULTA</button>
+        </div>
+
+        <div id="output">
+            <p style="text-align:center; color:#aaa; padding:20px;">Los resultados aparecerán aquí...</p>
+        </div>
+    </section>
+
+    <section id="recursos">
+        <h2>📂 Material de Apoyo</h2>
+        <p>Descarga los scripts originales para tu respaldo personal:</p>
+        <ul>
+            <li><a href="database/01_creacion_tablas_dalton.sql" target="_blank">Estructura Base (SQL)</a></li>
+            <li><a href="database/02_insertar_datos_dalton.sql" target="_blank">Datos de Prueba (SQL)</a></li>
+            <li><a href="database/05_modulo_1_ejercicios.sql" target="_blank">Hoja de Retos Módulo 1</a></li>
+        </ul>
     </section>
 </div>
 
+<footer>
+    <p>© 2026 Dalton TI | "Innovación en el análisis de datos"</p>
+</footer>
+
 <script>
     let db;
-    const config = { locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}` };
+    const config = { locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${f}` };
 
     initSqlJs(config).then(async function(SQL){
         db = new SQL.Database();
-        document.getElementById('status').innerText = "✅ Motor Listo";
+        document.getElementById('db-status').innerText = "✅ Motor en Línea";
+        document.getElementById('db-status').className = "status online";
 
-        // Cargamos tus tablas automáticamente
-        const files = ['database/01_creacion_tablas_dalton.sql', 'database/02_insertar_datos_dalton.sql'];
-        for (let f of files) {
-            const res = await fetch(f);
-            const sql = await res.text();
-            db.run(sql);
+        const scripts = ['database/01_creacion_tablas_dalton.sql', 'database/02_insertar_datos_dalton.sql'];
+        for (let s of scripts) {
+            const r = await fetch(s);
+            const t = await r.text();
+            db.run(t);
         }
     });
 
-    function runSQL() {
-        const code = document.getElementById('sql-code').value;
-        const out = document.getElementById('result-table');
+    function exec() {
+        const q = document.getElementById('sql-in').value;
+        const out = document.getElementById('output');
         try {
-            const res = db.exec(code);
-            if (res.length === 0) { out.innerHTML = "Consulta ejecutada."; return; }
-            let html = "<table><thead><tr>";
-            res[0].columns.forEach(c => html += `<th>${c}</th>`);
-            html += "</tr></thead><tbody>";
+            const res = db.exec(q);
+            if (res.length === 0) { out.innerHTML = "<p>Comando ejecutado.</p>"; return; }
+            let h = "<table class='sql-res'><thead><tr>";
+            res[0].columns.forEach(c => h += `<th>${c}</th>`);
+            h += "</tr></thead><tbody>";
             res[0].values.forEach(row => {
-                html += "<tr>";
-                row.forEach(v => html += `<td>${v}</td>`);
-                html += "</tr>";
+                h += "<tr>";
+                row.forEach(v => h += `<td>${v}</td>`);
+                h += "</tr>";
             });
-            out.innerHTML = html + "</tbody></table>";
+            out.innerHTML = h + "</tbody></table>";
         } catch (e) { out.innerHTML = `<p style="color:red">Error: ${e.message}</p>`; }
     }
 </script>
