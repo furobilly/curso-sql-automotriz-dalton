@@ -3,123 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma SQL Dalton - Interactiva</title>
+    <title>Plataforma SQL Dalton - De Cero a Experto</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
 
     <style>
-        :root { --azul-dalton: #004a99; --gris: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--gris); color: #333; }
-        header { background: var(--azul-dalton); color: white; padding: 2rem; text-align: center; }
-        .container { max-width: 1000px; margin: 20px auto; padding: 20px; }
-        section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        /* Estilos de la Consola */
-        #console-area { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; }
-        textarea { width: 100%; background: transparent; color: #a6e22e; border: none; font-size: 1.1rem; outline: none; resize: vertical; }
-        .btn-run { background: #28a745; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        
-        /* Tabla de Resultados */
-        .result-container { margin-top: 20px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: var(--azul-dalton); color: white; padding: 10px; }
-        td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        tr:nth-child(even) { background: #f2f2f2; }
+        :root {
+            --azul-dalton: #004a99;
+            --gris-fondo: #f4f7f6;
+            --blanco: #ffffff;
+            --verde-exito: #28a745;
+        }
 
-        .status-badge { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--gris-fondo); color: #333; line-height: 1.6; }
+        
+        /* Encabezado y Navegación */
+        header { background: var(--azul-dalton); color: white; padding: 2.5rem 1rem; text-align: center; }
+        nav { background: #fff; padding: 1rem; position: sticky; top: 0; display: flex; justify-content: center; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; }
+        nav a { text-decoration: none; color: var(--azul-dalton); font-weight: bold; font-size: 0.9rem; }
+
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        
+        /* Secciones */
+        section { background: var(--blanco); padding: 30px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { color: var(--azul-dalton); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+
+        /* Tabla de Info */
+        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .info-table td { padding: 12px; border: 1px solid #dee2e6; }
+        .info-table tr:nth-child(even) { background-color: #f8f9fa; }
+
+        /* Consola SQL interactiva */
+        .console-container { background: #2d2d2d; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        textarea { width: 100%; background: transparent; color: #a6e22e; border: 1px solid #444; font-family: 'Courier New', monospace; font-size: 1.1rem; padding: 10px; box-sizing: border-box; outline: none; }
+        .btn-run { background: var(--verde-exito); color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; width: 100%; transition: 0.3s; }
+        .btn-run:hover { background: #218838; }
+
+        /* Resultados */
+        .result-box { margin-top: 20px; overflow-x: auto; background: #fff; border-radius: 8px; }
+        table.sql-result { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        table.sql-result th { background: #eee; padding: 10px; border: 1px solid #ddd; }
+        table.sql-result td { padding: 8px; border: 1px solid #ddd; }
+
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
         .online { background: #d4edda; color: #155724; }
         .loading { background: #fff3cd; color: #856404; }
+
+        /* Recursos y Formularios */
+        .recursos-list { background: #eef2f7; padding: 20px; border-left: 6px solid var(--azul-dalton); border-radius: 4px; }
+        input, textarea.form-control { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        
+        footer { text-align: center; padding: 40px; color: #777; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Consola SQL Dalton Interactiva</h1>
-    <p>Nivel 0 a Experto | Practica en tiempo real</p>
-    <span id="db-status" class="status-badge loading">⏳ Cargando motor SQL...</span>
-</header>
+    <header>
+        <h1>Plataforma Educativa Dalton</h1>
+        <p>SQL: De Cero a Experto <span id="db-status" class="status-badge loading">Cargando motor...</span></p>
+    </header>
 
-<div class="container">
-    <section>
-        <h2>🚀 Instrucciones de Práctica</h2>
-        <p>No necesitas salir de la página. Escribe tus consultas abajo y presiona <strong>"Ejecutar SQL"</strong>. El sistema consultará automáticamente tus tablas de ventas y modelos.</p>
-        
-        <div id="console-area">
-            <p style="color: #75715e;">-- Escribe tu consulta aquí (Ejemplo: SELECT * FROM Ventas_Dalton;)</p>
-            <textarea id="sql-input" rows="4">SELECT * FROM Ventas_Dalton;</textarea>
-        </div>
-        <button class="btn-run" onclick="executeSQL()">▶ Ejecutar SQL</button>
+    <nav>
+        <a href="#info">Información</a>
+        <a href="#practica">Consola Interactiva</a>
+        <a href="#recursos">Recursos</a>
+        <a href="#soporte">Soporte</a>
+    </nav>
 
-        <div class="result-container" id="result-output">
-            <p style="color: #999;">Los resultados aparecerán aquí...</p>
-        </div>
-    </section>
+    <div class="container">
 
-    <section>
-        <h2>📂 Recursos del Módulo</h2>
-        <ul>
-            <li><a href="database/01_creacion_tablas_dalton.sql" target="_blank">Estructura de Datos</a></li>
-            <li><a href="database/02_insertar_datos_dalton.sql" target="_blank">Datos de Prueba</a></li>
-        </ul>
-    </section>
-</div>
+        <section id="info">
+            <h2>📋 Información del Curso</h2>
+            <table class="info-table">
+                <tr><td><strong>⏱️ Duración</strong></td><td>10 Semanas (A tu ritmo)</td></tr>
+                <tr><td><strong>🎯 Objetivo</strong></td><td>Dominar consultas SQL para reportes automotrices.</td></tr>
+                <tr><td><strong>🏢 Caso de Estudio</strong></td><td>Ecosistema Dalton (Toyota, Honda, Kia, etc.)</td></tr>
+            </table>
+        </section>
 
-<script>
-    let db;
-    let config = { locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${filename}` };
+        <section id="practica">
+            <h2>💻 Laboratorio SQL en Tiempo Real</h2>
+            <p>Escribe tu consulta abajo. El sistema ya tiene cargadas las tablas de <strong>Ventas</strong> e <strong>Inventario</strong>.</p>
+            <div class="console-container">
+                <textarea id="sql-input" rows="5">SELECT * FROM Ventas_Dalton;</textarea>
+                <button class="btn-run" onclick="executeSQL()">▶ EJECUTAR CONSULTA</button>
+            </div>
+            <div id="result-output" class="result-box">
+                <p style="text-align:center; color:#999; padding:20px;">Los resultados aparecerán aquí al ejecutar.</p>
+            </div>
+        </section>
 
-    // 1. Inicializar el motor SQL y cargar tus archivos de Dalton
-    initSqlJs(config).then(async function(SQL){
-        db = new SQL.Database();
-        document.getElementById('db-status').innerText = "✅ Motor Listo";
-        document.getElementById('db-status').className = "status-badge online";
+        <section id="recursos">
+            <h2>📂 Descarga de Materiales</h2>
+            <div class="recursos-list">
+                <ul>
+                    <li><a href="database/01_creacion_tablas_dalton.sql" target="_blank">Estructura de Tablas (SQL)</a></li>
+                    <li><a href="database/02_insertar_datos_dalton.sql" target="_blank">Carga de Datos (SQL)</a></li>
+                    <li><a href="database/03_ejercicios_nivel_basico.sql" target="_blank">Hoja de Ejercicios Báiscos</a></li>
+                </ul>
+            </div>
+        </section>
 
-        // Cargamos tus archivos automáticamente para que el alumno ya tenga datos
-        try {
-            const res1 = await fetch('database/01_creacion_tablas_dalton.sql');
-            const sql1 = await res1.text();
-            db.run(sql1);
+        <section id="soporte">
+            <h2>📧 ¿Necesitas ayuda?</h2>
+            <form id="contactForm" onsubmit="enviarMensaje(event)">
+                <input type="text" placeholder="Tu Nombre" required>
+                <input type="email" placeholder="Correo Corporativo" required>
+                <textarea class="form-control" placeholder="Describe tu duda con el código SQL..." rows="3"></textarea>
+                <button type="submit" style="background:var(--azul-dalton); color:white; border:none; padding:12px 30px; border-radius:6px; cursor:pointer;">Enviar a Soporte</button>
+            </form>
+        </section>
 
-            const res2 = await fetch('database/02_insertar_datos_dalton.sql');
-            const sql2 = await res2.text();
-            db.run(sql2);
-            
-            console.log("Base de datos Dalton inicializada correctamente.");
-        } catch (err) {
-            console.error("Error cargando archivos SQL:", err);
-        }
-    });
+    </div>
 
-    // 2. Función para ejecutar lo que el usuario escriba
-    function executeSQL() {
-        const sqlQuery = document.getElementById('sql-input').value;
-        const output = document.getElementById('result-output');
-        
-        try {
-            const results = db.exec(sqlQuery);
-            if (results.length === 0) {
-                output.innerHTML = "<p>Consulta ejecutada. No hay datos para mostrar o la tabla está vacía.</p>";
-                return;
+    <footer>
+        <p>© 2026 Dalton TI | "Educación que impulsa el análisis."</p>
+    </footer>
+
+    <script>
+        let db;
+        let config = { locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${filename}` };
+
+        initSqlJs(config).then(async function(SQL){
+            db = new SQL.Database();
+            document.getElementById('db-status').innerText = "✅ Motor Listo";
+            document.getElementById('db-status').className = "status-badge online";
+
+            // Carga automática de tus archivos de Dalton
+            try {
+                const res1 = await fetch('database/01_creacion_tablas_dalton.sql');
+                const sql1 = await res1.text();
+                db.run(sql1);
+                const res2 = await fetch('database/02_insertar_datos_dalton.sql');
+                const sql2 = await res2.text();
+                db.run(sql2);
+            } catch (e) { console.error("Error inicializando bases:", e); }
+        });
+
+        function executeSQL() {
+            const query = document.getElementById('sql-input').value;
+            const output = document.getElementById('result-output');
+            try {
+                const res = db.exec(query);
+                if (res.length === 0) {
+                    output.innerHTML = "<p style='padding:10px;'>Consulta ejecutada con éxito (sin resultados).</p>";
+                    return;
+                }
+                let html = "<table class='sql-result'><thead><tr>";
+                res[0].columns.forEach(c => html += `<th>${c}</th>`);
+                html += "</tr></thead><tbody>";
+                res[0].values.forEach(row => {
+                    html += "<tr>";
+                    row.forEach(v => html += `<td>${v}</td>`);
+                    html += "</tr>";
+                });
+                html += "</tbody></table>";
+                output.innerHTML = html;
+            } catch (err) {
+                output.innerHTML = `<p style="color:red; padding:10px;">❌ Error: ${err.message}</p>`;
             }
-
-            // Generar la tabla HTML automáticamente
-            let tableHTML = "<table><thead><tr>";
-            results[0].columns.forEach(col => tableHTML += `<th>${col}</th>`);
-            tableHTML += "</tr></thead><tbody>";
-            
-            results[0].values.forEach(row => {
-                tableHTML += "<tr>";
-                row.forEach(val => tableHTML += `<td>${val}</td>`);
-                tableHTML += "</tr>";
-            });
-            tableHTML += "</tbody></table>";
-            
-            output.innerHTML = tableHTML;
-        } catch (err) {
-            output.innerHTML = `<p style="color: red;">❌ Error en SQL: ${err.message}</p>`;
         }
-    }
-</script>
 
+        function enviarMensaje(e) {
+            e.preventDefault();
+            alert("¡Mensaje enviado! Nos pondremos en contacto contigo pronto, Toño.");
+        }
+    </script>
 </body>
 </html>
