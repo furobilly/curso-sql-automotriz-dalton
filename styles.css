@@ -1,194 +1,104 @@
-/* ============================================
-   ESTILOS MAESTROS: DALTON DATA QUEST
-   ============================================ */
-
 :root {
     --dalton-blue: #004a99;
-    --neon-blue: #0ea5e9;
-    --dark-bg: #0f172a;
-    --card-bg: #1e293b;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --error: #ef4444;
+    --neon-green: #22c55e;
+    --bg-dark: #0f172a;
+    --panel-bg: #1e293b;
+    --text-white: #f8fafc;
 }
 
 body {
-    margin: 0;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--dark-bg);
-    color: var(--text-main);
-    display: flex;
-    flex-direction: column;
+    margin: 0; padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-white);
     height: 100vh;
-    overflow: hidden;
 }
 
-/* --- HEADER --- */
-.header {
-    background: linear-gradient(90deg, var(--dalton-blue), #002d5e);
-    padding: 1rem 2rem;
+.game-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    height: 100vh;
 }
 
-.header-info { display: flex; align-items: center; gap: 15px; }
-.header-info h1 { margin: 0; font-size: 1.5rem; letter-spacing: 1px; }
-.logo { font-size: 2rem; }
-
-.stats { display: flex; gap: 20px; }
-.stat-item {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* --- LAYOUT PRINCIPAL --- */
-.main-layout {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-/* --- SIDEBAR (Mapa de Agencias) --- */
+/* SIDEBAR */
 .sidebar {
-    width: 300px;
-    background-color: #111827;
-    padding: 20px;
-    border-right: 1px solid #1e293b;
+    width: 320px;
+    background: #020617;
+    border-right: 2px solid #1e293b;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    padding: 20px;
 }
 
-.module-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 1px solid transparent;
+.avatar-circle {
+    width: 100px; height: 100px;
+    background: var(--dalton-blue);
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    font-size: 50px;
+    display: flex; align-items: center; justify-content: center;
+    border: 4px solid var(--neon-green);
 }
 
-.module-item.active {
-    background: rgba(14, 165, 233, 0.1);
-    border-color: var(--neon-blue);
+.rank-badge {
+    background: var(--neon-green);
+    color: #000;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-align: center;
 }
 
-.module-item.locked { opacity: 0.5; cursor: not-allowed; }
-.module-item:hover:not(.locked) { background: #1e293b; }
+/* HISTORIA Y TEORÍA */
+.story-panel {
+    background: var(--panel-bg);
+    margin: 20px;
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 6px solid var(--dalton-blue);
+}
 
-.module-item .icon { font-size: 1.5rem; }
-.module-item strong { display: block; font-size: 0.9rem; }
-.module-item small { color: var(--text-muted); font-size: 0.75rem; }
+.story-content p {
+    font-size: 18px; /* Texto más grande */
+    line-height: 1.6;
+}
 
-.data-dictionary {
-    margin-top: auto;
-    background: #1e293b;
+.theory-box {
+    background: rgba(0, 74, 153, 0.2);
     padding: 15px;
     border-radius: 8px;
-    font-size: 0.8rem;
+    margin-top: 15px;
+    border: 1px dashed var(--dalton-blue);
 }
 
-/* --- WORKSPACE (Área de Trabajo) --- */
-.workspace {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.story-box {
-    display: flex;
-    gap: 20px;
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    border-left: 4px solid var(--neon-blue);
-}
-
-.ana-avatar { font-size: 3rem; }
-
-/* --- TERMINAL --- */
-.terminal {
+/* TERMINAL */
+.terminal-section {
+    margin: 0 20px;
     background: #000;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-}
-
-.terminal-header {
-    background: #1e293b;
-    padding: 8px 15px;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-family: monospace;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 #sqlEditor {
-    width: 100%;
-    height: 150px;
-    background: transparent;
-    color: #38bdf8;
-    border: none;
-    padding: 15px;
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
+    width: 100%; height: 180px;
+    background: transparent; color: #a6e22e;
+    border: none; padding: 20px;
+    font-family: 'Fira Code', monospace; font-size: 16px;
     outline: none;
-    resize: none;
-}
-
-.controls {
-    padding: 10px 15px;
-    display: flex;
-    gap: 10px;
-    background: #0f172a;
 }
 
 .btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
+    padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 6px;
 }
 
-.btn-run { background: var(--success); color: white; }
-.btn-hint { background: var(--card-bg); color: var(--text-main); }
-.btn:hover { opacity: 0.9; transform: scale(1.02); }
+.btn-primary { background: var(--neon-green); border: none; }
 
-/* --- RESULTADOS --- */
-.results-table {
-    background: var(--card-bg);
-    border-radius: 8px;
-    padding: 15px;
-    min-height: 100px;
+/* TABLAS DE RESULTADOS */
+.results-panel {
+    margin: 20px;
+    overflow-x: auto;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-th { background: #334155; text-align: left; padding: 10px; font-size: 0.85rem; }
-td { border-bottom: 1px solid #334155; padding: 10px; font-size: 0.9rem; }
-tr:hover { background: rgba(255,255,255,0.05); }
-
-/* --- ADAPTABILIDAD MOBILE --- */
-@media (max-width: 768px) {
-    .main-layout { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; }
-    .workspace { padding: 15px; }
-}
+table { width: 100%; border-collapse: collapse; }
+th { background: #334155; padding: 12px; text-align: left; }
+td { padding: 12px; border-bottom: 1px solid #334155; }
