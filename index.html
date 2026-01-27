@@ -3,77 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dalton: El Códice del Analista</title>
+    <title>Dalton Core: Analista Pro</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
-<body data-theme="dark">
-
-    <div class="game-container">
-        <aside class="sidebar">
-            <div class="profile-section">
-                <div class="avatar-circle" id="playerAvatar">👨‍💻</div>
-                <h2 id="playerNameDisplay">Analista Toño</h2>
-                <div class="rank-badge" id="playerRank">Practicante de TI</div>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar-left">
+            <div class="profile-card">
+                <div class="avatar-box">👨‍💻</div>
+                <h2 id="userName">Analista Toño</h2>
+                <span class="badge" id="playerRank">PRACTICANTE TI</span>
             </div>
-
-            <div class="stats-container">
-                <div class="stat-row"><span>XP:</span> <strong id="playerXP">0</strong></div>
-                <div class="stat-row"><span>Bonos:</span> <strong id="playerCoins">0</strong></div>
-                <div class="progress-box">
-                    <p>Progreso Global</p>
-                    <div class="bar-bg"><div class="bar-fill" style="width: 5%">5%</div></div>
-                </div>
-            </div>
-
-            <nav class="module-nav">
-                <h3>📍 RUTA DE RESTAURACIÓN</h3>
-                <div class="nav-item active">🏢 GDL: El Inicio</div>
-                <div class="nav-item locked">🌵 SLP: El Almacén</div>
-                <div class="nav-item locked">🏙️ CDMX: La Central</div>
+            
+            <nav class="mission-map">
+                <h3>🗺️ RUTA DE REPARACIÓN</h3>
+                <div class="map-item active">GDL: Sucursal Centro</div>
+                <div class="map-item locked">SLP: Almacén Regional</div>
+                <div class="map-item locked">CDMX: Corporativo</div>
             </nav>
-
-            <div class="data-helper">
-                <h3>📊 DICCIONARIO ACTIVO</h3>
-                <div id="table-schema">
-                    </div>
-            </div>
         </aside>
 
-        <main class="main-content">
-            <section class="story-panel">
-                <div class="ana-header">
-                    <span class="ana-icon">👩‍💻</span>
-                    <div class="ana-title">
-                        <h3>MENSAJE DE ANA (Jefa de TI)</h3>
-                        <small>Transmisión Encriptada...</small>
-                    </div>
+        <main class="center-stage">
+            <header class="mission-header">
+                <h1 id="missionTitle">Sincronizando...</h1>
+                <div class="global-stats">
+                    <span>XP: <strong id="xpValue">0</strong></span>
+                    <span>BONOS: <strong id="coinsValue">0</strong></span>
                 </div>
-                <div class="story-content">
-                    <p id="npcStory">Cargando crónica del Gran Apagón...</p>
-                    <div class="theory-box" id="theorySection">
-                        <strong>💡 LECCIÓN TÉCNICA:</strong>
-                        <p id="sqlTheory">Selecciona un módulo para ver la teoría.</p>
-                    </div>
+            </header>
+
+            <section class="ana-comms">
+                <div class="ana-info">
+                    <strong>MENSAJE DE ANA (TI):</strong>
+                    <p id="anaSpeech">Conectando con el servidor central...</p>
+                </div>
+                <div class="theory-box">
+                    <strong>💡 MANUAL DE CAMPO:</strong>
+                    <p id="theoryText">...</p>
                 </div>
             </section>
 
-            <section class="terminal-section">
-                <div class="terminal-header">TERMINAL SQL - DALTON CORE v1.0</div>
-                <textarea id="sqlEditor" spellcheck="false" placeholder="-- Escribe tu consulta con comentarios..."></textarea>
-                <div class="terminal-footer">
-                    <button class="btn btn-primary" onclick="executeQuery()">▶ EJECUTAR RESTAURACIÓN</button>
-                    <button class="btn btn-outline" onclick="showHint()">🔍 AYUDA DE ANA</button>
+            <section class="code-terminal">
+                <div class="terminal-bar">RECOVERY_CONSOLE.SQL</div>
+                <p class="mission-task" id="challengeText">Cargando misión...</p>
+                <textarea id="sqlEditor" spellcheck="false" placeholder="-- Escribe tu consulta aquí..."></textarea>
+                <div class="actions">
+                    <button class="btn-run" onclick="executeSQL()">▶ EJECUTAR RESTAURACIÓN</button>
                 </div>
             </section>
 
-            <section class="results-panel">
-                <div id="results">
-                    <p class="placeholder-text">Esperando señal de la base de datos...</p>
+            <section class="output-area">
+                <div class="output-bar">RESULTADOS DE BASE DE DATOS</div>
+                <div id="resultsTable" class="table-container">
+                    <p class="wait">Esperando señal...</p>
                 </div>
             </section>
         </main>
+
+        <aside class="sidebar-right">
+            <h3>📊 DICCIONARIO DE DATOS</h3>
+            <div class="dictionary">
+                <div class="table-info">
+                    <strong>Dim_Modelos</strong>
+                    <ul>
+                        <li>ModeloID (INT)</li>
+                        <li>Nombre_Modelo (TEXT)</li>
+                        <li>Marca (TEXT)</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
     </div>
 
     <script src="game.js"></script>
