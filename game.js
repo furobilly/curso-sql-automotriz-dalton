@@ -1,6 +1,12 @@
 // ============================================
-// NEXUS SQL v1.0 - SISTEMA PEDAGÓGICO
+// NEXUS SQL v1.1 - SISTEMA PEDAGÓGICO
+// Con sistema multi-usuario y animaciones mejoradas
 // ============================================
+
+// Sistema de usuarios múltiples
+window.userProfiles = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+window.currentUserIndex = parseInt(localStorage.getItem('nexusSQL_currentUser') || '-1');
+
 window.gameState = {
   playerName: '',
   avatar: 0,
@@ -174,8 +180,83 @@ const sounds = {
       oscillator.start(audio.currentTime);
       oscillator.stop(audio.currentTime + 0.3);
     } catch(e) {}
+  },
+  coin: () => {
+    if (!window.gameState.soundEnabled) return;
+    try {
+      const audio = new AudioContext();
+      const oscillator = audio.createOscillator();
+      const gainNode = audio.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audio.destination);
+      oscillator.frequency.value = 1200;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.3, audio.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.15);
+      oscillator.start(audio.currentTime);
+      oscillator.stop(audio.currentTime + 0.15);
+    } catch(e) {}
   }
 };
+
+// Animación de monedas cayendo
+function createCoinRain(amount) {
+  const container = document.createElement('div');
+  container.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;';
+  document.body.appendChild(container);
+  
+  for (let i = 0; i < 30; i++) {
+    const coin = document.createElement('div');
+    coin.textContent = '🪙';
+    coin.style.cssText = `
+      position: absolute;
+      font-size: 32px;
+      left: ${Math.random() * 100}%;
+      top: -50px;
+      animation: coinFall ${2 + Math.random() * 2}s ease-in forwards;
+      animation-delay: ${Math.random() * 0.5}s;
+    `;
+    container.appendChild(coin);
+    
+    setTimeout(() => sounds.coin(), i * 50);
+  }
+  
+  // Mensaje flotante
+  const message = document.createElement('div');
+  message.textContent = `💰 +${amount} VC`;
+  message.style.cssText = `
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--accent);
+    text-shadow: 0 0 20px var(--accent);
+    animation: floatUp 2s ease-out forwards;
+  `;
+  container.appendChild(message);
+  
+  setTimeout(() => container.remove(), 4000);
+}
+
+// Añadir estilos para animaciones
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes coinFall {
+    to {
+      top: 110%;
+      transform: rotate(720deg);
+    }
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-100px); }
+  }
+`;
+document.head.appendChild(style);
 
 window.toggleTheme = function() {
   sounds.click();
@@ -193,6 +274,88 @@ window.toggleSound = function() {
   if (window.gameState.soundEnabled) sounds.click();
   saveGameState();
 };
+
+// Sistema de usuarios
+window.logoutUser = function() {
+  sounds.click();
+  if (confirm('¿Deseas cambiar de usuario? Tu progreso está guardado.')) {
+    window.currentUserIndex = -1;
+    localStorage.setItem('nexusSQL_currentUser', '-1');
+    location.reload();
+  }
+};
+
+window.switchUser = function(index) {
+  sounds.click();
+  window.currentUserIndex = index;
+  localStorage.setItem('nexusSQL_currentUser', index);
+  loadUserProfile(index);
+  closeModal('modalUserSelect');
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  renderGame();
+  createParticles();
+  updateAvatars();
+};
+
+window.deleteUser = function(index) {
+  if (confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) {
+    window.userProfiles.splice(index, 1);
+    localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
+    showUserSelection();
+  }
+};
+
+function showUserSelection() {
+  if (window.userProfiles.length === 0) {
+    startOnboarding();
+    return;
+  }
+  
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = '<h2>👥 Selecciona Usuario</h2><div style="margin: 20px 0;">';
+  
+  window.userProfiles.forEach((user, index) => {
+    const avatars = ['🎮', '💼', '🧘'];
+    content.innerHTML += `
+      <div style="background: var(--card); padding: 20px; margin: 15px 0; border-radius: 12px; border: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <span style="font-size: 48px;">${avatars[user.avatar]}</span>
+          <div>
+            <div style="font-size: 20px; font-weight: bold;">${user.playerName}</div>
+            <div style="font-size: 14px; color: var(--muted);">⭐ ${user.xp} XP | 🪙 ${user.coins} VC</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn" onclick="switchUser(${index})">▶️ Jugar</button>
+          <button class="btn btn-ghost" onclick="deleteUser(${index})" style="background: var(--danger);">🗑️</button>
+        </div>
+      </div>
+    `;
+  });
+  
+  if (window.userProfiles.length < 3) {
+    content.innerHTML += `<button class="btn btn-secondary" onclick="closeModal('modalGeneric'); startOnboarding();" style="width: 100%; margin-top: 20px;">➕ Crear Nuevo Usuario</button>`;
+  } else {
+    content.innerHTML += `<p style="color: var(--muted); text-align: center; margin-top: 20px;">Máximo 3 usuarios. Elimina uno para crear otro.</p>`;
+  }
+  
+  content.innerHTML += '</div>';
+  document.getElementById('modalGeneric').classList.add('active');
+}
+
+function loadUserProfile(index) {
+  const user = window.userProfiles[index];
+  Object.assign(window.gameState, user);
+}
+
+function saveUserProfile() {
+  if (window.currentUserIndex >= 0) {
+    window.userProfiles[window.currentUserIndex] = Object.assign({}, window.gameState);
+    delete window.userProfiles[window.currentUserIndex].db;
+    localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
+  }
+}
 
 async function init() {
   const loadingTexts = [
@@ -220,19 +383,18 @@ async function init() {
       
       setTimeout(() => {
         document.getElementById('loadingScreen').classList.add('hidden');
-        loadGameState();
         
-        if (!window.gameState.playerName) {
-          startOnboarding();
-        } else {
+        if (window.currentUserIndex >= 0 && window.userProfiles[window.currentUserIndex]) {
+          loadUserProfile(window.currentUserIndex);
           document.getElementById('mainApp').classList.remove('hidden');
           renderGame();
           createParticles();
           updateAvatars();
-          
           document.documentElement.setAttribute('data-theme', window.gameState.theme);
           document.getElementById('themeToggle').textContent = window.gameState.theme === 'light' ? '☀️' : '🌙';
           document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
+        } else {
+          showUserSelection();
         }
       }, 3000);
     });
@@ -249,37 +411,7 @@ if (document.readyState === 'loading') {
 }
 
 function saveGameState() {
-  const state = Object.assign({}, window.gameState);
-  delete state.db;
-  localStorage.setItem('nexusSQL_v1_0', JSON.stringify(state));
-}
-
-function loadGameState() {
-  const saved = localStorage.getItem('nexusSQL_v1_0');
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      Object.assign(window.gameState, data);
-      
-      if (!window.gameState.completedSubExercises) {
-        window.gameState.completedSubExercises = {};
-      }
-      if (!window.gameState.expandedChallenges) {
-        window.gameState.expandedChallenges = [];
-      }
-      if (!window.gameState.diary) {
-        window.gameState.diary = [];
-      }
-      if (!window.gameState.currentDay) {
-        window.gameState.currentDay = 1;
-      }
-      if (!window.gameState.tutorialsSeen) {
-        window.gameState.tutorialsSeen = [];
-      }
-    } catch (e) {
-      console.error('Error loading save:', e);
-    }
-  }
+  saveUserProfile();
 }
 
 const narrativeDialogues = {
@@ -325,6 +457,11 @@ window.closeTutorial = function(challengeId) {
 };
 
 function startOnboarding() {
+  if (window.userProfiles.length >= 3) {
+    alert('Máximo 3 usuarios. Elimina uno primero.');
+    showUserSelection();
+    return;
+  }
   document.getElementById('onboarding').classList.remove('hidden');
   showOnboardingStep(1);
 }
@@ -342,7 +479,7 @@ function showOnboardingStep(step) {
       </div>
       <h1 style="font-size: 32px; color: var(--primary); margin-bottom: 20px;">NEXUS SQL</h1>
       <p style="font-size: 18px; color: var(--text); margin-bottom: 10px;">Protocolo de Emergencia</p>
-      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.0 - Sistema de Recuperación</p>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.1 - Sistema de Recuperación</p>
       <button class="btn" onclick="showOnboardingStep(2)" style="font-size: 18px; padding: 16px 32px;">⚡ Iniciar Protocolo</button>
     `;
   } else if (step === 2) {
@@ -417,7 +554,11 @@ window.startAdventure = function() {
     window.gameState.completedSubExercises[i] = [];
   }
   
-  saveGameState();
+  window.userProfiles.push(Object.assign({}, window.gameState));
+  window.currentUserIndex = window.userProfiles.length - 1;
+  localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
+  localStorage.setItem('nexusSQL_currentUser', window.currentUserIndex);
+  
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
   renderGame();
@@ -732,12 +873,18 @@ function completeSubExercise(challengeId, subExerciseId, results) {
   const challenge = challenges[challengeId];
   const completedSubs = window.gameState.completedSubExercises[challengeId] || [];
   
+  let xpGained = 0;
+  let coinsGained = 0;
+  
   if (!window.gameState.practiceMode && !completedSubs.includes(subExerciseId)) {
     completedSubs.push(subExerciseId);
     window.gameState.completedSubExercises[challengeId] = completedSubs;
     
     const subXP = Math.ceil(challenge.xp / 4);
     const subCoins = Math.ceil(challenge.coins / 4);
+    xpGained = subXP;
+    coinsGained = subCoins;
+    
     window.gameState.xp += subXP;
     window.gameState.coins += subCoins;
     
@@ -757,41 +904,61 @@ function completeSubExercise(challengeId, subExerciseId, results) {
     saveGameState();
   }
   
-  const headerAvatar = document.getElementById('headerAvatar');
-  if (headerAvatar) {
-    headerAvatar.classList.add('avatar-celebrate');
-    setTimeout(() => headerAvatar.classList.remove('avatar-celebrate'), 1000);
-  }
-  
   sounds.success();
-  if (typeof confetti !== 'undefined') {
-    confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-  }
   
-  const resultsDiv = document.getElementById('results');
-  const successMsg = document.createElement('div');
-  successMsg.style.cssText = 'margin-top: 20px; padding: 20px; background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); border-radius: 12px; border: 2px solid var(--primary);';
+  // Mostrar modal de recompensas
+  showRewardModal(xpGained, coinsGained, challengeId, subExerciseId, results);
+}
+
+function showRewardModal(xp, coins, challengeId, subExerciseId, results) {
+  const content = document.getElementById('modalGenericContent');
   
   let resultSummary = '';
   if (results && results.length > 0) {
-    resultSummary = `<p style="margin-top: 10px;">📋 Filas obtenidas: <strong>${results[0].values.length}</strong></p>`;
+    resultSummary = `<p style="margin-top: 15px; font-size: 16px;">📋 Filas obtenidas: <strong>${results[0].values.length}</strong></p>`;
   }
   
-  successMsg.innerHTML = window.gameState.practiceMode ? 
-    `<div style="text-align: center;"><div style="font-size: 48px;">✅</div><h3>¡Correcto!</h3><p>Modo práctica</p>${resultSummary}</div>` :
-    `<div style="text-align: center;"><div style="font-size: 48px;">🎉</div><h3>¡Ejercicio Completado!</h3><p>+${Math.ceil(challenge.xp/4)} XP | +${Math.ceil(challenge.coins/4)} VC</p>${resultSummary}</div>`;
-  resultsDiv.appendChild(successMsg);
-  
-  renderGame();
-  
-  if (subExerciseId < 4) {
-    setTimeout(() => {
-      window.gameState.currentSubExercise = subExerciseId + 1;
-      loadChallenge(challengeId, subExerciseId + 1);
-      renderChallenges();
-    }, 2000);
+  if (window.gameState.practiceMode) {
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+        <h2 style="color: var(--primary); margin-bottom: 15px;">¡Correcto!</h2>
+        <p style="font-size: 18px; color: var(--muted);">Modo Práctica</p>
+        ${resultSummary}
+        <button class="btn btn-secondary" onclick="closeModal('modalGeneric')" style="width: 100%; margin-top: 30px; font-size: 18px;">Cerrar</button>
+      </div>
+    `;
+  } else {
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
+        <h2 style="color: var(--primary); margin-bottom: 15px;">¡Ejercicio Completado!</h2>
+        <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--primary);">
+          <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Recompensas Obtenidas</div>
+          <div style="font-size: 32px; margin: 15px 0;">⭐ +${xp} XP</div>
+          <div style="font-size: 32px; margin: 15px 0;">🪙 +${coins} VC</div>
+        </div>
+        ${resultSummary}
+        ${subExerciseId < 4 ? `<button class="btn" onclick="nextExercise(${challengeId}, ${subExerciseId})" style="width: 100%; margin-top: 20px; font-size: 18px;">➡️ Siguiente Ejercicio</button>` : `<button class="btn" onclick="closeModal('modalGeneric')" style="width: 100%; margin-top: 20px; font-size: 18px;">🎊 Finalizar Módulo</button>`}
+      </div>
+    `;
+    
+    // Animación de monedas
+    createCoinRain(coins);
   }
+  
+  document.getElementById('modalGeneric').classList.add('active');
 }
+
+window.nextExercise = function(challengeId, subExerciseId) {
+  closeModal('modalGeneric');
+  window.gameState.currentSubExercise = subExerciseId + 1;
+  loadChallenge(challengeId, subExerciseId + 1);
+  renderChallenges();
+  updateStats();
+  updateProgressBar();
+  updateSkillBars();
+};
 
 function updateAttemptCounter() {
   const counter = document.getElementById('attemptCounter');
