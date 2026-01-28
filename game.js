@@ -347,6 +347,11 @@ function showUserSelection() {
 function loadUserProfile(index) {
   const user = window.userProfiles[index];
   Object.assign(window.gameState, user);
+  // Recrear DB
+  if (window.SQL_CONSTRUCTOR) {
+    window.gameState.db = new window.SQL_CONSTRUCTOR.Database();
+    window.gameState.db.run(dbSeed);
+  }
 }
 
 function saveUserProfile() {
@@ -376,6 +381,8 @@ async function init() {
     await initSqlJs({
       locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
     }).then(SQL => {
+      // CRÍTICO: Guardar constructor para recrear DB
+      window.SQL_CONSTRUCTOR = SQL;
       window.gameState.db = new SQL.Database();
       window.gameState.db.run(dbSeed);
       
@@ -416,10 +423,10 @@ function saveGameState() {
 
 const narrativeDialogues = {
   1: {
-    1: 'Roberto (GDL): "¡Toño! ¿Me escuchas? El virus bloqueó el acceso al sistema de despacho. Tengo 15 camiones esperando cargar unidades. Necesito los MODELOS de inventario. ¡AHORA!"',
-    2: 'Roberto: "Bien, muy bien. Ahora necesito las MARCAS. Tengo que reportar a Toyota qué tenemos disponible."',
-    3: 'Roberto: "Perfecto. Ahora MODELO Y MARCA juntos. El cliente está en línea."',
-    4: 'Roberto: "¡Excelente! Última: dame TODO con asterisco (*). Necesito el inventario completo."'
+    1: () => `Roberto (GDL): "¡${window.gameState.playerName}! ¿Me escuchas? El virus bloqueó el acceso al sistema de despacho. Tengo 15 camiones esperando cargar unidades. Necesito los MODELOS de inventario. ¡AHORA!"`,
+    2: () => `Roberto: "Bien, muy bien. Ahora necesito las MARCAS. Tengo que reportar a Toyota qué tenemos disponible."`,
+    3: () => `Roberto: "Perfecto. Ahora MODELO Y MARCA juntos. El cliente está en línea."`,
+    4: () => `Roberto: "¡Excelente! Última: dame TODO con asterisco (*). Necesito el inventario completo."`
   }
 };
 
@@ -681,7 +688,9 @@ function loadChallenge(challengeId, subExerciseId) {
   }
   
   const subExercise = challenge.subExercises.find(s => s.id === subExerciseId);
-  const narrative = narrativeDialogues[challengeId] ? narrativeDialogues[challengeId][subExerciseId] : null;
+  const narrative = narrativeDialogues[challengeId] && narrativeDialogues[challengeId][subExerciseId] 
+    ? narrativeDialogues[challengeId][subExerciseId]() 
+    : null;
   
   const banner = document.getElementById('practiceBanner');
   const dayCounter = `<div style="text-align: center; padding: 8px; background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%); color: white; font-weight: bold; border-radius: 8px; margin-bottom: 10px; border: 2px solid var(--primary);">⏰ DÍA ${window.gameState.currentDay}/40</div>`;
@@ -856,7 +865,19 @@ function checkSolution(userQuery, results) {
   const challenge = challenges[challengeId];
   const subExercise = challenge.subExercises.find(s => s.id === subExerciseId);
   
-  const normalize = q => q.toLowerCase().replace(/\s+/g, ' ').replace(/;/g, '').trim();
+  // Normalización más agresiva para mayúsculas/minúsculas
+  const normalize = q => {
+    return q
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/;/g, '')
+      .replace(/\(/g, ' ( ')
+      .replace(/\)/g, ' ) ')
+      .replace(/,/g, ' , ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+  
   const userNorm = normalize(userQuery);
   const expectedNorm = normalize(subExercise.expected);
   
