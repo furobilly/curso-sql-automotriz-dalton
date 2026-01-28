@@ -1,82 +1,201 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dalton Core: Analista Pro</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS SQL - Protocolo de Emergencia</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-    <div class="dashboard">
-        <aside class="sidebar-left">
-            <div class="profile-card">
-                <div class="avatar-box">👨‍💻</div>
-                <h2 id="userName">Analista Toño</h2>
-                <span class="badge" id="playerRank">PRACTICANTE TI</span>
-            </div>
-            
-            <nav class="mission-map">
-                <h3>🗺️ RUTA DE REPARACIÓN</h3>
-                <div class="map-item active">GDL: Sucursal Centro</div>
-                <div class="map-item locked">SLP: Almacén Regional</div>
-                <div class="map-item locked">CDMX: Corporativo</div>
-            </nav>
-        </aside>
-
-        <main class="center-stage">
-            <header class="mission-header">
-                <h1 id="missionTitle">Sincronizando...</h1>
-                <div class="global-stats">
-                    <span>XP: <strong id="xpValue">0</strong></span>
-                    <span>BONOS: <strong id="coinsValue">0</strong></span>
-                </div>
-            </header>
-
-            <section class="ana-comms">
-                <div class="ana-info">
-                    <strong>MENSAJE DE ANA (TI):</strong>
-                    <p id="anaSpeech">Conectando con el servidor central...</p>
-                </div>
-                <div class="theory-box">
-                    <strong>💡 MANUAL DE CAMPO:</strong>
-                    <p id="theoryText">...</p>
-                </div>
-            </section>
-
-            <section class="code-terminal">
-                <div class="terminal-bar">RECOVERY_CONSOLE.SQL</div>
-                <p class="mission-task" id="challengeText">Cargando misión...</p>
-                <textarea id="sqlEditor" spellcheck="false" placeholder="-- Escribe tu consulta aquí..."></textarea>
-                <div class="actions">
-                    <button class="btn-run" onclick="executeSQL()">▶ EJECUTAR RESTAURACIÓN</button>
-                </div>
-            </section>
-
-            <section class="output-area">
-                <div class="output-bar">RESULTADOS DE BASE DE DATOS</div>
-                <div id="resultsTable" class="table-container">
-                    <p class="wait">Esperando señal...</p>
-                </div>
-            </section>
-        </main>
-
-        <aside class="sidebar-right">
-            <h3>📊 DICCIONARIO DE DATOS</h3>
-            <div class="dictionary">
-                <div class="table-info">
-                    <strong>Dim_Modelos</strong>
-                    <ul>
-                        <li>ModeloID (INT)</li>
-                        <li>Nombre_Modelo (TEXT)</li>
-                        <li>Marca (TEXT)</li>
-                    </ul>
-                </div>
-            </div>
-        </aside>
+  <!-- Pantalla de carga -->
+  <div id="loadingScreen" class="loading-screen">
+    <div style="text-align: center;">
+      <div style="font-size: 72px; margin-bottom: 20px;">⚡</div>
+      <h1 style="color: white; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 3px;">NEXUS SQL</h1>
+      <p id="loadingText" style="color: white; margin-bottom: 20px;">Inicializando sistema...</p>
+      <div class="loading-bar">
+        <div class="loading-fill"></div>
+      </div>
     </div>
+  </div>
 
-    <script src="game.js"></script>
+  <!-- Partículas flotantes -->
+  <div id="particles" class="particles"></div>
+
+  <!-- Onboarding -->
+  <div id="onboarding" class="onboarding hidden">
+    <div id="onboardingContent" class="onboarding-content"></div>
+  </div>
+
+  <!-- App principal -->
+  <div id="mainApp" class="app-container hidden">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <span style="font-size: 40px;">⚡</span>
+        <div>
+          <div style="font-size: 24px; font-weight: bold;">NEXUS SQL</div>
+          <div style="font-size: 12px; opacity: 0.9;">Protocolo de Emergencia v1.0</div>
+        </div>
+      </div>
+      
+      <div class="stats-bar">
+        <span id="headerAvatar" class="header-avatar">🎮</span>
+        <span id="playerName" style="font-weight: bold;">Operador</span>
+        <div class="stat-badge">
+          <span class="stat-icon">⭐</span>
+          <span id="playerXP">0</span> XP
+        </div>
+        <div class="stat-badge">
+          <span class="stat-icon">🪙</span>
+          <span id="playerCoins">0</span> VC
+        </div>
+        <div class="stat-badge">
+          <span class="stat-icon">🔥</span>
+          <span id="playerStreak">0</span> días
+        </div>
+        <button class="toggle-btn" onclick="showShop()">🛍️</button>
+        <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙</button>
+        <button class="toggle-btn" id="soundToggle" onclick="toggleSound()">🔊</button>
+      </div>
+    </header>
+
+    <!-- Grid principal -->
+    <div id="contentGrid" class="content-grid">
+      
+      <!-- Panel izquierdo: Retos -->
+      <aside class="panel">
+        <div class="panel-avatar">
+          <span id="panelAvatar" class="panel-avatar-icon">🎮</span>
+          <div style="font-weight: bold; margin-top: 10px;" id="playerNamePanel">Operador</div>
+        </div>
+
+        <div class="progress-world">
+          <h4 style="color: var(--primary); margin-bottom: 10px;">Progreso Módulo 1</h4>
+          <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;" id="worldProgress">0/4</div>
+          <div class="progress-bar-container">
+            <div id="worldProgressBar" class="progress-bar-fill" style="width: 0%">0%</div>
+          </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+          <h4 style="color: var(--primary); margin-bottom: 10px;">Reputación con Ing. Ana</h4>
+          <div id="lorenzoRep" class="reputation-stars">
+            <span class="star empty">★</span>
+            <span class="star empty">★</span>
+            <span class="star empty">★</span>
+          </div>
+        </div>
+
+        <h3>🗺️ Módulos de Recuperación</h3>
+        <div id="challengeList"></div>
+      </aside>
+
+      <!-- Panel central: Editor y desafíos -->
+      <main class="panel">
+        <div id="practiceBanner"></div>
+        
+        <h2 id="challengeTitle" style="color: var(--primary); margin-bottom: 10px;">Sistema Iniciado</h2>
+        <p id="challengeDesc" style="color: var(--muted); margin-bottom: 20px;">Selecciona un ejercicio para comenzar la recuperación</p>
+        
+        <div id="npcDialogue"></div>
+        
+        <div id="conceptBox" class="hint-box"></div>
+
+        <div class="editor-container">
+          <textarea id="sqlEditor" class="sql-editor" placeholder="-- Escribe tu consulta SQL aquí"></textarea>
+          <div class="editor-controls">
+            <button class="btn" onclick="executeQuery()">▶️ Ejecutar</button>
+            <button class="btn btn-ghost" onclick="clearEditor()">🗑️ Limpiar</button>
+            <button class="btn btn-secondary" onclick="showHints()">💡 Pista</button>
+            <button class="btn btn-ghost" id="exampleBtn" onclick="showExample()" disabled>🔒 Ver Ejemplo</button>
+            <div id="attemptCounter" class="attempt-counter" style="display: none;">
+              <span>⚠️</span>
+              <span id="attemptText">Intento 0/3</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="results" class="results">
+          <strong>📊 Resultados</strong>
+          <p style="color: var(--muted); margin-top: 10px;">Ejecuta tu consulta para ver resultados...</p>
+        </div>
+      </main>
+
+      <!-- Panel derecho: Stats y botones -->
+      <aside class="panel">
+        <h3>📊 Tu Progreso SQL</h3>
+        
+        <div class="progress-chart">
+          <h4>Habilidades Dominadas</h4>
+          
+          <div class="skill-bar">
+            <div class="skill-name">SELECT</div>
+            <div class="skill-bar-bg">
+              <div id="skillSELECT" class="skill-bar-fill" style="width: 0%">0%</div>
+            </div>
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-name">WHERE</div>
+            <div class="skill-bar-bg">
+              <div id="skillWHERE" class="skill-bar-fill" style="width: 0%">0%</div>
+            </div>
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-name">ORDER BY</div>
+            <div class="skill-bar-bg">
+              <div id="skillORDER" class="skill-bar-fill" style="width: 0%">0%</div>
+            </div>
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-name">ADVANCED</div>
+            <div class="skill-bar-bg">
+              <div id="skillADVANCED" class="skill-bar-fill" style="width: 0%">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+          <h3 style="cursor: pointer; padding: 12px; background: var(--card); border-radius: 8px; border: 2px solid var(--primary); margin-bottom: 0;" onclick="toggleTables()">
+            📊 Mis Tablas <span id="tablesToggle" style="float: right;">▼</span>
+          </h3>
+          <div id="tablesPanel" style="display: none; margin-top: 10px; padding: 15px; background: rgba(0, 217, 255, 0.05); border-radius: 8px; border: 2px solid rgba(0, 217, 255, 0.2);">
+            <h4 style="color: var(--primary); margin-bottom: 10px;">Tabla: T_Inventario_GDL</h4>
+            <ul style="margin-left: 20px; font-size: 14px; line-height: 2;">
+              <li><code>C_VIN</code> - TEXT (serie única)</li>
+              <li><code>C_Marca</code> - TEXT (marca)</li>
+              <li><code>C_Modelo</code> - TEXT (modelo)</li>
+              <li><code>C_Anio</code> - INTEGER (año)</li>
+              <li><code>C_Color</code> - TEXT (color)</li>
+              <li><code>C_Precio</code> - INTEGER (precio)</li>
+              <li><code>C_Stock</code> - INTEGER (stock)</li>
+            </ul>
+          </div>
+          <button class="btn btn-secondary" onclick="showBadges()" style="width: 100%; margin-top: 10px;">🏆 Mis Insignias</button>
+        </div>
+
+        <div id="lorenzoTips" class="hint-box" style="margin-top: 20px;">
+          <strong>⚡ Consejo de la Ing. Ana:</strong>
+          <p style="margin-top: 8px; font-size: 14px;">Selecciona un módulo para iniciar la recuperación del sistema.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Modal genérico -->
+  <div id="modalGeneric" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('modalGeneric')">×</button>
+      <div id="modalGenericContent"></div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
 </body>
 </html>
