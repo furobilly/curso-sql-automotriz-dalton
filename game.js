@@ -1,6 +1,6 @@
 // ============================================
-// NEXUS SQL v1.2 - SISTEMA PEDAGÓGICO
-// Bugs corregidos: Carga de usuarios y SQL case-insensitive
+// NEXUS SQL v1.3 - MÓDULO 1 COMPLETO
+// Nuevo: Ejercicios 1.5-1.10 + Boss Final + Trivia
 // ============================================
 
 // Sistema de usuarios múltiples
@@ -32,17 +32,17 @@ window.gameState = {
   db: null,
   skills: { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 },
   expandedChallenges: [],
-  tutorialsSeen: []
+  tutorialsSeen: [],
+  triviaAnswered: false
 };
 
 const allBadges = [
   { id: 'primera', name: 'Primera Consulta', icon: '🛡️', desc: 'Completar ejercicio 1.1' },
-  { id: 'domador', name: 'Domador de WHERE', icon: '⚔️', desc: 'Completar reto 3' },
-  { id: 'ordenador', name: 'Ordenador Maestro', icon: '📖', desc: 'Completar reto 5' },
-  { id: 'cazador', name: 'Cazador de Datos', icon: '🔍', desc: 'Completar reto 7' },
-  { id: 'revelacion', name: 'Portador de Verdad', icon: '💎', desc: 'Completar reto 8' },
-  { id: 'conquistador', name: 'Vencedor de The Void', icon: '👑', desc: 'Completar reto 10' },
-  { id: 'mundo1', name: 'Salvador de Velocity', icon: '🏆', desc: '100% Mundo 1' }
+  { id: 'glitch', name: 'Cazador de Duplicados', icon: '⚡', desc: 'Completar GLITCH 1.4' },
+  { id: 'domador', name: 'Domador de WHERE', icon: '⚔️', desc: 'Completar ejercicio 1.7' },
+  { id: 'between', name: 'Maestro del Rango', icon: '📊', desc: 'Completar ERROR DE NODO 1.9' },
+  { id: 'boss1', name: 'Vencedor de Roberto', icon: '👑', desc: 'Completar Boss Final Módulo 1' },
+  { id: 'mundo1', name: 'Salvador de GDL', icon: '🏆', desc: '100% Módulo 1' }
 ];
 
 const dbSeed = `
@@ -66,7 +66,8 @@ const dbSeed = `
   ('VIN007BY', 'BYD', 'Dolphin', 2024, 'Verde', 380000, 10),
   ('VIN008TY', 'Toyota', 'Tacoma', 2024, 'Azul', 720000, 3),
   ('VIN009BY', 'BYD', 'Atto3', 2024, 'Blanco', 490000, 7),
-  ('VIN010TY', 'Toyota', 'Highlander', 2024, 'Negro', 850000, 2);
+  ('VIN010TY', 'Toyota', 'Highlander', 2024, 'Negro', 850000, 2),
+  ('VIN011TY', 'Toyota', 'Hilander', 2024, 'Gris', 420000, 4);
   
   CREATE TABLE T_Clientes_GDL (
     C_ID_Cliente INTEGER PRIMARY KEY,
@@ -82,6 +83,19 @@ const dbSeed = `
   (3, 'Carlos López', 'carlos@hotmail.com', '3335555555', 'Zapopan'),
   (4, 'Ana Rodríguez', 'ana.r@outlook.com', '3338888888', 'Guadalajara'),
   (5, 'Luis Hernández', 'luis.h@yahoo.com', '3337777777', 'Tlaquepaque');
+
+  CREATE TABLE T_Ventas_GDL (
+    C_ID_Venta INTEGER PRIMARY KEY,
+    C_VIN TEXT,
+    C_Fecha DATE,
+    C_Metodo_Pago TEXT
+  );
+
+  INSERT INTO T_Ventas_GDL VALUES
+  (1, 'VIN001TY', '2024-01-15', 'Efectivo'),
+  (2, 'VIN003BY', '2024-01-20', NULL),
+  (3, 'VIN005BY', '2024-01-22', 'Crédito'),
+  (4, 'VIN007BY', '2024-01-25', NULL);
 `;
 
 const sqlTutorials = {
@@ -221,7 +235,6 @@ function createCoinRain(amount) {
     setTimeout(() => sounds.coin(), i * 50);
   }
   
-  // Mensaje flotante
   const message = document.createElement('div');
   message.textContent = `💰 +${amount} VC`;
   message.style.cssText = `
@@ -240,7 +253,6 @@ function createCoinRain(amount) {
   setTimeout(() => container.remove(), 4000);
 }
 
-// Añadir estilos para animaciones
 const style = document.createElement('style');
 style.textContent = `
   @keyframes coinFall {
@@ -275,7 +287,6 @@ window.toggleSound = function() {
   saveGameState();
 };
 
-// Sistema de usuarios
 window.logoutUser = function() {
   sounds.click();
   if (confirm('¿Deseas cambiar de usuario? Tu progreso está guardado.')) {
@@ -290,19 +301,16 @@ window.switchUser = function(index) {
   window.currentUserIndex = index;
   localStorage.setItem('nexusSQL_currentUser', index);
   
-  // CARGAR USUARIO
   loadUserProfile(index);
   
   closeModal('modalGeneric');
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
   
-  // RENDERIZAR TODO
   renderGame();
   createParticles();
   updateAvatars();
   
-  // Forzar actualización visual
   updateStats();
   renderChallenges();
   updateProgressBar();
@@ -358,7 +366,6 @@ function showUserSelection() {
 function loadUserProfile(index) {
   const user = window.userProfiles[index];
   
-  // Copiar TODOS los datos del usuario
   window.gameState.playerName = user.playerName;
   window.gameState.avatar = user.avatar;
   window.gameState.xp = user.xp;
@@ -377,14 +384,13 @@ function loadUserProfile(index) {
   window.gameState.tutorialsSeen = user.tutorialsSeen || [];
   window.gameState.theme = user.theme || 'dark';
   window.gameState.soundEnabled = user.soundEnabled !== false;
+  window.gameState.triviaAnswered = user.triviaAnswered || false;
   
-  // RECREAR BASE DE DATOS
   if (window.SQL_CONSTRUCTOR) {
     window.gameState.db = new window.SQL_CONSTRUCTOR.Database();
     window.gameState.db.run(dbSeed);
   }
   
-  // Aplicar tema
   document.documentElement.setAttribute('data-theme', window.gameState.theme);
   document.getElementById('themeToggle').textContent = window.gameState.theme === 'light' ? '☀️' : '🌙';
   document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
@@ -417,7 +423,6 @@ async function init() {
     await initSqlJs({
       locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
     }).then(SQL => {
-      // CRÍTICO: Guardar constructor para recrear DB
       window.SQL_CONSTRUCTOR = SQL;
       window.gameState.db = new SQL.Database();
       window.gameState.db.run(dbSeed);
@@ -459,26 +464,40 @@ function saveGameState() {
 
 const narrativeDialogues = {
   1: {
-    1: () => `Roberto (GDL): "¡${window.gameState.playerName}! ¿Me escuchas? El virus bloqueó el acceso al sistema de despacho. Tengo 15 camiones esperando cargar unidades. Necesito los MODELOS de inventario. ¡AHORA!"`,
-    2: () => `Roberto: "Bien, muy bien. Ahora necesito las MARCAS. Tengo que reportar a Toyota qué tenemos disponible."`,
-    3: () => `Roberto: "Perfecto. Ahora MODELO Y MARCA juntos. El cliente está en línea."`,
-    4: () => `Roberto: "¡Excelente! Última: dame TODO con asterisco (*). Necesito el inventario completo."`
+    1: () => `Roberto (GDL): "¡${window.gameState.playerName}! El virus bloqueó el sistema. Necesito los NOMBRES de todos los clientes. ¡RÁPIDO!"`,
+    2: () => `Roberto: "Bien. Ahora dame MODELO y VIN. Tengo que validar los números de serie."`,
+    3: () => `Roberto: "Perfecto. Ahora el PRECIO pero renombrado como M_Precio_Lista. Es para el reporte."`,
+    4: () => `Roberto: "⚠️ GLITCH DETECTADO: El servidor duplica marcas. Usa DISTINCT para ver solo las únicas."`,
+    5: () => `Roberto: "Necesito SOLO los autos BYD. Filtra por marca = 'BYD'."`,
+    6: () => `Roberto: "Ahora trae autos con precio MAYOR a 600,000. Los clientes VIP están esperando."`,
+    7: () => `Roberto: "Busco UN auto específico: Toyota Y color Gris. Usa AND."`,
+    8: () => `Roberto: "⚠️ ERROR DE NODO: Precios inestables. Trae autos entre 350,000 y 550,000 con BETWEEN."`,
+    9: () => `Roberto: "Alguien escribió mal 'Hilux'. Busca modelos que empiecen con 'Hi' usando LIKE 'Hi%'."`,
+    10: () => `Roberto: "El virus borró datos de pagos. Encuentra ventas donde C_Metodo_Pago sea NULL."`
   }
 };
 
 const challenges = {
   1: {
     title: 'Restauración de Nodo GDL',
-    concept: '<strong>📜 SELECT y FROM</strong><br><br>SELECT elige columnas, FROM indica tabla.<br><code>SELECT C_Modelo FROM T_Inventario_GDL;</code>',
+    concept: '<strong>📜 SELECT, WHERE, ORDER BY</strong><br><br>Extrae, filtra y ordena datos del servidor.<br><code>SELECT C_Modelo FROM T_Inventario_GDL WHERE C_Precio > 500000;</code>',
     subExercises: [
-      { id: 1, desc: '🚗 Solo modelos', expected: 'SELECT C_Modelo FROM T_Inventario_GDL', hint: 'SELECT C_Modelo FROM T_Inventario_GDL;', example: 'SELECT C_Marca FROM T_Inventario_GDL;' },
-      { id: 2, desc: '🏭 Solo marcas', expected: 'SELECT C_Marca FROM T_Inventario_GDL', hint: 'SELECT C_Marca FROM T_Inventario_GDL;', example: 'SELECT C_Color FROM T_Inventario_GDL;' },
-      { id: 3, desc: '📋 Modelo Y Marca', expected: 'SELECT C_Modelo, C_Marca FROM T_Inventario_GDL', hint: 'SELECT C_Modelo, C_Marca FROM T_Inventario_GDL;', example: 'SELECT C_Modelo, C_Anio FROM T_Inventario_GDL;' },
-      { id: 4, desc: '🌟 Todo con *', expected: 'SELECT * FROM T_Inventario_GDL', hint: 'SELECT * FROM T_Inventario_GDL;', example: 'SELECT C_Modelo, C_Marca FROM T_Inventario_GDL;' }
+      { id: 1, desc: '📋 Listado de Clientes', expected: 'SELECT C_Nombre_Completo FROM T_Clientes_GDL', hint: 'SELECT C_Nombre_Completo FROM T_Clientes_GDL;', example: 'SELECT C_Correo FROM T_Clientes_GDL;' },
+      { id: 2, desc: '🚗 Identificación de Unidades', expected: 'SELECT C_Modelo, C_VIN FROM T_Inventario_GDL', hint: 'SELECT C_Modelo, C_VIN FROM T_Inventario_GDL;', example: 'SELECT C_Marca, C_Color FROM T_Inventario_GDL;' },
+      { id: 3, desc: '💰 Etiquetado Profesional', expected: 'SELECT C_Precio AS M_Precio_Lista FROM T_Inventario_GDL', hint: 'SELECT C_Precio AS M_Precio_Lista FROM T_Inventario_GDL;', example: 'SELECT C_Marca AS Fabricante FROM T_Inventario_GDL;' },
+      { id: 4, desc: '⚠️ GLITCH: Marcas Únicas', expected: 'SELECT DISTINCT C_Marca FROM T_Inventario_GDL', hint: 'SELECT DISTINCT C_Marca FROM T_Inventario_GDL;', example: 'SELECT DISTINCT C_Color FROM T_Inventario_GDL;' },
+      { id: 5, desc: '🔋 Filtro BYD', expected: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD'", hint: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD';", example: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota';" },
+      { id: 6, desc: '💎 Poder Adquisitivo', expected: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 600000', hint: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 600000;', example: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 500000;' },
+      { id: 7, desc: '🎯 Doble Validación', expected: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota' AND C_Color = 'Gris'", hint: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota' AND C_Color = 'Gris';", example: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD' AND C_Stock > 5;" },
+      { id: 8, desc: '⚠️ ERROR: BETWEEN', expected: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 350000 AND 550000', hint: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 350000 AND 550000;', example: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 400000 AND 600000;' },
+      { id: 9, desc: '🔍 Búsqueda por Patrón', expected: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'Hi%'", hint: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'Hi%';", example: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'C%';" },
+      { id: 10, desc: '🕳️ Auditoría de Vacíos', expected: 'SELECT * FROM T_Ventas_GDL WHERE C_Metodo_Pago IS NULL', hint: 'SELECT * FROM T_Ventas_GDL WHERE C_Metodo_Pago IS NULL;', example: 'SELECT * FROM T_Clientes_GDL WHERE C_Telefono IS NULL;' }
     ],
-    xp: 20, coins: 100, difficulty: 1, skill: 'SELECT',
-    diaryEntry: 'Día 1: The Void atacó. La Ing. Ana me contactó. Salvé el nodo de GDL.',
-    hasTutorial: true
+    xp: 100, coins: 1000, difficulty: 1, skill: 'SELECT',
+    diaryEntry: 'Día 1: Salvé el nodo de GDL. Roberto puede despachar las unidades.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -522,7 +541,7 @@ function showOnboardingStep(step) {
       </div>
       <h1 style="font-size: 32px; color: var(--primary); margin-bottom: 20px;">NEXUS SQL</h1>
       <p style="font-size: 18px; color: var(--text); margin-bottom: 10px;">Protocolo de Emergencia</p>
-      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.2 - Sistema de Recuperación</p>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.3 - Módulo 1 Completo</p>
       <button class="btn" onclick="showOnboardingStep(2)" style="font-size: 18px; padding: 16px 32px;">⚡ Iniciar Protocolo</button>
     `;
   } else if (step === 2) {
@@ -655,7 +674,7 @@ function renderChallenges() {
   for (let i = 1; i <= 1; i++) {
     const challenge = challenges[i];
     const completedSubs = window.gameState.completedSubExercises[i] || [];
-    const isFullyCompleted = completedSubs.length === 4;
+    const isFullyCompleted = completedSubs.length === 10;
     const isCurrent = window.gameState.currentChallenge === i;
     const isExpanded = window.gameState.expandedChallenges.includes(i);
     
@@ -676,7 +695,7 @@ function renderChallenges() {
     div.innerHTML = `
       <div style="display: flex; justify-content: space-between;">
         <div style="font-weight: bold;">${isExpanded ? '▼' : '▶'} ${i}. ${challenge.title}</div>
-        <div style="font-size: 11px;">[${completedSubs.length}/4]</div>
+        <div style="font-size: 11px;">[${completedSubs.length}/10]</div>
       </div>
       <div style="font-size: 12px; margin-top: 4px;">${'⭐'.repeat(challenge.difficulty)}</div>
       ${subExercisesHTML}
@@ -762,8 +781,8 @@ function updateProgressBar() {
     totalCompleted += completed.length;
   }
   
-  const percentage = Math.round((totalCompleted / 4) * 100);
-  document.getElementById('worldProgress').textContent = `${totalCompleted}/4`;
+  const percentage = Math.round((totalCompleted / 10) * 100);
+  document.getElementById('worldProgress').textContent = `${totalCompleted}/10`;
   document.getElementById('worldProgressBar').style.width = percentage + '%';
   document.getElementById('worldProgressBar').textContent = percentage + '%';
   
@@ -901,20 +920,19 @@ function checkSolution(userQuery, results) {
   const challenge = challenges[challengeId];
   const subExercise = challenge.subExercises.find(s => s.id === subExerciseId);
   
-  // NORMALIZACIÓN EXTREMA (acepta TODO)
   const normalize = q => {
     return q
-      .toLowerCase()                    // Todo a minúsculas
-      .replace(/\s+/g, ' ')            // Espacios múltiples → 1 espacio
-      .replace(/;+/g, '')              // Quitar punto y coma
-      .replace(/\t/g, ' ')             // Tabs → espacios
-      .replace(/\n/g, ' ')             // Saltos de línea → espacios
-      .replace(/\r/g, ' ')             // Retornos → espacios
-      .replace(/\(/g, ' ( ')           // Espacios alrededor de paréntesis
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/;+/g, '')
+      .replace(/\t/g, ' ')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, ' ')
+      .replace(/\(/g, ' ( ')
       .replace(/\)/g, ' ) ')
-      .replace(/,/g, ' , ')            // Espacios alrededor de comas
-      .replace(/\s+/g, ' ')            // Limpiar espacios otra vez
-      .trim();                          // Quitar espacios al inicio/final
+      .replace(/,/g, ' , ')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
   
   const userNorm = normalize(userQuery);
@@ -923,7 +941,6 @@ function checkSolution(userQuery, results) {
   console.log('USER:', userNorm);
   console.log('EXPECTED:', expectedNorm);
   
-  // Aceptar si es EXACTO o si contiene la respuesta esperada
   if (userNorm === expectedNorm || userNorm.includes(expectedNorm)) {
     completeSubExercise(challengeId, subExerciseId, results);
   } else {
@@ -944,34 +961,232 @@ function completeSubExercise(challengeId, subExerciseId, results) {
     completedSubs.push(subExerciseId);
     window.gameState.completedSubExercises[challengeId] = completedSubs;
     
-    const subXP = Math.ceil(challenge.xp / 4);
-    const subCoins = Math.ceil(challenge.coins / 4);
+    const subXP = Math.ceil(challenge.xp / 10);
+    const subCoins = Math.ceil(challenge.coins / 10);
     xpGained = subXP;
     coinsGained = subCoins;
     
     window.gameState.xp += subXP;
     window.gameState.coins += subCoins;
     
-    window.gameState.skills[challenge.skill] = Math.min(100, window.gameState.skills[challenge.skill] + 5);
-    window.gameState.reputation.ana = Math.min(3, window.gameState.reputation.ana + 0.25);
+    window.gameState.skills[challenge.skill] = Math.min(100, window.gameState.skills[challenge.skill] + 10);
+    window.gameState.reputation.ana = Math.min(3, window.gameState.reputation.ana + 0.3);
     
-    if (completedSubs.length === 4) {
+    // TRIVIA después del ejercicio 5
+    if (subExerciseId === 5 && challenge.hasTrivia && !window.gameState.triviaAnswered) {
+      saveGameState();
+      showTrivia(challengeId);
+      return;
+    }
+    
+    // BOSS FINAL después del ejercicio 10
+    if (completedSubs.length === 10 && challenge.hasBoss) {
       window.gameState.currentDay++;
       if (challenge.diaryEntry) {
         window.gameState.diary.push({ day: challengeId, entry: challenge.diaryEntry });
       }
-      if (challenge.badge && !window.gameState.unlockedBadges.includes(challenge.badge)) {
-        window.gameState.unlockedBadges.push(challenge.badge);
-      }
+      saveGameState();
+      showBossFight(challengeId);
+      return;
     }
     
     saveGameState();
   }
   
   sounds.success();
-  
-  // Mostrar modal de recompensas
   showRewardModal(xpGained, coinsGained, challengeId, subExerciseId, results);
+}
+
+window.showTrivia = function(challengeId) {
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = `
+    <div style="text-align: center;">
+      <h2 style="color: var(--accent); margin-bottom: 20px;">⚡ TRIVIA DE VELOCIDAD</h2>
+      <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 12px; border: 2px solid var(--accent); margin: 20px 0;">
+        <p style="font-size: 18px; margin-bottom: 20px;">La Ing. Ana pregunta:</p>
+        <p style="font-size: 16px; font-style: italic; margin-bottom: 30px;">"Si Roberto te pide ver los autos que NO son de color 'Rojo', ¿qué operador de comparación usarías en el WHERE?"</p>
+        <button class="btn btn-secondary" onclick="answerTrivia('A')" style="width: 100%; margin: 10px 0; font-size: 16px;">A) ==</button>
+        <button class="btn btn-secondary" onclick="answerTrivia('B')" style="width: 100%; margin: 10px 0; font-size: 16px;">B) <> o !=</button>
+        <button class="btn btn-secondary" onclick="answerTrivia('C')" style="width: 100%; margin: 10px 0; font-size: 16px;">C) NOT LIKE</button>
+      </div>
+      <p style="font-size: 14px; color: var(--accent);">💰 Premio: 200 VC</p>
+    </div>
+  `;
+  document.getElementById('modalGeneric').classList.add('active');
+};
+
+window.answerTrivia = function(answer) {
+  window.gameState.triviaAnswered = true;
+  
+  if (answer === 'B') {
+    sounds.success();
+    window.gameState.coins += 200;
+    window.gameState.xp += 20;
+    createCoinRain(200);
+    saveGameState();
+    
+    const content = document.getElementById('modalGenericContent');
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+        <h2 style="color: var(--primary);">¡CORRECTO!</h2>
+        <p style="margin: 20px 0; font-size: 16px;">El operador <strong><></strong> o <strong>!=</strong> significa "diferente de".</p>
+        <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--accent);">
+          <div style="font-size: 32px; margin: 15px 0;">🪙 +200 VC</div>
+          <div style="font-size: 32px; margin: 15px 0;">⭐ +20 XP</div>
+        </div>
+        <button class="btn" onclick="closeModal('modalGeneric'); loadChallenge(1, 6);" style="width: 100%; margin-top: 20px;">Continuar</button>
+      </div>
+    `;
+  } else {
+    sounds.error();
+    const content = document.getElementById('modalGenericContent');
+    content.innerHTML = `
+      <div style="text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+        <h2 style="color: var(--danger);">Incorrecto</h2>
+        <p style="margin: 20px 0; font-size: 16px;">La respuesta correcta era: <strong>B) <> o !=</strong></p>
+        <p style="color: var(--muted);">No hay recompensa, pero puedes continuar.</p>
+        <button class="btn btn-secondary" onclick="closeModal('modalGeneric'); loadChallenge(1, 6);" style="width: 100%; margin-top: 20px;">Continuar</button>
+      </div>
+    `;
+  }
+};
+
+window.showBossFight = function(challengeId) {
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = `
+    <div style="text-align: center;">
+      <h2 style="color: var(--danger); margin-bottom: 20px;">👹 BOSS FINAL</h2>
+      <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; border: 2px solid var(--danger); margin: 20px 0;">
+        <p style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">Roberto está gritando al teléfono:</p>
+        <p style="font-size: 16px; font-style: italic; line-height: 1.6;">"¡${window.gameState.playerName}, la planta ya va a cerrar el sistema! Necesito que me des el <strong>Top 5 de los autos más caros</strong> que sean marca 'Toyota', que <strong>NO sean de color 'Blanco'</strong> y que el precio esté ordenado de <strong>mayor a menor</strong>. ¡Dámelo ya!"</p>
+      </div>
+      <p style="font-size: 14px; color: var(--muted); margin: 20px 0;">Combina: SELECT TOP 5, WHERE, AND, NOT, ORDER BY DESC</p>
+      <button class="btn" onclick="closeModal('modalGeneric'); startBoss();" style="width: 100%; font-size: 18px;">⚔️ Aceptar Desafío</button>
+    </div>
+  `;
+  document.getElementById('modalGeneric').classList.add('active');
+};
+
+window.startBoss = function() {
+  window.gameState.currentChallenge = 1;
+  window.gameState.currentSubExercise = 'BOSS';
+  document.getElementById('challengeTitle').textContent = '👹 BOSS FINAL - El Ultimátum de Roberto';
+  document.getElementById('challengeDesc').textContent = 'Top 5 autos Toyota más caros, NO blancos, ordenados DESC';
+  document.getElementById('npcDialogue').innerHTML = `<div class="npc-dialogue"><span class="npc-avatar">👹</span><div style="display: inline-block; width: calc(100% - 80px); vertical-align: top;"><div class="npc-name" style="color: var(--danger);">BOSS FINAL</div><div class="npc-text"><p>¡La planta cierra en minutos! Top 5 Toyota más caros, NO blancos, DESC. ¡AHORA!</p></div></div></div>`;
+  document.getElementById('sqlEditor').value = '-- Escribe tu consulta BOSS aquí\n';
+  document.getElementById('results').innerHTML = '<strong>📊 Resultados</strong><p style="color: var(--muted); margin-top: 10px;">Ejecuta tu consulta...</p>';
+  window.gameState.attempts = 0;
+  updateAttemptCounter();
+};
+
+window.executeQuery = function() {
+  sounds.click();
+  const query = document.getElementById('sqlEditor').value.trim();
+  if (!query || query === '-- Escribe tu consulta SQL aquí' || query === '-- Escribe tu consulta BOSS aquí') {
+    sounds.error();
+    alert('Escribe una consulta');
+    return;
+  }
+  
+  // BOSS CHECK
+  if (window.gameState.currentSubExercise === 'BOSS') {
+    try {
+      const results = window.gameState.db.exec(query);
+      displayResults(results, query);
+      checkBossSolution(query, results);
+    } catch (e) {
+      sounds.error();
+      displayError(e.message, query);
+      window.gameState.attempts++;
+      updateAttemptCounter();
+    }
+    return;
+  }
+  
+  // EJERCICIO NORMAL
+  try {
+    const results = window.gameState.db.exec(query);
+    displayResults(results, query);
+    checkSolution(query, results);
+  } catch (e) {
+    sounds.error();
+    displayError(e.message, query);
+    window.gameState.attempts++;
+    updateAttemptCounter();
+  }
+};
+
+function checkBossSolution(userQuery, results) {
+  const normalize = q => {
+    return q
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/;+/g, '')
+      .replace(/\t/g, ' ')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, ' ')
+      .replace(/\(/g, ' ( ')
+      .replace(/\)/g, ' ) ')
+      .replace(/,/g, ' , ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+  
+  const userNorm = normalize(userQuery);
+  
+  // Verificar componentes clave del BOSS
+  const hasTop5 = userNorm.includes('top 5') || userNorm.includes('limit 5');
+  const hasToyota = userNorm.includes("'toyota'");
+  const hasNotWhite = (userNorm.includes("!= 'blanco'") || userNorm.includes("<> 'blanco'") || userNorm.includes("not") && userNorm.includes("'blanco'"));
+  const hasOrderDesc = userNorm.includes('order by') && userNorm.includes('desc');
+  const hasPrice = userNorm.includes('c_precio');
+  
+  if (hasTop5 && hasToyota && hasNotWhite && hasOrderDesc && hasPrice && results && results[0] && results[0].values.length <= 5) {
+    completeBoss();
+  } else {
+    sounds.error();
+    window.gameState.attempts++;
+    updateAttemptCounter();
+    
+    let hint = 'Verifica: ';
+    if (!hasTop5) hint += 'TOP 5, ';
+    if (!hasToyota) hint += "marca='Toyota', ";
+    if (!hasNotWhite) hint += "NOT color='Blanco', ";
+    if (!hasOrderDesc) hint += 'ORDER BY DESC, ';
+    alert(hint.slice(0, -2));
+  }
+}
+
+function completeBoss() {
+  sounds.success();
+  window.gameState.xp += 50;
+  window.gameState.coins += 1500;
+  window.gameState.unlockedBadges.push('boss1');
+  window.gameState.unlockedBadges.push('mundo1');
+  saveGameState();
+  
+  createCoinRain(1500);
+  
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = `
+    <div style="text-align: center;">
+      <div style="font-size: 80px; margin-bottom: 20px;">👑</div>
+      <h2 style="color: var(--accent); margin-bottom: 15px;">¡BOSS DERROTADO!</h2>
+      <p style="font-size: 18px; margin: 20px 0;">Has salvado el Nodo GDL. Roberto puede despachar las unidades.</p>
+      <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--accent);">
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 15px;">🏆 RECOMPENSAS FINALES</div>
+        <div style="font-size: 32px; margin: 10px 0;">⭐ +50 XP</div>
+        <div style="font-size: 32px; margin: 10px 0;">🪙 +1,500 VC</div>
+        <div style="font-size: 20px; margin: 15px 0;">👑 Insignia: Vencedor de Roberto</div>
+        <div style="font-size: 20px; margin: 15px 0;">🏆 Insignia: Salvador de GDL</div>
+      </div>
+      <p style="color: var(--muted); margin: 20px 0;">Módulo 1 - COMPLETO 100%</p>
+      <button class="btn" onclick="closeModal('modalGeneric'); location.reload();" style="width: 100%; margin-top: 20px; font-size: 18px;">🎊 Finalizar Módulo</button>
+    </div>
+  `;
+  document.getElementById('modalGeneric').classList.add('active');
 }
 
 function showRewardModal(xp, coins, challengeId, subExerciseId, results) {
@@ -1003,11 +1218,10 @@ function showRewardModal(xp, coins, challengeId, subExerciseId, results) {
           <div style="font-size: 32px; margin: 15px 0;">🪙 +${coins} VC</div>
         </div>
         ${resultSummary}
-        ${subExerciseId < 4 ? `<button class="btn" onclick="nextExercise(${challengeId}, ${subExerciseId})" style="width: 100%; margin-top: 20px; font-size: 18px;">➡️ Siguiente Ejercicio</button>` : `<button class="btn" onclick="closeModal('modalGeneric')" style="width: 100%; margin-top: 20px; font-size: 18px;">🎊 Finalizar Módulo</button>`}
+        ${subExerciseId < 10 ? `<button class="btn" onclick="nextExercise(${challengeId}, ${subExerciseId})" style="width: 100%; margin-top: 20px; font-size: 18px;">➡️ Siguiente Ejercicio</button>` : ''}
       </div>
     `;
     
-    // Animación de monedas
     createCoinRain(coins);
   }
   
@@ -1053,6 +1267,12 @@ window.showExample = function() {
     return;
   }
   sounds.click();
+  
+  if (window.gameState.currentSubExercise === 'BOSS') {
+    alert(`💡 PISTA BOSS:\n\nSELECT TOP 5 * FROM tabla\nWHERE condicion1 AND condicion2\nORDER BY columna DESC;`);
+    return;
+  }
+  
   const challenge = challenges[window.gameState.currentChallenge];
   const subExercise = challenge.subExercises.find(s => s.id === window.gameState.currentSubExercise);
   alert(`💡 EJEMPLO:\n\n${subExercise.example}\n\nAdáptalo a lo que se pide.`);
@@ -1065,6 +1285,24 @@ window.clearEditor = function() {
 
 window.showHints = function() {
   sounds.click();
+  
+  if (window.gameState.currentSubExercise === 'BOSS') {
+    const content = document.getElementById('modalGenericContent');
+    content.innerHTML = `
+      <h2>💡 Pista BOSS</h2>
+      <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; margin-top: 20px; border: 2px solid var(--accent);">
+        <p>Necesitas combinar:</p>
+        <p>1️⃣ SELECT TOP 5 *<br>
+        2️⃣ FROM T_Inventario_GDL<br>
+        3️⃣ WHERE C_Marca = 'Toyota' AND C_Color <> 'Blanco'<br>
+        4️⃣ ORDER BY C_Precio DESC;</p>
+      </div>
+      <button class="btn" onclick="closeModal('modalGeneric')" style="margin-top: 20px; width: 100%;">Cerrar</button>
+    `;
+    document.getElementById('modalGeneric').classList.add('active');
+    return;
+  }
+  
   const challenge = challenges[window.gameState.currentChallenge];
   const subExercise = challenge.subExercises.find(s => s.id === window.gameState.currentSubExercise);
   const content = document.getElementById('modalGenericContent');
@@ -1093,6 +1331,21 @@ window.showTables = function() {
         <li><code>C_Color</code> - TEXT (color)</li>
         <li><code>C_Precio</code> - INTEGER (precio en pesos)</li>
         <li><code>C_Stock</code> - INTEGER (unidades disponibles)</li>
+      </ul>
+      <h3 style="color: var(--primary); margin-top: 20px;">Tabla: T_Clientes_GDL</h3>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><code>C_ID_Cliente</code> - INTEGER</li>
+        <li><code>C_Nombre_Completo</code> - TEXT</li>
+        <li><code>C_Correo</code> - TEXT</li>
+        <li><code>C_Telefono</code> - TEXT</li>
+        <li><code>C_Ciudad_Registro</code> - TEXT</li>
+      </ul>
+      <h3 style="color: var(--primary); margin-top: 20px;">Tabla: T_Ventas_GDL</h3>
+      <ul style="margin-left: 20px; margin-top: 10px;">
+        <li><code>C_ID_Venta</code> - INTEGER</li>
+        <li><code>C_VIN</code> - TEXT</li>
+        <li><code>C_Fecha</code> - DATE</li>
+        <li><code>C_Metodo_Pago</code> - TEXT (puede ser NULL)</li>
       </ul>
       <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid var(--accent);">
         <strong>💡 Recuerda:</strong><br>
