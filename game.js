@@ -1,6 +1,6 @@
 // ============================================
-// NEXUS SQL v1.1 - SISTEMA PEDAGÓGICO
-// Con sistema multi-usuario y animaciones mejoradas
+// NEXUS SQL v1.2 - SISTEMA PEDAGÓGICO
+// Bugs corregidos: Carga de usuarios y SQL case-insensitive
 // ============================================
 
 // Sistema de usuarios múltiples
@@ -289,13 +289,24 @@ window.switchUser = function(index) {
   sounds.click();
   window.currentUserIndex = index;
   localStorage.setItem('nexusSQL_currentUser', index);
+  
+  // CARGAR USUARIO
   loadUserProfile(index);
-  closeModal('modalUserSelect');
+  
+  closeModal('modalGeneric');
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
+  
+  // RENDERIZAR TODO
   renderGame();
   createParticles();
   updateAvatars();
+  
+  // Forzar actualización visual
+  updateStats();
+  renderChallenges();
+  updateProgressBar();
+  updateSkillBars();
 };
 
 window.deleteUser = function(index) {
@@ -346,12 +357,37 @@ function showUserSelection() {
 
 function loadUserProfile(index) {
   const user = window.userProfiles[index];
-  Object.assign(window.gameState, user);
-  // Recrear DB
+  
+  // Copiar TODOS los datos del usuario
+  window.gameState.playerName = user.playerName;
+  window.gameState.avatar = user.avatar;
+  window.gameState.xp = user.xp;
+  window.gameState.coins = user.coins;
+  window.gameState.streak = user.streak;
+  window.gameState.currentChallenge = user.currentChallenge;
+  window.gameState.currentSubExercise = user.currentSubExercise;
+  window.gameState.currentDay = user.currentDay;
+  window.gameState.completedChallenges = user.completedChallenges || [];
+  window.gameState.completedSubExercises = user.completedSubExercises || {};
+  window.gameState.unlockedBadges = user.unlockedBadges || [];
+  window.gameState.reputation = user.reputation || { ana: 0, roberto: 0 };
+  window.gameState.diary = user.diary || [];
+  window.gameState.skills = user.skills || { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 };
+  window.gameState.expandedChallenges = user.expandedChallenges || [];
+  window.gameState.tutorialsSeen = user.tutorialsSeen || [];
+  window.gameState.theme = user.theme || 'dark';
+  window.gameState.soundEnabled = user.soundEnabled !== false;
+  
+  // RECREAR BASE DE DATOS
   if (window.SQL_CONSTRUCTOR) {
     window.gameState.db = new window.SQL_CONSTRUCTOR.Database();
     window.gameState.db.run(dbSeed);
   }
+  
+  // Aplicar tema
+  document.documentElement.setAttribute('data-theme', window.gameState.theme);
+  document.getElementById('themeToggle').textContent = window.gameState.theme === 'light' ? '☀️' : '🌙';
+  document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
 }
 
 function saveUserProfile() {
@@ -486,7 +522,7 @@ function showOnboardingStep(step) {
       </div>
       <h1 style="font-size: 32px; color: var(--primary); margin-bottom: 20px;">NEXUS SQL</h1>
       <p style="font-size: 18px; color: var(--text); margin-bottom: 10px;">Protocolo de Emergencia</p>
-      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.1 - Sistema de Recuperación</p>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.2 - Sistema de Recuperación</p>
       <button class="btn" onclick="showOnboardingStep(2)" style="font-size: 18px; padding: 16px 32px;">⚡ Iniciar Protocolo</button>
     `;
   } else if (step === 2) {
@@ -865,22 +901,29 @@ function checkSolution(userQuery, results) {
   const challenge = challenges[challengeId];
   const subExercise = challenge.subExercises.find(s => s.id === subExerciseId);
   
-  // Normalización más agresiva para mayúsculas/minúsculas
+  // NORMALIZACIÓN EXTREMA (acepta TODO)
   const normalize = q => {
     return q
-      .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .replace(/;/g, '')
-      .replace(/\(/g, ' ( ')
+      .toLowerCase()                    // Todo a minúsculas
+      .replace(/\s+/g, ' ')            // Espacios múltiples → 1 espacio
+      .replace(/;+/g, '')              // Quitar punto y coma
+      .replace(/\t/g, ' ')             // Tabs → espacios
+      .replace(/\n/g, ' ')             // Saltos de línea → espacios
+      .replace(/\r/g, ' ')             // Retornos → espacios
+      .replace(/\(/g, ' ( ')           // Espacios alrededor de paréntesis
       .replace(/\)/g, ' ) ')
-      .replace(/,/g, ' , ')
-      .replace(/\s+/g, ' ')
-      .trim();
+      .replace(/,/g, ' , ')            // Espacios alrededor de comas
+      .replace(/\s+/g, ' ')            // Limpiar espacios otra vez
+      .trim();                          // Quitar espacios al inicio/final
   };
   
   const userNorm = normalize(userQuery);
   const expectedNorm = normalize(subExercise.expected);
   
+  console.log('USER:', userNorm);
+  console.log('EXPECTED:', expectedNorm);
+  
+  // Aceptar si es EXACTO o si contiene la respuesta esperada
   if (userNorm === expectedNorm || userNorm.includes(expectedNorm)) {
     completeSubExercise(challengeId, subExerciseId, results);
   } else {
