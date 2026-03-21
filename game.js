@@ -1,9 +1,8 @@
 // ============================================
-// NEXUS SQL v1.3 - MÓDULO 1 COMPLETO
-// Nuevo: Ejercicios 1.5-1.10 + Boss Final + Trivia
+// NEXUS SQL v2.0 — PROTOCOLO DE EMERGENCIA
+// NexCorp Industries / AXIOM Motors
 // ============================================
 
-// Sistema de usuarios múltiples
 window.userProfiles = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
 window.currentUserIndex = parseInt(localStorage.getItem('nexusSQL_currentUser') || '-1');
 
@@ -20,6 +19,8 @@ window.gameState = {
   completedChallenges: [],
   completedSubExercises: {},
   unlockedBadges: [],
+  unlockedItems: [],
+  equippedItems: {},
   reputation: { ana: 0, roberto: 0 },
   favorites: [],
   diary: [],
@@ -33,18 +34,41 @@ window.gameState = {
   skills: { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 },
   expandedChallenges: [],
   tutorialsSeen: [],
-  triviaAnswered: false
+  triviaAnswered: false,
+  rank: 'Analista JR'
 };
+
+// ============================================
+// SISTEMA DE TIENDA Y SKINS
+// ============================================
+const shopItems = [
+  // AVATARES / SKINS
+  { id: 'skin_hacker', name: 'Hoodie de Hacker', icon: '🥷', type: 'avatar', price: 500, desc: 'El look del que hackea el sistema... legalmente.' },
+  { id: 'skin_ejecutivo', name: 'Traje Ejecutivo', icon: '🤵', type: 'avatar', price: 800, desc: 'Para cuando Roberto te invite a su oficina.' },
+  { id: 'skin_astronauta', name: 'Casco Espacial', icon: '👨‍🚀', type: 'avatar', price: 1200, desc: 'Tus queries viajan a velocidad orbital.' },
+  { id: 'skin_mago', name: 'Capa de Mago SQL', icon: '🧙', type: 'avatar', price: 2000, desc: 'SELECT * FROM magia WHERE existe = TRUE.' },
+  // OFICINA / ENTORNO
+  { id: 'monitor_dual', name: 'Monitor Dual', icon: '🖥️', type: 'office', price: 300, desc: 'Dobla tu pantalla, dobla tu productividad.' },
+  { id: 'silla_gamer', name: 'Silla Gamer RGB', icon: '🪑', type: 'office', price: 600, desc: 'Lumbar support para queries de 3 horas.' },
+  { id: 'cafe_infinito', name: 'Café Infinito ☕', icon: '☕', type: 'office', price: 200, desc: 'Nunca más vas a tener error de timeout.' },
+  // POWER-UPS
+  { id: 'pista_gratis', name: 'Kit de Pistas x3', icon: '💡', type: 'powerup', price: 150, desc: '3 pistas extra para cuando el WHERE no cede.' },
+  { id: 'xp_boost', name: 'Boost XP x2', icon: '⚡', type: 'powerup', price: 400, desc: 'Duplica tu XP por 5 ejercicios.' },
+];
 
 const allBadges = [
   { id: 'primera', name: 'Primera Consulta', icon: '🛡️', desc: 'Completar ejercicio 1.1' },
   { id: 'glitch', name: 'Cazador de Duplicados', icon: '⚡', desc: 'Completar GLITCH 1.4' },
   { id: 'domador', name: 'Domador de WHERE', icon: '⚔️', desc: 'Completar ejercicio 1.7' },
-  { id: 'between', name: 'Maestro del Rango', icon: '📊', desc: 'Completar ERROR DE NODO 1.9' },
+  { id: 'between', name: 'Maestro del Rango', icon: '📊', desc: 'Completar ERROR DE NODO 1.8' },
   { id: 'boss1', name: 'Vencedor de Roberto', icon: '👑', desc: 'Completar Boss Final Módulo 1' },
   { id: 'mundo1', name: 'Salvador de GDL', icon: '🏆', desc: '100% Módulo 1' }
 ];
 
+// ============================================
+// BASE DE DATOS — AXIOM MOTORS / NEXCORP
+// Esquema simple para Módulo 1 — AXIOM Motors GDL
+// ============================================
 const dbSeed = `
   CREATE TABLE T_Inventario_GDL (
     C_VIN TEXT PRIMARY KEY,
@@ -55,20 +79,20 @@ const dbSeed = `
     C_Precio INTEGER,
     C_Stock INTEGER
   );
-  
+
   INSERT INTO T_Inventario_GDL VALUES
-  ('VIN001TY', 'Toyota', 'Hilux', 2024, 'Gris', 650000, 5),
-  ('VIN002TY', 'Toyota', 'Corolla', 2024, 'Blanco', 450000, 8),
-  ('VIN003BY', 'BYD', 'Seal', 2024, 'Azul', 550000, 3),
-  ('VIN004TY', 'Toyota', 'RAV4', 2024, 'Negro', 700000, 2),
-  ('VIN005BY', 'BYD', 'Han', 2024, 'Rojo', 580000, 4),
-  ('VIN006TY', 'Toyota', 'Camry', 2024, 'Plata', 520000, 6),
-  ('VIN007BY', 'BYD', 'Dolphin', 2024, 'Verde', 380000, 10),
-  ('VIN008TY', 'Toyota', 'Tacoma', 2024, 'Azul', 720000, 3),
-  ('VIN009BY', 'BYD', 'Atto3', 2024, 'Blanco', 490000, 7),
-  ('VIN010TY', 'Toyota', 'Highlander', 2024, 'Negro', 850000, 2),
-  ('VIN011TY', 'Toyota', 'Hilander', 2024, 'Gris', 420000, 4);
-  
+  ('AX001TY', 'Toyota', 'Hilux', 2024, 'Gris', 650000, 5),
+  ('AX002TY', 'Toyota', 'Corolla', 2024, 'Blanco', 450000, 8),
+  ('AX003BYD', 'BYD', 'Seal', 2024, 'Azul', 550000, 3),
+  ('AX004TY', 'Toyota', 'RAV4', 2024, 'Negro', 700000, 2),
+  ('AX005BYD', 'BYD', 'Han', 2024, 'Rojo', 580000, 4),
+  ('AX006TY', 'Toyota', 'Camry', 2024, 'Plata', 520000, 6),
+  ('AX007BYD', 'BYD', 'Dolphin', 2024, 'Verde', 380000, 10),
+  ('AX008TY', 'Toyota', 'Tacoma', 2024, 'Azul', 720000, 3),
+  ('AX009BYD', 'BYD', 'Atto3', 2024, 'Blanco', 490000, 7),
+  ('AX010TY', 'Toyota', 'Highlander', 2024, 'Negro', 850000, 2),
+  ('AX011TY', 'Toyota', 'Hiloader', 2024, 'Gris', 420000, 4);
+
   CREATE TABLE T_Clientes_GDL (
     C_ID_Cliente INTEGER PRIMARY KEY,
     C_Nombre_Completo TEXT,
@@ -76,89 +100,358 @@ const dbSeed = `
     C_Telefono TEXT,
     C_Ciudad_Registro TEXT
   );
-  
+
   INSERT INTO T_Clientes_GDL VALUES
-  (1, 'Roberto Martínez', 'roberto@velocity.com', '3331234567', 'Guadalajara'),
+  (1, 'Roberto Mendoza', 'roberto@nexcorp.mx', '3331234567', 'Guadalajara'),
   (2, 'María González', 'maria@gmail.com', '3339876543', 'Guadalajara'),
   (3, 'Carlos López', 'carlos@hotmail.com', '3335555555', 'Zapopan'),
   (4, 'Ana Rodríguez', 'ana.r@outlook.com', '3338888888', 'Guadalajara'),
-  (5, 'Luis Hernández', 'luis.h@yahoo.com', '3337777777', 'Tlaquepaque');
+  (5, 'Luis Hernández', 'luis.h@yahoo.com', '3337777777', 'Tlaquepaque'),
+  (6, 'Sofía Vargas', 'sofia@nexcorp.mx', '3332222222', 'Guadalajara'),
+  (7, 'Diego Ruiz', 'diego@gmail.com', '3336666666', 'Zapopan'),
+  (8, 'Fernanda Castro', 'fer.castro@hotmail.com', '3339999999', 'Guadalajara');
 
   CREATE TABLE T_Ventas_GDL (
     C_ID_Venta INTEGER PRIMARY KEY,
     C_VIN TEXT,
+    C_ID_Cliente INTEGER,
     C_Fecha DATE,
-    C_Metodo_Pago TEXT
+    C_Metodo_Pago TEXT,
+    C_Monto INTEGER
   );
 
   INSERT INTO T_Ventas_GDL VALUES
-  (1, 'VIN001TY', '2024-01-15', 'Efectivo'),
-  (2, 'VIN003BY', '2024-01-20', NULL),
-  (3, 'VIN005BY', '2024-01-22', 'Crédito'),
-  (4, 'VIN007BY', '2024-01-25', NULL);
+  (1, 'AX001TY', 1, '2024-01-15', 'Efectivo', 650000),
+  (2, 'AX003BYD', 2, '2024-01-20', NULL, 550000),
+  (3, 'AX005BYD', 3, '2024-01-22', 'Crédito', 580000),
+  (4, 'AX007BYD', 4, '2024-01-25', NULL, 380000),
+  (5, 'AX002TY', 5, '2024-02-01', 'Contado', 450000),
+  (6, 'AX006TY', 6, '2024-02-10', 'Crédito', 520000),
+  (7, 'AX004TY', 7, '2024-02-15', 'Efectivo', 700000),
+  (8, 'AX010TY', 8, '2024-02-20', NULL, 850000);
 `;
 
+// ============================================
+// NARRATIVA INMERSIVA — Módulo 1
+// NexCorp Industries / AXIOM Motors GDL
+// ============================================
+const narrativeDialogues = {
+  1: {
+    // Ejercicio 1 — El primer contacto
+    1: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 Servidor Regional GDL — Puerto 8080 — 06:47 AM</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👨‍💼</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ROBERTO — Gerente AXIOM Motors GDL</div>
+            <p>"${window.gameState.playerName}, ¿me escuchas? El virus bloqueó el módulo de clientes.
+            Tengo a 15 asesores en el piso sin poder ver a <strong>UN SOLO cliente</strong>.
+            Necesito los NOMBRES de todos los registros en el servidor. Ahora."</p>
+            <p class="npc-whisper">🔒 <em>La pantalla de Roberto parpadea. The Void está borrando registros en tiempo real.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 2 — Escalando el problema
+    2: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 07:03 AM — Alerta de sistema: 47 unidades sin despachar</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👨‍💼</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ROBERTO — Gerente AXIOM Motors GDL</div>
+            <p>"¡Bien! Ya veo los nombres. Pero ahora necesito validar los números de serie
+            de las unidades. Dame el <strong>MODELO y el VIN</strong> de todo el inventario.
+            Toyota ya me está llamando para cancelar el embarque si no confirmo."</p>
+            <p class="npc-whisper">⚠️ <em>14 minutos para el deadline de Toyota.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 3 — El reporte ejecutivo
+    3: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 07:18 AM — Llamada entrante: Ing. Ana (NEXUS)</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👩‍💻</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ING. ANA — Arquitecta NEXUS</div>
+            <p>"${window.gameState.playerName}, escucha. Roberto está bien pero el Director Regional
+            va a pedir un reporte formal en 20 minutos. Necesitan ver el precio del inventario
+            pero con nomenclatura ejecutiva. Muestra <strong>C_Precio como M_Precio_Lista</strong>.
+            Los directores odian los nombres técnicos."</p>
+            <p class="npc-whisper">💡 <em>Tip: En SQL puedes renombrar columnas con la palabra AS.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 4 — GLITCH
+    4: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 07:31 AM — ⚠️ ALERTA: Corrupción de datos detectada</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👨‍💼</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ROBERTO — Gerente AXIOM Motors GDL</div>
+            <p>"¡ESPERA! El sistema está devolviendo marcas duplicadas como loco.
+            The Void inyectó registros falsos. Necesito ver <strong>solo las marcas únicas</strong>
+            para saber con qué realmente contamos. ¡Sin duplicados!"</p>
+            <p class="npc-whisper">🔴 <em>GLITCH ACTIVO: El servidor está multiplicando marcas.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 5 — Filtro BYD
+    5: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 07:44 AM — Llamada: Cliente flotilla eléctrica</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👨‍💼</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ROBERTO — Gerente AXIOM Motors GDL</div>
+            <p>"Tengo a Logística Nacional en la línea. Quieren comprar FLOTA completa de eléctricos.
+            Solo les interesan las unidades <strong>BYD</strong>. Dame todos los registros
+            de esa marca. Nada de Toyota por ahora."</p>
+            <p class="npc-whisper">💰 <em>Venta potencial: $2,980,000 MXN si cerramos hoy.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 6 — VIP
+    6: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 08:02 AM — Segmento VIP activado</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👩‍💻</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ING. ANA — Arquitecta NEXUS</div>
+            <p>"Nuevo objetivo. El Director de NexCorp quiere ver las unidades de alto valor
+            para la junta del mediodía. Solo unidades con precio <strong>mayor a $600,000</strong>.
+            Los clientes VIP no quieren ver el catálogo completo."</p>
+            <p class="npc-whisper">🏆 <em>Ana está monitoreando tu velocidad de respuesta.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 7 — Doble filtro
+    7: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 08:19 AM — Solicitud específica de cliente</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👨‍💼</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ROBERTO — Gerente AXIOM Motors GDL</div>
+            <p>"Tengo un cliente muy específico. Quiere exactamente:
+            <strong>Toyota Y color Gris</strong>. Ni otro color, ni otra marca.
+            Búscame esa combinación exacta en el inventario."</p>
+            <p class="npc-whisper">🎯 <em>Necesitas combinar DOS condiciones con AND.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 8 — BETWEEN
+    8: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 08:33 AM — ⚠️ ERROR DE NODO: Precios inestables</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👩‍💻</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ING. ANA — Arquitecta NEXUS</div>
+            <p>"The Void atacó el módulo de precios. Algunos datos están corruptos arriba y abajo.
+            Necesito que aisles el rango CONFIABLE: unidades entre
+            <strong>$350,000 y $550,000</strong>. Usa BETWEEN para capturar el rango exacto."</p>
+            <p class="npc-whisper">🔧 <em>ERROR DE NODO activo. Trabaja rápido.</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 9 — LIKE
+    9: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 08:47 AM — Registro con error tipográfico</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👨‍💼</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ROBERTO — Gerente AXIOM Motors GDL</div>
+            <p>"The Void corrompió nombres de modelos. Alguien capturó 'Hiloader' en lugar
+            de 'Hilux'. Necesito encontrar TODO lo que empiece con <strong>'Hi'</strong>
+            para no perder ningún registro. Usa búsqueda por patrón."</p>
+            <p class="npc-whisper">🔍 <em>El símbolo % significa "cualquier cosa después de esto".</em></p>
+          </div>
+        </div>
+      </div>`,
+
+    // Ejercicio 10 — IS NULL
+    10: () => `
+      <div class="npc-scene">
+        <div class="npc-location">📍 09:01 AM — Auditoría de datos críticos</div>
+        <div class="npc-message">
+          <span class="npc-avatar">👩‍💻</span>
+          <div class="npc-bubble">
+            <div class="npc-name">ING. ANA — Arquitecta NEXUS</div>
+            <p>"Última misión antes del Boss. The Void borró métodos de pago en algunas ventas.
+            Contabilidad necesita saber cuáles ventas tienen el campo
+            <strong>C_Metodo_Pago vacío (NULL)</strong>. Esos registros necesitan auditoría urgente."</p>
+            <p class="npc-whisper">🕵️ <em>NULL no es cero ni texto vacío. Es ausencia total de dato.</em></p>
+          </div>
+        </div>
+      </div>`
+  }
+};
+
+// ============================================
+// DEFINICIÓN DE EJERCICIOS — MÓDULO 1
+// Tablas: T_Inventario_GDL, T_Clientes_GDL, T_Ventas_GDL
+// ============================================
+const challenges = {
+  1: {
+    title: 'Restauración de Nodo GDL',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>SELECT</code> — elige QUÉ columnas ver<br>
+      <code>FROM</code> — de QUÉ tabla sacar datos<br><br>
+      <em>Tip: usa * para ver TODAS las columnas</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '📋 Listado de Clientes',
+        expected: 'SELECT C_Nombre_Completo FROM T_Clientes_GDL',
+        hint: 'SELECT C_Nombre_Completo FROM T_Clientes_GDL;',
+        example: 'SELECT C_Correo FROM T_Clientes_GDL;'
+      },
+      {
+        id: 2, desc: '🚗 Identificación de Unidades',
+        expected: 'SELECT C_Modelo, C_VIN FROM T_Inventario_GDL',
+        hint: 'SELECT C_Modelo, C_VIN FROM T_Inventario_GDL;',
+        example: 'SELECT C_Marca, C_Color FROM T_Inventario_GDL;'
+      },
+      {
+        id: 3, desc: '💰 Etiquetado Profesional (AS)',
+        expected: 'SELECT C_Precio AS M_Precio_Lista FROM T_Inventario_GDL',
+        hint: 'SELECT C_Precio AS M_Precio_Lista FROM T_Inventario_GDL;',
+        example: 'SELECT C_Marca AS Fabricante FROM T_Inventario_GDL;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: Marcas Únicas (DISTINCT)',
+        expected: 'SELECT DISTINCT C_Marca FROM T_Inventario_GDL',
+        hint: 'SELECT DISTINCT C_Marca FROM T_Inventario_GDL;',
+        example: 'SELECT DISTINCT C_Color FROM T_Inventario_GDL;'
+      },
+      {
+        id: 5, desc: '🔋 Filtro BYD (WHERE)',
+        expected: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD'",
+        hint: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD';",
+        example: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota';"
+      },
+      {
+        id: 6, desc: '💎 Unidades VIP (> $600,000)',
+        expected: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 600000',
+        hint: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 600000;',
+        example: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 500000;'
+      },
+      {
+        id: 7, desc: '🎯 Doble Filtro (AND)',
+        expected: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota' AND C_Color = 'Gris'",
+        hint: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota' AND C_Color = 'Gris';",
+        example: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD' AND C_Stock > 5;"
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: BETWEEN',
+        expected: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 350000 AND 550000',
+        hint: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 350000 AND 550000;',
+        example: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 400000 AND 600000;'
+      },
+      {
+        id: 9, desc: '🔍 Patrón LIKE (Hi%)',
+        expected: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'Hi%'",
+        hint: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'Hi%';",
+        example: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'C%';"
+      },
+      {
+        id: 10, desc: '🕳️ Auditoría IS NULL',
+        expected: 'SELECT * FROM T_Ventas_GDL WHERE C_Metodo_Pago IS NULL',
+        hint: 'SELECT * FROM T_Ventas_GDL WHERE C_Metodo_Pago IS NULL;',
+        example: 'SELECT * FROM T_Clientes_GDL WHERE C_Telefono IS NULL;'
+      }
+    ],
+    xp: 100, coins: 1000, difficulty: 1, skill: 'SELECT',
+    diaryEntry: 'Día 1: Restauré el nodo GDL. Roberto pudo despachar las unidades. Ana dice que tengo potencial.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
+  }
+};
+
+// ============================================
+// TUTORIALES INMERSIVOS (integrados en historia)
+// ============================================
 const sqlTutorials = {
   1: {
     title: 'SELECT y FROM',
     content: `
-<h2>📚 LECCIÓN: SELECT y FROM</h2>
-<div style="background: rgba(0, 217, 255, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid var(--primary);">
-  <h3>🎯 ¿Qué hacen?</h3>
-  <p><strong>SELECT</strong> elige QUÉ columnas quieres ver<br>
-  <strong>FROM</strong> indica DE QUÉ tabla sacar los datos</p>
+<div style="text-align:center; margin-bottom: 20px;">
+  <div style="font-size: 48px;">📡</div>
+  <div style="font-size: 12px; color: var(--primary); letter-spacing: 2px; text-transform: uppercase;">NEXUS SQL — Transmisión entrante</div>
 </div>
-<div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid var(--accent);">
-  <h3>📖 ESTRUCTURA BÁSICA:</h3>
-  <pre style="background: #0d1117; color: #00ff41; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
-SELECT columna1, columna2
+<div style="background: rgba(0,217,255,0.08); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin: 15px 0;">
+  <div style="color: var(--primary); font-weight: bold; margin-bottom: 12px;">👩‍💻 Ing. Ana — Canal encriptado</div>
+  <p style="font-style: italic; line-height: 1.8; color: var(--text);">
+    "Escucha bien, ${() => window.gameState.playerName}. El servidor de AXIOM Motors responde
+    a un idioma muy específico. No es inglés ni español — es <strong>SQL</strong>.
+    Si lo hablas correctamente, el servidor te da lo que pides.
+    Si cometes un error de sintaxis, te rechaza. Sin excepciones."
+  </p>
+</div>
+
+<div style="background: rgba(245,158,11,0.08); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; margin: 15px 0;">
+  <h3 style="color: var(--accent); margin-bottom: 12px;">⚡ EL HECHIZO BÁSICO: SELECT + FROM</h3>
+  <p><strong>SELECT</strong> = "Quiero ver estas columnas"<br>
+  <strong>FROM</strong> = "De esta tabla"</p>
+  <pre style="background: #0d1117; color: #00ff41; padding: 15px; border-radius: 8px; border: 1px solid var(--primary); margin-top: 12px; font-size: 14px;">SELECT columna1, columna2
 FROM nombre_tabla;</pre>
 </div>
-<div style="background: rgba(0, 217, 255, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid var(--primary);">
-  <h3>🔑 REGLAS IMPORTANTES:</h3>
+
+<div style="background: rgba(0,217,255,0.05); border: 1px solid rgba(0,217,255,0.3); border-radius: 12px; padding: 20px; margin: 15px 0;">
+  <h3 style="color: var(--primary); margin-bottom: 12px;">🔑 REGLAS DEL SERVIDOR</h3>
   <p>1️⃣ Las columnas se separan con <strong>comas (,)</strong><br>
-  2️⃣ La consulta termina con <strong>punto y coma (;)</strong><br>
-  3️⃣ Usa <strong>*</strong> para seleccionar TODAS las columnas<br>
+  2️⃣ Termina siempre con <strong>punto y coma (;)</strong><br>
+  3️⃣ Usa <strong>*</strong> para ver TODAS las columnas<br>
   4️⃣ SQL no distingue mayúsculas/minúsculas</p>
 </div>
-<div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; margin: 15px 0; border: 2px solid var(--accent);">
-  <h3>✏️ EJEMPLOS:</h3>
-  <p><strong>Ejemplo 1:</strong> Solo una columna</p>
-  <pre style="background: #0d1117; color: #00ff41; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
+
+<div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 20px; margin: 15px 0;">
+  <h3 style="color: var(--accent); margin-bottom: 12px;">✏️ EJEMPLOS REALES DEL SISTEMA</h3>
+  <pre style="background: #0d1117; color: #00ff41; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 10px; font-size: 13px;">-- Ver solo los modelos
 SELECT C_Modelo
 FROM T_Inventario_GDL;</pre>
-  
-  <p style="margin-top: 15px;"><strong>Ejemplo 2:</strong> Dos columnas (nota la coma)</p>
-  <pre style="background: #0d1117; color: #00ff41; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
+  <pre style="background: #0d1117; color: #00ff41; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 10px; font-size: 13px;">-- Ver modelo Y marca (nota la coma)
 SELECT C_Modelo, C_Marca
-FROM T_Inventario_GDL;
-           ↑
-      Coma separa columnas</pre>
-  
-  <p style="margin-top: 15px;"><strong>Ejemplo 3:</strong> Todas las columnas</p>
-  <pre style="background: #0d1117; color: #00ff41; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
+FROM T_Inventario_GDL;</pre>
+  <pre style="background: #0d1117; color: #00ff41; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); font-size: 13px;">-- Ver TODO el inventario
 SELECT *
 FROM T_Inventario_GDL;</pre>
+</div>
+<div style="background: rgba(124,58,237,0.15); border: 1px solid var(--secondary); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center;">
+  <p style="color: var(--muted); font-size: 14px;">💬 <em>"Roberto está esperando. El reloj corre."</em> — Ing. Ana</p>
 </div>
 `
   }
 };
 
+// ============================================
+// SONIDOS
+// ============================================
 const sounds = {
   click: () => {
     if (!window.gameState.soundEnabled) return;
     try {
       const audio = new AudioContext();
-      const oscillator = audio.createOscillator();
-      const gainNode = audio.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audio.destination);
-      oscillator.frequency.value = 800;
-      oscillator.type = 'sine';
-      gainNode.gain.setValueAtTime(0.1, audio.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.1);
-      oscillator.start(audio.currentTime);
-      oscillator.stop(audio.currentTime + 0.1);
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.connect(gain); gain.connect(audio.destination);
+      osc.frequency.value = 800; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.1, audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.1);
+      osc.start(audio.currentTime); osc.stop(audio.currentTime + 0.1);
     } catch(e) {}
   },
   success: () => {
@@ -166,16 +459,14 @@ const sounds = {
     try {
       const audio = new AudioContext();
       [523, 659, 784].forEach((freq, i) => {
-        const oscillator = audio.createOscillator();
-        const gainNode = audio.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audio.destination);
-        oscillator.frequency.value = freq;
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0.2, audio.currentTime + i * 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + i * 0.1 + 0.2);
-        oscillator.start(audio.currentTime + i * 0.1);
-        oscillator.stop(audio.currentTime + i * 0.1 + 0.2);
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.connect(gain); gain.connect(audio.destination);
+        osc.frequency.value = freq; osc.type = 'sine';
+        gain.gain.setValueAtTime(0.2, audio.currentTime + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + i * 0.1 + 0.2);
+        osc.start(audio.currentTime + i * 0.1);
+        osc.stop(audio.currentTime + i * 0.1 + 0.2);
       });
     } catch(e) {}
   },
@@ -183,97 +474,73 @@ const sounds = {
     if (!window.gameState.soundEnabled) return;
     try {
       const audio = new AudioContext();
-      const oscillator = audio.createOscillator();
-      const gainNode = audio.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audio.destination);
-      oscillator.frequency.value = 200;
-      oscillator.type = 'sawtooth';
-      gainNode.gain.setValueAtTime(0.15, audio.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.3);
-      oscillator.start(audio.currentTime);
-      oscillator.stop(audio.currentTime + 0.3);
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.connect(gain); gain.connect(audio.destination);
+      osc.frequency.value = 200; osc.type = 'sawtooth';
+      gain.gain.setValueAtTime(0.15, audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.3);
+      osc.start(audio.currentTime); osc.stop(audio.currentTime + 0.3);
     } catch(e) {}
   },
   coin: () => {
     if (!window.gameState.soundEnabled) return;
     try {
       const audio = new AudioContext();
-      const oscillator = audio.createOscillator();
-      const gainNode = audio.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audio.destination);
-      oscillator.frequency.value = 1200;
-      oscillator.type = 'sine';
-      gainNode.gain.setValueAtTime(0.3, audio.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.15);
-      oscillator.start(audio.currentTime);
-      oscillator.stop(audio.currentTime + 0.15);
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.connect(gain); gain.connect(audio.destination);
+      osc.frequency.value = 1200; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.15);
+      osc.start(audio.currentTime); osc.stop(audio.currentTime + 0.15);
     } catch(e) {}
   }
 };
 
-// Animación de monedas cayendo
+// Animación de monedas
 function createCoinRain(amount) {
   const container = document.createElement('div');
-  container.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;';
+  container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
   document.body.appendChild(container);
-  
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 25; i++) {
     const coin = document.createElement('div');
     coin.textContent = '🪙';
-    coin.style.cssText = `
-      position: absolute;
-      font-size: 32px;
-      left: ${Math.random() * 100}%;
-      top: -50px;
-      animation: coinFall ${2 + Math.random() * 2}s ease-in forwards;
-      animation-delay: ${Math.random() * 0.5}s;
-    `;
+    coin.style.cssText = `position:absolute;font-size:28px;left:${Math.random()*100}%;top:-50px;animation:coinFall ${2+Math.random()*2}s ease-in forwards;animation-delay:${Math.random()*0.5}s;`;
     container.appendChild(coin);
-    
     setTimeout(() => sounds.coin(), i * 50);
   }
-  
-  const message = document.createElement('div');
-  message.textContent = `💰 +${amount} VC`;
-  message.style.cssText = `
-    position: absolute;
-    top: 30%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 48px;
-    font-weight: bold;
-    color: var(--accent);
-    text-shadow: 0 0 20px var(--accent);
-    animation: floatUp 2s ease-out forwards;
-  `;
-  container.appendChild(message);
-  
+  const msg = document.createElement('div');
+  msg.textContent = `💰 +${amount} VC`;
+  msg.style.cssText = `position:absolute;top:30%;left:50%;transform:translateX(-50%);font-size:48px;font-weight:bold;color:var(--accent);text-shadow:0 0 20px var(--accent);animation:floatUp 2s ease-out forwards;`;
+  container.appendChild(msg);
   setTimeout(() => container.remove(), 4000);
 }
 
 const style = document.createElement('style');
 style.textContent = `
-  @keyframes coinFall {
-    to {
-      top: 110%;
-      transform: rotate(720deg);
-    }
-  }
+  @keyframes coinFall { to { top:110%; transform:rotate(720deg); } }
   @keyframes floatUp {
-    0% { opacity: 0; transform: translateX(-50%) translateY(0); }
-    20% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(-50%) translateY(-100px); }
+    0% { opacity:0; transform:translateX(-50%) translateY(0); }
+    20% { opacity:1; } 80% { opacity:1; }
+    100% { opacity:0; transform:translateX(-50%) translateY(-100px); }
   }
+  .npc-scene { padding: 5px 0; }
+  .npc-location { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .npc-message { display: flex; align-items: flex-start; gap: 12px; }
+  .npc-bubble { background: linear-gradient(135deg, rgba(0,217,255,0.08) 0%, rgba(124,58,237,0.08) 100%); border: 1px solid rgba(0,217,255,0.25); border-radius: 12px; padding: 16px; flex: 1; }
+  .npc-name { font-weight: bold; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .npc-bubble p { line-height: 1.7; color: var(--text); margin: 6px 0; }
+  .npc-whisper { font-size: 12px; color: var(--muted); border-top: 1px solid rgba(0,217,255,0.15); padding-top: 8px; margin-top: 8px; }
 `;
 document.head.appendChild(style);
 
+// ============================================
+// TEMA Y SONIDO
+// ============================================
 window.toggleTheme = function() {
   sounds.click();
-  const current = window.gameState.theme;
-  const newTheme = current === 'light' ? 'dark' : 'light';
+  const newTheme = window.gameState.theme === 'light' ? 'dark' : 'light';
   window.gameState.theme = newTheme;
   document.documentElement.setAttribute('data-theme', newTheme);
   document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
@@ -289,28 +556,27 @@ window.toggleSound = function() {
 
 window.logoutUser = function() {
   sounds.click();
-  if (confirm('¿Deseas cambiar de usuario? Tu progreso está guardado.')) {
+  if (confirm('¿Deseas cambiar de operador? Tu progreso está guardado.')) {
     window.currentUserIndex = -1;
     localStorage.setItem('nexusSQL_currentUser', '-1');
     location.reload();
   }
 };
 
+// ============================================
+// GESTIÓN DE USUARIOS
+// ============================================
 window.switchUser = function(index) {
   sounds.click();
   window.currentUserIndex = index;
   localStorage.setItem('nexusSQL_currentUser', index);
-  
   loadUserProfile(index);
-  
   closeModal('modalGeneric');
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
-  
   renderGame();
   createParticles();
   updateAvatars();
-  
   updateStats();
   renderChallenges();
   updateProgressBar();
@@ -318,79 +584,77 @@ window.switchUser = function(index) {
 };
 
 window.deleteUser = function(index) {
-  if (confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) {
+  if (confirm('¿Eliminar este operador? Esta acción no se puede deshacer.')) {
     window.userProfiles.splice(index, 1);
     localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
     showUserSelection();
   }
 };
 
-function showUserSelection() {
-  if (window.userProfiles.length === 0) {
-    startOnboarding();
-    return;
+function getAvatarIcon(avatarIndex, equipped) {
+  if (equipped && equipped.avatar) {
+    const item = shopItems.find(i => i.id === equipped.avatar);
+    if (item) return item.icon;
   }
-  
+  const defaults = ['🎮', '💼', '🧘'];
+  return defaults[avatarIndex] || '🎮';
+}
+
+function showUserSelection() {
+  if (window.userProfiles.length === 0) { startOnboarding(); return; }
   const content = document.getElementById('modalGenericContent');
-  content.innerHTML = '<h2>👥 Selecciona Usuario</h2><div style="margin: 20px 0;">';
-  
+  let html = '<h2>👥 Selecciona Operador</h2><div style="margin:20px 0;">';
   window.userProfiles.forEach((user, index) => {
-    const avatars = ['🎮', '💼', '🧘'];
-    content.innerHTML += `
-      <div style="background: var(--card); padding: 20px; margin: 15px 0; border-radius: 12px; border: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <span style="font-size: 48px;">${avatars[user.avatar]}</span>
+    const icon = getAvatarIcon(user.avatar, user.equippedItems);
+    html += `
+      <div style="background:var(--card);padding:20px;margin:15px 0;border-radius:12px;border:2px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;align-items:center;gap:15px;">
+          <span style="font-size:48px;">${icon}</span>
           <div>
-            <div style="font-size: 20px; font-weight: bold;">${user.playerName}</div>
-            <div style="font-size: 14px; color: var(--muted);">⭐ ${user.xp} XP | 🪙 ${user.coins} VC</div>
+            <div style="font-size:20px;font-weight:bold;">${user.playerName}</div>
+            <div style="font-size:12px;color:var(--muted);">${user.rank || 'Analista JR'}</div>
+            <div style="font-size:14px;color:var(--muted);">⭐ ${user.xp} XP | 🪙 ${user.coins} VC</div>
           </div>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div style="display:flex;gap:10px;">
           <button class="btn" onclick="switchUser(${index})">▶️ Jugar</button>
-          <button class="btn btn-ghost" onclick="deleteUser(${index})" style="background: var(--danger);">🗑️</button>
+          <button class="btn btn-ghost" onclick="deleteUser(${index})" style="background:var(--danger);">🗑️</button>
         </div>
-      </div>
-    `;
+      </div>`;
   });
-  
   if (window.userProfiles.length < 3) {
-    content.innerHTML += `<button class="btn btn-secondary" onclick="closeModal('modalGeneric'); startOnboarding();" style="width: 100%; margin-top: 20px;">➕ Crear Nuevo Usuario</button>`;
-  } else {
-    content.innerHTML += `<p style="color: var(--muted); text-align: center; margin-top: 20px;">Máximo 3 usuarios. Elimina uno para crear otro.</p>`;
+    html += `<button class="btn btn-secondary" onclick="closeModal('modalGeneric');startOnboarding();" style="width:100%;margin-top:20px;">➕ Nuevo Operador</button>`;
   }
-  
-  content.innerHTML += '</div>';
+  html += '</div>';
+  content.innerHTML = html;
   document.getElementById('modalGeneric').classList.add('active');
 }
 
 function loadUserProfile(index) {
-  const user = window.userProfiles[index];
-  
-  window.gameState.playerName = user.playerName;
-  window.gameState.avatar = user.avatar;
-  window.gameState.xp = user.xp;
-  window.gameState.coins = user.coins;
-  window.gameState.streak = user.streak;
-  window.gameState.currentChallenge = user.currentChallenge;
-  window.gameState.currentSubExercise = user.currentSubExercise;
-  window.gameState.currentDay = user.currentDay;
-  window.gameState.completedChallenges = user.completedChallenges || [];
-  window.gameState.completedSubExercises = user.completedSubExercises || {};
-  window.gameState.unlockedBadges = user.unlockedBadges || [];
-  window.gameState.reputation = user.reputation || { ana: 0, roberto: 0 };
-  window.gameState.diary = user.diary || [];
-  window.gameState.skills = user.skills || { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 };
-  window.gameState.expandedChallenges = user.expandedChallenges || [];
-  window.gameState.tutorialsSeen = user.tutorialsSeen || [];
-  window.gameState.theme = user.theme || 'dark';
-  window.gameState.soundEnabled = user.soundEnabled !== false;
-  window.gameState.triviaAnswered = user.triviaAnswered || false;
-  
+  const u = window.userProfiles[index];
+  Object.assign(window.gameState, {
+    playerName: u.playerName, avatar: u.avatar, xp: u.xp, coins: u.coins,
+    streak: u.streak, currentChallenge: u.currentChallenge || 1,
+    currentSubExercise: u.currentSubExercise || 1, currentDay: u.currentDay || 1,
+    completedChallenges: u.completedChallenges || [],
+    completedSubExercises: u.completedSubExercises || {},
+    unlockedBadges: u.unlockedBadges || [],
+    unlockedItems: u.unlockedItems || [],
+    equippedItems: u.equippedItems || {},
+    reputation: u.reputation || { ana: 0, roberto: 0 },
+    diary: u.diary || [],
+    skills: u.skills || { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 },
+    expandedChallenges: u.expandedChallenges || [],
+    tutorialsSeen: u.tutorialsSeen || [],
+    theme: u.theme || 'dark',
+    soundEnabled: u.soundEnabled !== false,
+    triviaAnswered: u.triviaAnswered || false,
+    rank: u.rank || 'Analista JR'
+  });
   if (window.SQL_CONSTRUCTOR) {
     window.gameState.db = new window.SQL_CONSTRUCTOR.Database();
     window.gameState.db.run(dbSeed);
   }
-  
   document.documentElement.setAttribute('data-theme', window.gameState.theme);
   document.getElementById('themeToggle').textContent = window.gameState.theme === 'light' ? '☀️' : '🌙';
   document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
@@ -398,202 +662,163 @@ function loadUserProfile(index) {
 
 function saveUserProfile() {
   if (window.currentUserIndex >= 0) {
-    window.userProfiles[window.currentUserIndex] = Object.assign({}, window.gameState);
-    delete window.userProfiles[window.currentUserIndex].db;
+    const snapshot = Object.assign({}, window.gameState);
+    delete snapshot.db;
+    window.userProfiles[window.currentUserIndex] = snapshot;
     localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
   }
 }
 
+// ============================================
+// INICIALIZACIÓN
+// ============================================
 async function init() {
-  const loadingTexts = [
+  const texts = [
     'Detectando virus The Void...',
-    'Restaurando nodos del sistema...',
-    'Inicializando terminal NEXUS...',
-    'Preparando misión de rescate...'
+    'Restaurando nodos de NexCorp...',
+    'Inicializando terminal NEXUS SQL...',
+    'Preparando protocolo de emergencia...'
   ];
-  
-  let textIndex = 0;
-  const textInterval = setInterval(() => {
-    const elem = document.getElementById('loadingText');
-    if (elem) elem.textContent = loadingTexts[textIndex];
-    textIndex = (textIndex + 1) % loadingTexts.length;
+  let ti = 0;
+  const interval = setInterval(() => {
+    const el = document.getElementById('loadingText');
+    if (el) el.textContent = texts[ti];
+    ti = (ti + 1) % texts.length;
   }, 800);
 
   try {
-    await initSqlJs({
-      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
-    }).then(SQL => {
-      window.SQL_CONSTRUCTOR = SQL;
-      window.gameState.db = new SQL.Database();
-      window.gameState.db.run(dbSeed);
-      
-      clearInterval(textInterval);
-      
-      setTimeout(() => {
-        document.getElementById('loadingScreen').classList.add('hidden');
-        
-        if (window.currentUserIndex >= 0 && window.userProfiles[window.currentUserIndex]) {
-          loadUserProfile(window.currentUserIndex);
-          document.getElementById('mainApp').classList.remove('hidden');
-          renderGame();
-          createParticles();
-          updateAvatars();
-          document.documentElement.setAttribute('data-theme', window.gameState.theme);
-          document.getElementById('themeToggle').textContent = window.gameState.theme === 'light' ? '☀️' : '🌙';
-          document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
-        } else {
-          showUserSelection();
-        }
-      }, 3000);
-    });
-  } catch (e) {
-    clearInterval(textInterval);
+    await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
+      .then(SQL => {
+        window.SQL_CONSTRUCTOR = SQL;
+        window.gameState.db = new SQL.Database();
+        window.gameState.db.run(dbSeed);
+        clearInterval(interval);
+        setTimeout(() => {
+          document.getElementById('loadingScreen').classList.add('hidden');
+          if (window.currentUserIndex >= 0 && window.userProfiles[window.currentUserIndex]) {
+            loadUserProfile(window.currentUserIndex);
+            document.getElementById('mainApp').classList.remove('hidden');
+            renderGame(); createParticles(); updateAvatars();
+          } else {
+            showUserSelection();
+          }
+        }, 3000);
+      });
+  } catch(e) {
+    clearInterval(interval);
     alert('Error cargando SQL: ' + e.message);
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+document.readyState === 'loading'
+  ? document.addEventListener('DOMContentLoaded', init)
+  : init();
 
-function saveGameState() {
-  saveUserProfile();
-}
+function saveGameState() { saveUserProfile(); }
 
-const narrativeDialogues = {
-  1: {
-    1: () => `Roberto (GDL): "¡${window.gameState.playerName}! El virus bloqueó el sistema. Necesito los NOMBRES de todos los clientes. ¡RÁPIDO!"`,
-    2: () => `Roberto: "Bien. Ahora dame MODELO y VIN. Tengo que validar los números de serie."`,
-    3: () => `Roberto: "Perfecto. Ahora el PRECIO pero renombrado como M_Precio_Lista. Es para el reporte."`,
-    4: () => `Roberto: "⚠️ GLITCH DETECTADO: El servidor duplica marcas. Usa DISTINCT para ver solo las únicas."`,
-    5: () => `Roberto: "Necesito SOLO los autos BYD. Filtra por marca = 'BYD'."`,
-    6: () => `Roberto: "Ahora trae autos con precio MAYOR a 600,000. Los clientes VIP están esperando."`,
-    7: () => `Roberto: "Busco UN auto específico: Toyota Y color Gris. Usa AND."`,
-    8: () => `Roberto: "⚠️ ERROR DE NODO: Precios inestables. Trae autos entre 350,000 y 550,000 con BETWEEN."`,
-    9: () => `Roberto: "Alguien escribió mal 'Hilux'. Busca modelos que empiecen con 'Hi' usando LIKE 'Hi%'."`,
-    10: () => `Roberto: "El virus borró datos de pagos. Encuentra ventas donde C_Metodo_Pago sea NULL."`
-  }
-};
-
-const challenges = {
-  1: {
-    title: 'Restauración de Nodo GDL',
-    concept: '<strong>📜 SELECT, WHERE, ORDER BY</strong><br><br>Extrae, filtra y ordena datos del servidor.<br><code>SELECT C_Modelo FROM T_Inventario_GDL WHERE C_Precio > 500000;</code>',
-    subExercises: [
-      { id: 1, desc: '📋 Listado de Clientes', expected: 'SELECT C_Nombre_Completo FROM T_Clientes_GDL', hint: 'SELECT C_Nombre_Completo FROM T_Clientes_GDL;', example: 'SELECT C_Correo FROM T_Clientes_GDL;' },
-      { id: 2, desc: '🚗 Identificación de Unidades', expected: 'SELECT C_Modelo, C_VIN FROM T_Inventario_GDL', hint: 'SELECT C_Modelo, C_VIN FROM T_Inventario_GDL;', example: 'SELECT C_Marca, C_Color FROM T_Inventario_GDL;' },
-      { id: 3, desc: '💰 Etiquetado Profesional', expected: 'SELECT C_Precio AS M_Precio_Lista FROM T_Inventario_GDL', hint: 'SELECT C_Precio AS M_Precio_Lista FROM T_Inventario_GDL;', example: 'SELECT C_Marca AS Fabricante FROM T_Inventario_GDL;' },
-      { id: 4, desc: '⚠️ GLITCH: Marcas Únicas', expected: 'SELECT DISTINCT C_Marca FROM T_Inventario_GDL', hint: 'SELECT DISTINCT C_Marca FROM T_Inventario_GDL;', example: 'SELECT DISTINCT C_Color FROM T_Inventario_GDL;' },
-      { id: 5, desc: '🔋 Filtro BYD', expected: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD'", hint: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD';", example: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota';" },
-      { id: 6, desc: '💎 Poder Adquisitivo', expected: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 600000', hint: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 600000;', example: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio > 500000;' },
-      { id: 7, desc: '🎯 Doble Validación', expected: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota' AND C_Color = 'Gris'", hint: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'Toyota' AND C_Color = 'Gris';", example: "SELECT * FROM T_Inventario_GDL WHERE C_Marca = 'BYD' AND C_Stock > 5;" },
-      { id: 8, desc: '⚠️ ERROR: BETWEEN', expected: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 350000 AND 550000', hint: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 350000 AND 550000;', example: 'SELECT * FROM T_Inventario_GDL WHERE C_Precio BETWEEN 400000 AND 600000;' },
-      { id: 9, desc: '🔍 Búsqueda por Patrón', expected: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'Hi%'", hint: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'Hi%';", example: "SELECT * FROM T_Inventario_GDL WHERE C_Modelo LIKE 'C%';" },
-      { id: 10, desc: '🕳️ Auditoría de Vacíos', expected: 'SELECT * FROM T_Ventas_GDL WHERE C_Metodo_Pago IS NULL', hint: 'SELECT * FROM T_Ventas_GDL WHERE C_Metodo_Pago IS NULL;', example: 'SELECT * FROM T_Clientes_GDL WHERE C_Telefono IS NULL;' }
-    ],
-    xp: 100, coins: 1000, difficulty: 1, skill: 'SELECT',
-    diaryEntry: 'Día 1: Salvé el nodo de GDL. Roberto puede despachar las unidades.',
-    hasTutorial: true,
-    hasTrivia: true,
-    hasBoss: true
-  }
-};
-
-function showTutorial(challengeId) {
-  const tutorial = sqlTutorials[challengeId];
-  if (!tutorial || window.gameState.tutorialsSeen.includes(challengeId)) return;
-  
-  const modal = document.getElementById('modalGeneric');
-  const content = document.getElementById('modalGenericContent');
-  content.innerHTML = tutorial.content + `<button class="btn" onclick="closeTutorial(${challengeId})" style="width: 100%; margin-top: 20px; font-size: 18px;">¡Entendido! Comenzar ejercicios</button>`;
-  modal.classList.add('active');
-  sounds.click();
-}
-
-window.closeTutorial = function(challengeId) {
-  window.gameState.tutorialsSeen.push(challengeId);
-  saveGameState();
-  closeModal('modalGeneric');
-};
-
+// ============================================
+// ONBOARDING — Historia inmersiva
+// ============================================
 function startOnboarding() {
-  if (window.userProfiles.length >= 3) {
-    alert('Máximo 3 usuarios. Elimina uno primero.');
-    showUserSelection();
-    return;
-  }
+  if (window.userProfiles.length >= 3) { alert('Máximo 3 operadores.'); showUserSelection(); return; }
   document.getElementById('onboarding').classList.remove('hidden');
   showOnboardingStep(1);
 }
 
 function showOnboardingStep(step) {
   const content = document.getElementById('onboardingContent');
-  
   if (step === 1) {
     content.innerHTML = `
       <div class="logo-animation">
-        <svg viewBox="0 0 200 200" style="width: 100%; height: 100%;">
-          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--primary)" stroke-width="4"/>
-          <text x="100" y="110" text-anchor="middle" font-size="48" fill="var(--primary)">⚡</text>
+        <svg viewBox="0 0 200 200" style="width:100%;height:100%;">
+          <circle cx="100" cy="100" r="80" fill="none" stroke="var(--primary)" stroke-width="3"/>
+          <circle cx="100" cy="100" r="60" fill="none" stroke="var(--secondary)" stroke-width="1" stroke-dasharray="5,5"/>
+          <text x="100" y="115" text-anchor="middle" font-size="52" fill="var(--primary)">⚡</text>
         </svg>
       </div>
-      <h1 style="font-size: 32px; color: var(--primary); margin-bottom: 20px;">NEXUS SQL</h1>
-      <p style="font-size: 18px; color: var(--text); margin-bottom: 10px;">Protocolo de Emergencia</p>
-      <p style="font-size: 14px; color: var(--muted); margin-bottom: 30px;">v1.3 - Módulo 1 Completo</p>
-      <button class="btn" onclick="showOnboardingStep(2)" style="font-size: 18px; padding: 16px 32px;">⚡ Iniciar Protocolo</button>
-    `;
+      <h1 style="font-size:32px;color:var(--primary);margin-bottom:10px;letter-spacing:3px;">NEXUS SQL</h1>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:2px;">Protocolo de Emergencia</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:30px;">NexCorp Industries · AXIOM Motors</p>
+      <button class="btn" onclick="showOnboardingStep(2)" style="font-size:18px;padding:16px 32px;">⚡ Iniciar Protocolo</button>`;
   } else if (step === 2) {
     content.innerHTML = `
-      <h2 style="color: var(--primary); margin-bottom: 20px;">Identificación de Operador</h2>
-      <input type="text" id="nameInput" class="input-name" placeholder="Ingresa tu nombre (3-15 caracteres)" maxlength="15">
-      <button class="btn" onclick="saveName()" style="width: 100%; margin-top: 20px;">Continuar</button>
-    `;
-    setTimeout(() => document.getElementById('nameInput').focus(), 100);
+      <div style="text-align:left;margin-bottom:20px;">
+        <div style="background:rgba(239,68,68,0.15);border:2px solid var(--danger);border-radius:12px;padding:20px;margin-bottom:20px;">
+          <h3 style="color:var(--danger);margin-bottom:12px;">⚡ ALERTA CRÍTICA — NexCorp Industries</h3>
+          <p style="font-style:italic;line-height:1.7;font-size:15px;">
+            "El virus <strong>'The Void'</strong> ha penetrado todos los nodos visuales de
+            <strong>AXIOM Motors</strong>. Los datos están ahí — inventarios, clientes, ventas —
+            pero están completamente ciegos. Sin acceso al servidor,
+            <strong>NexCorp declarará quiebra técnica en 24 horas</strong>.
+            No hay tiempo para inducción. O aprendes SQL hoy,
+            o mañana ninguno de los dos tiene trabajo."
+          </p>
+          <p style="color:var(--primary);font-weight:bold;margin-top:10px;">— Ing. Ana, Arquitecta NEXUS</p>
+        </div>
+      </div>
+      <h2 style="color:var(--primary);margin-bottom:20px;text-align:center;">Identificación de Operador</h2>
+      <input type="text" id="nameInput" class="input-name" placeholder="Tu nombre (3-15 caracteres)" maxlength="15">
+      <button class="btn" onclick="saveName()" style="width:100%;margin-top:15px;">Continuar →</button>`;
+    setTimeout(() => document.getElementById('nameInput')?.focus(), 100);
   } else if (step === 3) {
     content.innerHTML = `
-      <h2 style="color: var(--primary); margin-bottom: 20px;">Elige tu Kit de Inicio</h2>
+      <h2 style="color:var(--primary);margin-bottom:8px;text-align:center;">Elige tu Kit de Inicio</h2>
+      <p style="color:var(--muted);text-align:center;font-size:13px;margin-bottom:25px;">Define tu perfil de Analista en NEXUS</p>
       <div class="avatar-selector">
         <div class="avatar-card active" onclick="selectAvatar(0)">
           <div class="avatar-icon">🎮</div>
-          <div style="font-size: 14px; font-weight: bold;">Kit Gamer</div>
-          <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">RGB Master</div>
+          <div style="font-size:14px;font-weight:bold;">Kit Gamer</div>
+          <div style="font-size:11px;margin-top:5px;opacity:0.8;">RGB Master</div>
         </div>
         <div class="avatar-card" onclick="selectAvatar(1)">
           <div class="avatar-icon">💼</div>
-          <div style="font-size: 14px; font-weight: bold;">Kit Ejecutivo</div>
-          <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">The Boss</div>
+          <div style="font-size:14px;font-weight:bold;">Kit Ejecutivo</div>
+          <div style="font-size:11px;margin-top:5px;opacity:0.8;">The Boss</div>
         </div>
         <div class="avatar-card" onclick="selectAvatar(2)">
           <div class="avatar-icon">🧘</div>
-          <div style="font-size: 14px; font-weight: bold;">Kit Zen</div>
-          <div style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Minimalista</div>
+          <div style="font-size:14px;font-weight:bold;">Kit Zen</div>
+          <div style="font-size:11px;margin-top:5px;opacity:0.8;">Minimalista</div>
         </div>
       </div>
-      <button class="btn" onclick="showOnboardingStep(4)" style="width: 100%; margin-top: 20px;">Continuar</button>
-    `;
+      <button class="btn" onclick="showOnboardingStep(4)" style="width:100%;margin-top:20px;">Continuar →</button>`;
   } else if (step === 4) {
+    const name = window.gameState.playerName;
     content.innerHTML = `
-      <div style="text-align: left;">
-        <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">⚡ ALERTA CRÍTICA</h2>
-        <div style="background: rgba(239, 68, 68, 0.2); border-left: 4px solid var(--danger); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px solid var(--danger);">
-          <p style="font-size: 15px; line-height: 1.6; font-style: italic;">"El virus 'The Void' ha bloqueado todas las interfaces visuales. Los datos están ahí, pero están 'ciegos'. Si no los recuperamos usando consultas directas al servidor, Grupo Velocity declarará la quiebra mañana. No hay tiempo para manuales: o aprendes SQL hoy, o buscamos trabajo los dos mañana." - <strong>Ing. Ana</strong></p>
+      <div style="text-align:left;">
+        <h2 style="color:var(--primary);text-align:center;margin-bottom:20px;">📋 Tu Misión, ${name}</h2>
+        <div style="background:rgba(0,217,255,0.08);border:1px solid var(--primary);border-radius:12px;padding:20px;margin-bottom:15px;">
+          <p style="line-height:1.8;">
+            Eres el nuevo <strong>Analista JR de Sistemas</strong> en NexCorp Industries.
+            Tu primera semana debería ser inducción, café y presentaciones.
+          </p>
+          <p style="line-height:1.8;margin-top:10px;">
+            Pero The Void llegó primero.
+          </p>
+          <p style="line-height:1.8;margin-top:10px;">
+            Tienes acceso al servidor de <strong>AXIOM Motors GDL</strong>.
+            Roberto, el Gerente Regional, lleva 3 horas sin poder ver un solo dato.
+            La Ing. Ana te guiará con los comandos.
+          </p>
+          <p style="line-height:1.8;margin-top:10px;color:var(--accent);font-weight:bold;">
+            Cada consulta que escribas correctamente restaura un nodo del sistema.
+          </p>
         </div>
-        <button class="btn" onclick="startAdventure()" style="width: 100%; font-size: 18px;">⚡ ¡Acepto la Misión!</button>
-      </div>
-    `;
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:15px;margin-bottom:20px;">
+          <p style="font-size:13px;color:var(--muted);">
+            💡 <strong>Reglas del protocolo:</strong> No puedes avanzar sin completar el ejercicio anterior.
+            Si te atascas, tienes pistas y ejemplos. Nadie aprende SQL leyendo — lo aprenden haciendo.
+          </p>
+        </div>
+        <button class="btn" onclick="startAdventure()" style="width:100%;font-size:18px;">⚡ ¡Acepto la Misión!</button>
+      </div>`;
   }
 }
 
 window.saveName = function() {
   sounds.click();
   const name = document.getElementById('nameInput').value.trim();
-  if (name.length < 3 || name.length > 15) {
-    sounds.error();
-    alert('El nombre debe tener entre 3 y 15 caracteres');
-    return;
-  }
+  if (name.length < 3 || name.length > 15) { sounds.error(); alert('El nombre debe tener entre 3 y 15 caracteres'); return; }
   window.gameState.playerName = name;
   showOnboardingStep(3);
 };
@@ -601,56 +826,54 @@ window.saveName = function() {
 window.selectAvatar = function(index) {
   sounds.click();
   window.gameState.avatar = index;
-  document.querySelectorAll('.avatar-card').forEach((card, i) => {
-    card.classList.toggle('active', i === index);
-  });
+  document.querySelectorAll('.avatar-card').forEach((c, i) => c.classList.toggle('active', i === index));
 };
 
 window.startAdventure = function() {
   sounds.success();
   window.gameState.lastVisit = new Date().toISOString();
   window.gameState.currentDay = 1;
-  window.gameState.diary.push({ day: 0, entry: 'Acepté la misión. Grupo Velocity depende de mí.' });
-  
-  for (let i = 1; i <= 10; i++) {
-    window.gameState.completedSubExercises[i] = [];
-  }
-  
-  window.userProfiles.push(Object.assign({}, window.gameState));
+  window.gameState.diary.push({ day: 0, entry: 'Primer día en NexCorp. Acepté una misión que no pedí. The Void no sabe con quién se metió.' });
+  for (let i = 1; i <= 10; i++) window.gameState.completedSubExercises[i] = [];
+  const snapshot = Object.assign({}, window.gameState);
+  delete snapshot.db;
+  window.userProfiles.push(snapshot);
   window.currentUserIndex = window.userProfiles.length - 1;
   localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
   localStorage.setItem('nexusSQL_currentUser', window.currentUserIndex);
-  
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
-  renderGame();
-  createParticles();
-  updateAvatars();
+  renderGame(); createParticles(); updateAvatars();
 };
 
+// ============================================
+// PARTÍCULAS Y AVATARES
+// ============================================
 function createParticles() {
   const container = document.getElementById('particles');
   container.innerHTML = '';
   for (let i = 0; i < 30; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.top = Math.random() * 100 + '%';
-    particle.style.animationDelay = Math.random() * 15 + 's';
-    particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-    container.appendChild(particle);
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 15 + 's';
+    p.style.animationDuration = (15 + Math.random() * 10) + 's';
+    container.appendChild(p);
   }
 }
 
 function updateAvatars() {
-  const avatars = ['🎮', '💼', '🧘'];
-  const selected = avatars[window.gameState.avatar];
-  const headerAvatar = document.getElementById('headerAvatar');
-  const panelAvatar = document.getElementById('panelAvatar');
-  if (headerAvatar) headerAvatar.textContent = selected;
-  if (panelAvatar) panelAvatar.textContent = selected;
+  const icon = getAvatarIcon(window.gameState.avatar, window.gameState.equippedItems);
+  const h = document.getElementById('headerAvatar');
+  const p = document.getElementById('panelAvatar');
+  if (h) h.textContent = icon;
+  if (p) p.textContent = icon;
 }
 
+// ============================================
+// RENDER PRINCIPAL
+// ============================================
 function renderGame() {
   updateStats();
   renderChallenges();
@@ -660,622 +883,459 @@ function renderGame() {
 }
 
 function updateStats() {
-  document.getElementById('playerName').textContent = window.gameState.playerName || 'Operador';
-  document.getElementById('playerNamePanel').textContent = window.gameState.playerName || 'Operador';
-  document.getElementById('playerXP').textContent = window.gameState.xp;
-  document.getElementById('playerCoins').textContent = window.gameState.coins;
-  document.getElementById('playerStreak').textContent = window.gameState.streak;
+  const gs = window.gameState;
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('playerName', gs.playerName || 'Operador');
+  setTxt('playerNamePanel', gs.playerName || 'Operador');
+  const rankEl = document.getElementById('playerRankPanel');
+  if (rankEl) rankEl.textContent = gs.rank || 'Analista JR';
+  setTxt('playerXP', gs.xp);
+  setTxt('playerCoins', gs.coins);
+  setTxt('playerStreak', gs.streak);
+  setTxt('playerRank', gs.rank || 'Analista JR');
 }
 
 function renderChallenges() {
   const list = document.getElementById('challengeList');
   list.innerHTML = '';
-  
   for (let i = 1; i <= 1; i++) {
-    const challenge = challenges[i];
-    const completedSubs = window.gameState.completedSubExercises[i] || [];
-    const isFullyCompleted = completedSubs.length === 10;
+    const ch = challenges[i];
+    const completed = window.gameState.completedSubExercises[i] || [];
     const isCurrent = window.gameState.currentChallenge === i;
     const isExpanded = window.gameState.expandedChallenges.includes(i);
-    
+    const isFullDone = completed.length === 10;
     const div = document.createElement('div');
-    div.className = `challenge-item ${isCurrent ? 'active' : ''} ${isFullyCompleted ? 'completed' : ''} ${isExpanded ? 'expanded' : ''}`;
-    
-    let subExercisesHTML = '';
+    div.className = `challenge-item ${isCurrent?'active':''} ${isFullDone?'completed':''} ${isExpanded?'expanded':''}`;
+    let subsHTML = '';
     if (isExpanded) {
-      subExercisesHTML = '<div class="sub-exercises">';
-      challenge.subExercises.forEach((sub) => {
-        const subCompleted = completedSubs.includes(sub.id);
+      subsHTML = '<div class="sub-exercises">';
+      ch.subExercises.forEach(sub => {
+        const subDone = completed.includes(sub.id);
         const subCurrent = isCurrent && window.gameState.currentSubExercise === sub.id;
-        subExercisesHTML += `<div class="sub-exercise ${subCompleted ? 'completed' : ''} ${subCurrent ? 'active' : ''}" onclick="loadSubExercise(${i}, ${sub.id}); event.stopPropagation();">${i}.${sub.id} ${sub.desc} ${subCompleted ? '✓' : ''}</div>`;
+        subsHTML += `<div class="sub-exercise ${subDone?'completed':''} ${subCurrent?'active':''}" onclick="loadSubExercise(${i},${sub.id});event.stopPropagation();">${i}.${sub.id} ${sub.desc} ${subDone?'✓':''}</div>`;
       });
-      subExercisesHTML += '</div>';
+      subsHTML += '</div>';
     }
-    
     div.innerHTML = `
-      <div style="display: flex; justify-content: space-between;">
-        <div style="font-weight: bold;">${isExpanded ? '▼' : '▶'} ${i}. ${challenge.title}</div>
-        <div style="font-size: 11px;">[${completedSubs.length}/10]</div>
+      <div style="display:flex;justify-content:space-between;">
+        <div style="font-weight:bold;">${isExpanded?'▼':'▶'} ${i}. ${ch.title}</div>
+        <div style="font-size:11px;">[${completed.length}/10]</div>
       </div>
-      <div style="font-size: 12px; margin-top: 4px;">${'⭐'.repeat(challenge.difficulty)}</div>
-      ${subExercisesHTML}
-    `;
-    
-    div.onclick = function(e) {
-      if (e.target.classList.contains('sub-exercise')) return;
-      sounds.click();
-      toggleChallengeExpansion(i);
-    };
-    
+      <div style="font-size:12px;margin-top:4px;">${'⭐'.repeat(ch.difficulty)}</div>
+      ${subsHTML}`;
+    div.onclick = e => { if (e.target.classList.contains('sub-exercise')) return; sounds.click(); toggleChallengeExpansion(i); };
     list.appendChild(div);
   }
 }
 
-function toggleChallengeExpansion(challengeId) {
-  const index = window.gameState.expandedChallenges.indexOf(challengeId);
-  if (index > -1) {
-    window.gameState.expandedChallenges.splice(index, 1);
-  } else {
-    window.gameState.expandedChallenges.push(challengeId);
-  }
-  saveGameState();
-  renderChallenges();
+function toggleChallengeExpansion(id) {
+  const idx = window.gameState.expandedChallenges.indexOf(id);
+  idx > -1 ? window.gameState.expandedChallenges.splice(idx, 1) : window.gameState.expandedChallenges.push(id);
+  saveGameState(); renderChallenges();
 }
 
-window.loadSubExercise = function(challengeId, subExerciseId) {
+window.loadSubExercise = function(cId, sId) {
   sounds.click();
-  window.gameState.currentChallenge = challengeId;
-  window.gameState.currentSubExercise = subExerciseId;
-  
-  const completedSubs = window.gameState.completedSubExercises[challengeId] || [];
-  window.gameState.practiceMode = completedSubs.includes(subExerciseId);
-  
-  saveGameState();
-  renderChallenges();
-  loadChallenge(challengeId, subExerciseId);
+  window.gameState.currentChallenge = cId;
+  window.gameState.currentSubExercise = sId;
+  const done = window.gameState.completedSubExercises[cId] || [];
+  window.gameState.practiceMode = done.includes(sId);
+  saveGameState(); renderChallenges(); loadChallenge(cId, sId);
 };
 
-function loadChallenge(challengeId, subExerciseId) {
-  const challenge = challenges[challengeId];
-  
-  if (challenge.hasTutorial && subExerciseId === 1 && !window.gameState.tutorialsSeen.includes(challengeId)) {
-    showTutorial(challengeId);
-  }
-  
-  const subExercise = challenge.subExercises.find(s => s.id === subExerciseId);
-  const narrative = narrativeDialogues[challengeId] && narrativeDialogues[challengeId][subExerciseId] 
-    ? narrativeDialogues[challengeId][subExerciseId]() 
-    : null;
-  
+function loadChallenge(cId, sId) {
+  const ch = challenges[cId];
+  if (ch.hasTutorial && sId === 1 && !window.gameState.tutorialsSeen.includes(cId)) showTutorial(cId);
+  const sub = ch.subExercises.find(s => s.id === sId);
+  const narr = narrativeDialogues[cId] && narrativeDialogues[cId][sId] ? narrativeDialogues[cId][sId]() : null;
   const banner = document.getElementById('practiceBanner');
-  const dayCounter = `<div style="text-align: center; padding: 8px; background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%); color: white; font-weight: bold; border-radius: 8px; margin-bottom: 10px; border: 2px solid var(--primary);">⏰ DÍA ${window.gameState.currentDay}/40</div>`;
-  
-  if (window.gameState.practiceMode) {
-    banner.innerHTML = dayCounter + '<div class="practice-mode-banner">🎯 MODO PRÁCTICA</div>';
-  } else {
-    banner.innerHTML = dayCounter;
-  }
-  
-  document.getElementById('challengeTitle').textContent = `${challengeId}. ${challenge.title}`;
-  document.getElementById('challengeDesc').textContent = `Ejercicio ${challengeId}.${subExerciseId}: ${subExercise.desc}`;
-  
-  if (narrative) {
-    document.getElementById('npcDialogue').innerHTML = `<div class="npc-dialogue"><span class="npc-avatar">👨‍💼</span><div style="display: inline-block; width: calc(100% - 80px); vertical-align: top;"><div class="npc-name">Roberto - Gerente GDL</div><div class="npc-text"><p>${narrative}</p></div></div></div>`;
-  } else {
-    document.getElementById('npcDialogue').innerHTML = '';
-  }
-  
-  document.getElementById('conceptBox').innerHTML = challenge.concept;
+  const dayCounter = `<div style="text-align:center;padding:8px;background:linear-gradient(90deg,var(--primary) 0%,var(--secondary) 100%);color:white;font-weight:bold;border-radius:8px;margin-bottom:10px;border:2px solid var(--primary);">⏰ DÍA ${window.gameState.currentDay}/40 — Nodo GDL</div>`;
+  banner.innerHTML = window.gameState.practiceMode ? dayCounter + '<div class="practice-mode-banner">🎯 MODO PRÁCTICA</div>' : dayCounter;
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setTxt('challengeTitle', `${cId}. ${ch.title}`);
+  document.getElementById('challengeDesc').textContent = `Ejercicio ${cId}.${sId}: ${sub.desc}`;
+  document.getElementById('npcDialogue').innerHTML = narr ? `<div class="npc-dialogue">${narr}</div>` : '';
+  document.getElementById('conceptBox').innerHTML = ch.concept;
   document.getElementById('sqlEditor').value = '-- Escribe tu consulta SQL aquí\n';
-  document.getElementById('results').innerHTML = '<strong>📊 Resultados</strong><p style="color: var(--muted); margin-top: 10px;">Ejecuta tu consulta...</p>';
-  
+  document.getElementById('results').innerHTML = '<strong>📊 Resultados</strong><p style="color:var(--muted);margin-top:10px;">Ejecuta tu consulta...</p>';
   window.gameState.attempts = 0;
   window.gameState.exampleUnlocked = false;
   updateAttemptCounter();
 }
 
 function updateProgressBar() {
-  let totalCompleted = 0;
-  for (let i = 1; i <= 1; i++) {
-    const completed = window.gameState.completedSubExercises[i] || [];
-    totalCompleted += completed.length;
-  }
-  
-  const percentage = Math.round((totalCompleted / 10) * 100);
-  document.getElementById('worldProgress').textContent = `${totalCompleted}/10`;
-  document.getElementById('worldProgressBar').style.width = percentage + '%';
-  document.getElementById('worldProgressBar').textContent = percentage + '%';
-  
+  let total = 0;
+  for (let i = 1; i <= 1; i++) total += (window.gameState.completedSubExercises[i] || []).length;
+  const pct = Math.round((total / 10) * 100);
+  const el = document.getElementById('worldProgress');
+  const bar = document.getElementById('worldProgressBar');
+  if (el) el.textContent = `${total}/10`;
+  if (bar) { bar.style.width = pct + '%'; bar.textContent = pct + '%'; }
   const stars = document.getElementById('lorenzoRep');
-  const rep = Math.floor(window.gameState.reputation.ana);
-  stars.innerHTML = '';
-  for (let i = 0; i < 3; i++) {
-    stars.innerHTML += `<span class="star ${i < rep ? '' : 'empty'}">★</span>`;
+  if (stars) {
+    const rep = Math.floor(window.gameState.reputation.ana);
+    stars.innerHTML = '';
+    for (let i = 0; i < 3; i++) stars.innerHTML += `<span class="star ${i<rep?'':'empty'}">★</span>`;
   }
 }
 
 function updateSkillBars() {
-  const skills = window.gameState.skills;
-  ['SELECT', 'WHERE', 'ORDER', 'ADVANCED'].forEach(skill => {
-    const elem = document.getElementById(`skill${skill}`);
-    if (elem) {
-      const percent = Math.min(100, skills[skill]);
-      elem.style.width = percent + '%';
-      elem.textContent = percent + '%';
-    }
+  ['SELECT','WHERE','ORDER','ADVANCED'].forEach(s => {
+    const el = document.getElementById(`skill${s}`);
+    if (el) { const pct = Math.min(100, window.gameState.skills[s]); el.style.width = pct+'%'; el.textContent = pct+'%'; }
   });
 }
 
-window.executeQuery = function() {
-  sounds.click();
-  const query = document.getElementById('sqlEditor').value.trim();
-  if (!query || query === '-- Escribe tu consulta SQL aquí') {
-    sounds.error();
-    alert('Escribe una consulta');
-    return;
-  }
-  
-  try {
-    const results = window.gameState.db.exec(query);
-    displayResults(results, query);
-    checkSolution(query, results);
-  } catch (e) {
-    sounds.error();
-    displayError(e.message, query);
-    window.gameState.attempts++;
-    updateAttemptCounter();
-  }
-};
-
-function displayResults(results, query) {
-  const container = document.getElementById('results');
-  container.innerHTML = `<strong>📊 Resultados de tu consulta</strong>
-  <div style="background: #0d1117; color: #00ff41; padding: 10px; border-radius: 8px; margin: 10px 0; font-family: monospace; font-size: 13px; border: 1px solid var(--primary);">${query}</div>`;
-  
-  if (!results || results.length === 0) {
-    container.innerHTML += '<p style="color: var(--muted); margin-top: 10px;">✅ Consulta ejecutada. Sin resultados (0 filas).</p>';
-    return;
-  }
-  
-  const result = results[0];
-  const table = document.createElement('table');
-  const thead = document.createElement('thead');
-  const trHead = document.createElement('tr');
-  
-  result.columns.forEach(col => {
-    const th = document.createElement('th');
-    th.textContent = col;
-    trHead.appendChild(th);
-  });
-  thead.appendChild(trHead);
-  table.appendChild(thead);
-  
-  const tbody = document.createElement('tbody');
-  result.values.forEach(row => {
-    const tr = document.createElement('tr');
-    row.forEach(cell => {
-      const td = document.createElement('td');
-      td.textContent = cell === null ? 'NULL' : cell;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);
-  
-  const resultCount = document.createElement('div');
-  resultCount.style.cssText = 'margin-top: 10px; font-size: 14px; color: var(--muted);';
-  resultCount.textContent = `📋 ${result.values.length} fila(s) encontrada(s)`;
-  
-  container.appendChild(table);
-  container.appendChild(resultCount);
-}
-
-function displayError(message, query) {
-  const container = document.getElementById('results');
-  container.innerHTML = `<strong style="color: var(--danger);">❌ Error en tu consulta</strong>`;
-  
-  const queryDisplay = document.createElement('div');
-  queryDisplay.style.cssText = 'background: #0d1117; color: #ff4444; padding: 10px; border-radius: 8px; margin: 10px 0; font-family: monospace; font-size: 13px; border: 1px solid var(--danger);';
-  queryDisplay.textContent = query;
-  container.appendChild(queryDisplay);
-  
-  const errorBox = document.createElement('div');
-  errorBox.style.cssText = 'background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid var(--danger); border: 2px solid var(--danger);';
-  
-  let explanation = '';
-  if (message.includes('no such column')) {
-    const columnName = message.split(':')[1]?.trim() || 'desconocido';
-    explanation = `
-      <h3 style="color: var(--danger); margin-bottom: 10px;">🔍 Problema detectado:</h3>
-      <p><strong>"${columnName}"</strong> no es una columna válida.</p>
-      <h3 style="color: var(--danger); margin: 15px 0 10px 0;">💡 Posibles causas:</h3>
-      <p>1️⃣ <strong>Olvidaste comillas:</strong> Si es texto, debe ir entre 'comillas'<br>
-      Ejemplo: <code>WHERE C_Marca = 'Toyota'</code></p>
-      <p>2️⃣ <strong>Nombre incorrecto:</strong> Verifica que la columna exista<br>
-      Columnas disponibles: <code>C_VIN, C_Marca, C_Modelo, C_Anio, C_Color, C_Precio, C_Stock</code></p>
-    `;
-  } else if (message.includes('syntax error')) {
-    explanation = `
-      <h3 style="color: var(--danger); margin-bottom: 10px;">🔍 Error de sintaxis:</h3>
-      <p>Revisa que tu consulta tenga la estructura correcta:</p>
-      <pre style="background: #0d1117; color: #00ff41; padding: 10px; border-radius: 4px; margin-top: 10px; border: 1px solid var(--primary);">SELECT columnas
-FROM tabla
-WHERE condición;</pre>
-      <p style="margin-top: 10px;">🔑 Verifica:<br>
-      - ¿Separaste las columnas con comas (,)?<br>
-      - ¿Terminaste con punto y coma (;)?<br>
-      - ¿El texto va entre 'comillas simples'?</p>
-    `;
-  } else {
-    explanation = `<pre style="color: var(--danger); margin-top: 10px;">${message}</pre>`;
-  }
-  
-  errorBox.innerHTML = explanation;
-  container.appendChild(errorBox);
-}
-
-function checkSolution(userQuery, results) {
-  const challengeId = window.gameState.currentChallenge;
-  const subExerciseId = window.gameState.currentSubExercise;
-  const challenge = challenges[challengeId];
-  const subExercise = challenge.subExercises.find(s => s.id === subExerciseId);
-  
-  const normalize = q => {
-    return q
-      .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .replace(/;+/g, '')
-      .replace(/\t/g, ' ')
-      .replace(/\n/g, ' ')
-      .replace(/\r/g, ' ')
-      .replace(/\(/g, ' ( ')
-      .replace(/\)/g, ' ) ')
-      .replace(/,/g, ' , ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-  
-  const userNorm = normalize(userQuery);
-  const expectedNorm = normalize(subExercise.expected);
-  
-  console.log('USER:', userNorm);
-  console.log('EXPECTED:', expectedNorm);
-  
-  if (userNorm === expectedNorm || userNorm.includes(expectedNorm)) {
-    completeSubExercise(challengeId, subExerciseId, results);
-  } else {
-    sounds.error();
-    window.gameState.attempts++;
-    updateAttemptCounter();
-  }
-}
-
-function completeSubExercise(challengeId, subExerciseId, results) {
-  const challenge = challenges[challengeId];
-  const completedSubs = window.gameState.completedSubExercises[challengeId] || [];
-  
-  let xpGained = 0;
-  let coinsGained = 0;
-  
-  if (!window.gameState.practiceMode && !completedSubs.includes(subExerciseId)) {
-    completedSubs.push(subExerciseId);
-    window.gameState.completedSubExercises[challengeId] = completedSubs;
-    
-    const subXP = Math.ceil(challenge.xp / 10);
-    const subCoins = Math.ceil(challenge.coins / 10);
-    xpGained = subXP;
-    coinsGained = subCoins;
-    
-    window.gameState.xp += subXP;
-    window.gameState.coins += subCoins;
-    
-    window.gameState.skills[challenge.skill] = Math.min(100, window.gameState.skills[challenge.skill] + 10);
-    window.gameState.reputation.ana = Math.min(3, window.gameState.reputation.ana + 0.3);
-    
-    // TRIVIA después del ejercicio 5
-    if (subExerciseId === 5 && challenge.hasTrivia && !window.gameState.triviaAnswered) {
-      saveGameState();
-      showTrivia(challengeId);
-      return;
-    }
-    
-    // BOSS FINAL después del ejercicio 10
-    if (completedSubs.length === 10 && challenge.hasBoss) {
-      window.gameState.currentDay++;
-      if (challenge.diaryEntry) {
-        window.gameState.diary.push({ day: challengeId, entry: challenge.diaryEntry });
-      }
-      saveGameState();
-      showBossFight(challengeId);
-      return;
-    }
-    
-    saveGameState();
-  }
-  
-  sounds.success();
-  showRewardModal(xpGained, coinsGained, challengeId, subExerciseId, results);
-}
-
-window.showTrivia = function(challengeId) {
-  const content = document.getElementById('modalGenericContent');
-  content.innerHTML = `
-    <div style="text-align: center;">
-      <h2 style="color: var(--accent); margin-bottom: 20px;">⚡ TRIVIA DE VELOCIDAD</h2>
-      <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 12px; border: 2px solid var(--accent); margin: 20px 0;">
-        <p style="font-size: 18px; margin-bottom: 20px;">La Ing. Ana pregunta:</p>
-        <p style="font-size: 16px; font-style: italic; margin-bottom: 30px;">"Si Roberto te pide ver los autos que NO son de color 'Rojo', ¿qué operador de comparación usarías en el WHERE?"</p>
-        <button class="btn btn-secondary" onclick="answerTrivia('A')" style="width: 100%; margin: 10px 0; font-size: 16px;">A) ==</button>
-        <button class="btn btn-secondary" onclick="answerTrivia('B')" style="width: 100%; margin: 10px 0; font-size: 16px;">B) <> o !=</button>
-        <button class="btn btn-secondary" onclick="answerTrivia('C')" style="width: 100%; margin: 10px 0; font-size: 16px;">C) NOT LIKE</button>
-      </div>
-      <p style="font-size: 14px; color: var(--accent);">💰 Premio: 200 VC</p>
-    </div>
-  `;
-  document.getElementById('modalGeneric').classList.add('active');
-};
-
-window.answerTrivia = function(answer) {
-  window.gameState.triviaAnswered = true;
-  
-  if (answer === 'B') {
-    sounds.success();
-    window.gameState.coins += 200;
-    window.gameState.xp += 20;
-    createCoinRain(200);
-    saveGameState();
-    
-    const content = document.getElementById('modalGenericContent');
-    content.innerHTML = `
-      <div style="text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
-        <h2 style="color: var(--primary);">¡CORRECTO!</h2>
-        <p style="margin: 20px 0; font-size: 16px;">El operador <strong><></strong> o <strong>!=</strong> significa "diferente de".</p>
-        <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--accent);">
-          <div style="font-size: 32px; margin: 15px 0;">🪙 +200 VC</div>
-          <div style="font-size: 32px; margin: 15px 0;">⭐ +20 XP</div>
-        </div>
-        <button class="btn" onclick="closeModal('modalGeneric'); loadChallenge(1, 6);" style="width: 100%; margin-top: 20px;">Continuar</button>
-      </div>
-    `;
-  } else {
-    sounds.error();
-    const content = document.getElementById('modalGenericContent');
-    content.innerHTML = `
-      <div style="text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
-        <h2 style="color: var(--danger);">Incorrecto</h2>
-        <p style="margin: 20px 0; font-size: 16px;">La respuesta correcta era: <strong>B) <> o !=</strong></p>
-        <p style="color: var(--muted);">No hay recompensa, pero puedes continuar.</p>
-        <button class="btn btn-secondary" onclick="closeModal('modalGeneric'); loadChallenge(1, 6);" style="width: 100%; margin-top: 20px;">Continuar</button>
-      </div>
-    `;
-  }
-};
-
-window.showBossFight = function(challengeId) {
-  const content = document.getElementById('modalGenericContent');
-  content.innerHTML = `
-    <div style="text-align: center;">
-      <h2 style="color: var(--danger); margin-bottom: 20px;">👹 BOSS FINAL</h2>
-      <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 12px; border: 2px solid var(--danger); margin: 20px 0;">
-        <p style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">Roberto está gritando al teléfono:</p>
-        <p style="font-size: 16px; font-style: italic; line-height: 1.6;">"¡${window.gameState.playerName}, la planta ya va a cerrar el sistema! Necesito que me des el <strong>Top 5 de los autos más caros</strong> que sean marca 'Toyota', que <strong>NO sean de color 'Blanco'</strong> y que el precio esté ordenado de <strong>mayor a menor</strong>. ¡Dámelo ya!"</p>
-      </div>
-      <p style="font-size: 14px; color: var(--muted); margin: 20px 0;">Combina: SELECT TOP 5, WHERE, AND, NOT, ORDER BY DESC</p>
-      <button class="btn" onclick="closeModal('modalGeneric'); startBoss();" style="width: 100%; font-size: 18px;">⚔️ Aceptar Desafío</button>
-    </div>
-  `;
-  document.getElementById('modalGeneric').classList.add('active');
-};
-
-window.startBoss = function() {
-  window.gameState.currentChallenge = 1;
-  window.gameState.currentSubExercise = 'BOSS';
-  document.getElementById('challengeTitle').textContent = '👹 BOSS FINAL - El Ultimátum de Roberto';
-  document.getElementById('challengeDesc').textContent = 'Top 5 autos Toyota más caros, NO blancos, ordenados DESC';
-  document.getElementById('npcDialogue').innerHTML = `<div class="npc-dialogue"><span class="npc-avatar">👹</span><div style="display: inline-block; width: calc(100% - 80px); vertical-align: top;"><div class="npc-name" style="color: var(--danger);">BOSS FINAL</div><div class="npc-text"><p>¡La planta cierra en minutos! Top 5 Toyota más caros, NO blancos, DESC. ¡AHORA!</p></div></div></div>`;
-  document.getElementById('sqlEditor').value = '-- Escribe tu consulta BOSS aquí\n';
-  document.getElementById('results').innerHTML = '<strong>📊 Resultados</strong><p style="color: var(--muted); margin-top: 10px;">Ejecuta tu consulta...</p>';
-  window.gameState.attempts = 0;
-  updateAttemptCounter();
-};
-
+// ============================================
+// EJECUCIÓN DE QUERIES
+// ============================================
 window.executeQuery = function() {
   sounds.click();
   const query = document.getElementById('sqlEditor').value.trim();
   if (!query || query === '-- Escribe tu consulta SQL aquí' || query === '-- Escribe tu consulta BOSS aquí') {
-    sounds.error();
-    alert('Escribe una consulta');
-    return;
+    sounds.error(); alert('Escribe una consulta primero'); return;
   }
-  
-  // BOSS CHECK
   if (window.gameState.currentSubExercise === 'BOSS') {
-    try {
-      const results = window.gameState.db.exec(query);
-      displayResults(results, query);
-      checkBossSolution(query, results);
-    } catch (e) {
-      sounds.error();
-      displayError(e.message, query);
-      window.gameState.attempts++;
-      updateAttemptCounter();
-    }
+    try { const r = window.gameState.db.exec(query); displayResults(r, query); checkBossSolution(query, r); }
+    catch(e) { sounds.error(); displayError(e.message, query); window.gameState.attempts++; updateAttemptCounter(); }
     return;
   }
-  
-  // EJERCICIO NORMAL
-  try {
-    const results = window.gameState.db.exec(query);
-    displayResults(results, query);
-    checkSolution(query, results);
-  } catch (e) {
-    sounds.error();
-    displayError(e.message, query);
-    window.gameState.attempts++;
-    updateAttemptCounter();
-  }
+  try { const r = window.gameState.db.exec(query); displayResults(r, query); checkSolution(query, r); }
+  catch(e) { sounds.error(); displayError(e.message, query); window.gameState.attempts++; updateAttemptCounter(); }
 };
 
-function checkBossSolution(userQuery, results) {
-  const normalize = q => {
-    return q
-      .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .replace(/;+/g, '')
-      .replace(/\t/g, ' ')
-      .replace(/\n/g, ' ')
-      .replace(/\r/g, ' ')
-      .replace(/\(/g, ' ( ')
-      .replace(/\)/g, ' ) ')
-      .replace(/,/g, ' , ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-  
-  const userNorm = normalize(userQuery);
-  
-  // Verificar componentes clave del BOSS
-  const hasTop5 = userNorm.includes('top 5') || userNorm.includes('limit 5');
-  const hasToyota = userNorm.includes("'toyota'");
-  const hasNotWhite = (userNorm.includes("!= 'blanco'") || userNorm.includes("<> 'blanco'") || userNorm.includes("not") && userNorm.includes("'blanco'"));
-  const hasOrderDesc = userNorm.includes('order by') && userNorm.includes('desc');
-  const hasPrice = userNorm.includes('c_precio');
-  
-  if (hasTop5 && hasToyota && hasNotWhite && hasOrderDesc && hasPrice && results && results[0] && results[0].values.length <= 5) {
-    completeBoss();
+function displayResults(results, query) {
+  const c = document.getElementById('results');
+  c.innerHTML = `<strong>📊 Resultados de tu consulta</strong><div style="background:#0d1117;color:#00ff41;padding:10px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:13px;border:1px solid var(--primary);">${query}</div>`;
+  if (!results || results.length === 0) { c.innerHTML += '<p style="color:var(--muted);margin-top:10px;">✅ Ejecutada. 0 filas.</p>'; return; }
+  const res = results[0];
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const trH = document.createElement('tr');
+  res.columns.forEach(col => { const th = document.createElement('th'); th.textContent = col; trH.appendChild(th); });
+  thead.appendChild(trH); table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  res.values.forEach(row => {
+    const tr = document.createElement('tr');
+    row.forEach(cell => { const td = document.createElement('td'); td.textContent = cell === null ? 'NULL' : cell; tr.appendChild(td); });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  c.appendChild(table);
+  const count = document.createElement('div');
+  count.style.cssText = 'margin-top:10px;font-size:14px;color:var(--muted);';
+  count.textContent = `📋 ${res.values.length} fila(s) encontrada(s)`;
+  c.appendChild(count);
+}
+
+function displayError(message, query) {
+  const c = document.getElementById('results');
+  c.innerHTML = `<strong style="color:var(--danger);">❌ Error en tu consulta</strong>
+    <div style="background:#0d1117;color:#ff4444;padding:10px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:13px;border:1px solid var(--danger);">${query}</div>`;
+  const box = document.createElement('div');
+  box.style.cssText = 'background:rgba(239,68,68,0.1);padding:15px;border-radius:8px;margin:10px 0;border:2px solid var(--danger);';
+  let exp = '';
+  if (message.includes('no such column')) {
+    const col = message.split(':')[1]?.trim() || '?';
+    exp = `<h3 style="color:var(--danger);margin-bottom:10px;">🔍 Columna no encontrada: "${col}"</h3>
+      <p>1️⃣ ¿Olvidaste comillas? El texto va entre 'comillas simples'<br>
+      2️⃣ ¿Nombre correcto? Columnas: <code>C_VIN, C_Marca, C_Modelo, C_Anio, C_Color, C_Precio, C_Stock</code></p>`;
+  } else if (message.includes('syntax error')) {
+    exp = `<h3 style="color:var(--danger);margin-bottom:10px;">🔍 Error de sintaxis</h3>
+      <pre style="background:#0d1117;color:#00ff41;padding:10px;border-radius:4px;border:1px solid var(--primary);">SELECT columnas\nFROM tabla\nWHERE condición;</pre>
+      <p style="margin-top:10px;">¿Separaste columnas con comas? ¿El texto va entre 'comillas'?</p>`;
+  } else {
+    exp = `<pre style="color:var(--danger);">${message}</pre>`;
+  }
+  box.innerHTML = exp;
+  c.appendChild(box);
+}
+
+function normalize(q) {
+  return q.toLowerCase().replace(/\s+/g,' ').replace(/;+/g,'').replace(/\t|\n|\r/g,' ')
+    .replace(/\(/g,' ( ').replace(/\)/g,' ) ').replace(/,/g,' , ').replace(/\s+/g,' ').trim();
+}
+
+function checkSolution(userQuery, results) {
+  const cId = window.gameState.currentChallenge;
+  const sId = window.gameState.currentSubExercise;
+  const sub = challenges[cId].subExercises.find(s => s.id === sId);
+  const uNorm = normalize(userQuery);
+  const eNorm = normalize(sub.expected);
+  if (uNorm === eNorm || uNorm.includes(eNorm)) {
+    completeSubExercise(cId, sId, results);
   } else {
     sounds.error();
     window.gameState.attempts++;
     updateAttemptCounter();
-    
+  }
+}
+
+function completeSubExercise(cId, sId, results) {
+  const ch = challenges[cId];
+  const done = window.gameState.completedSubExercises[cId] || [];
+  let xpG = 0, coinsG = 0;
+  if (!window.gameState.practiceMode && !done.includes(sId)) {
+    done.push(sId);
+    window.gameState.completedSubExercises[cId] = done;
+    xpG = Math.ceil(ch.xp / 10);
+    coinsG = Math.ceil(ch.coins / 10);
+    window.gameState.xp += xpG;
+    window.gameState.coins += coinsG;
+    window.gameState.skills[ch.skill] = Math.min(100, window.gameState.skills[ch.skill] + 10);
+    window.gameState.reputation.ana = Math.min(3, window.gameState.reputation.ana + 0.3);
+    if (sId === 1) window.gameState.unlockedBadges.push('primera');
+    if (sId === 4) window.gameState.unlockedBadges.push('glitch');
+    if (sId === 7) window.gameState.unlockedBadges.push('domador');
+    if (sId === 8) window.gameState.unlockedBadges.push('between');
+    if (sId === 5 && ch.hasTrivia && !window.gameState.triviaAnswered) { saveGameState(); showTrivia(cId); return; }
+    if (done.length === 10 && ch.hasBoss) {
+      window.gameState.currentDay++;
+      if (ch.diaryEntry) window.gameState.diary.push({ day: cId, entry: ch.diaryEntry });
+      saveGameState(); showBossFight(cId); return;
+    }
+    saveGameState();
+  }
+  sounds.success();
+  showRewardModal(xpG, coinsG, cId, sId, results);
+}
+
+// ============================================
+// TRIVIA
+// ============================================
+window.showTrivia = function(cId) {
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:15px;">⚡</div>
+      <h2 style="color:var(--accent);margin-bottom:5px;">TRIVIA DE VELOCIDAD</h2>
+      <p style="color:var(--muted);margin-bottom:20px;">La Ing. Ana te evalúa en tiempo real</p>
+      <div style="background:rgba(245,158,11,0.1);padding:20px;border-radius:12px;border:2px solid var(--accent);margin:20px 0;text-align:left;">
+        <p style="font-size:16px;margin-bottom:20px;font-style:italic;">"Si Roberto te pide ver los autos que NO son de color 'Rojo', ¿qué operador de comparación usarías en el WHERE?"</p>
+        <button class="btn btn-secondary" onclick="answerTrivia('A')" style="width:100%;margin:8px 0;font-size:15px;">A) ==</button>
+        <button class="btn btn-secondary" onclick="answerTrivia('B')" style="width:100%;margin:8px 0;font-size:15px;">B) &lt;&gt; o !=</button>
+        <button class="btn btn-secondary" onclick="answerTrivia('C')" style="width:100%;margin:8px 0;font-size:15px;">C) NOT LIKE</button>
+      </div>
+      <p style="font-size:14px;color:var(--accent);">💰 Premio: +200 VC si aciertas a la primera</p>
+    </div>`;
+  document.getElementById('modalGeneric').classList.add('active');
+};
+
+window.answerTrivia = function(ans) {
+  window.gameState.triviaAnswered = true;
+  const content = document.getElementById('modalGenericContent');
+  if (ans === 'B') {
+    sounds.success();
+    window.gameState.coins += 200; window.gameState.xp += 20;
+    createCoinRain(200); saveGameState();
+    content.innerHTML = `
+      <div style="text-align:center;">
+        <div style="font-size:64px;margin-bottom:20px;">✅</div>
+        <h2 style="color:var(--primary);">¡CORRECTO!</h2>
+        <p style="margin:20px 0;font-size:16px;"><strong>&lt;&gt;</strong> o <strong>!=</strong> significa "diferente de".</p>
+        <div style="background:linear-gradient(135deg,rgba(0,217,255,0.2),rgba(124,58,237,0.2));padding:25px;border-radius:12px;margin:20px 0;border:2px solid var(--accent);">
+          <div style="font-size:32px;margin:10px 0;">🪙 +200 VC</div>
+          <div style="font-size:32px;margin:10px 0;">⭐ +20 XP</div>
+        </div>
+        <button class="btn" onclick="closeModal('modalGeneric');loadChallenge(1,6);" style="width:100%;margin-top:20px;">Continuar →</button>
+      </div>`;
+  } else {
+    sounds.error();
+    content.innerHTML = `
+      <div style="text-align:center;">
+        <div style="font-size:64px;margin-bottom:20px;">❌</div>
+        <h2 style="color:var(--danger);">Incorrecto</h2>
+        <p style="margin:20px 0;">Respuesta: <strong>B) &lt;&gt; o !=</strong></p>
+        <p style="color:var(--muted);">Sin recompensa esta vez. Sigue adelante.</p>
+        <button class="btn btn-secondary" onclick="closeModal('modalGeneric');loadChallenge(1,6);" style="width:100%;margin-top:20px;">Continuar →</button>
+      </div>`;
+  }
+};
+
+// ============================================
+// BOSS FINAL
+// ============================================
+window.showBossFight = function(cId) {
+  const name = window.gameState.playerName;
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:64px;margin-bottom:15px;">👹</div>
+      <h2 style="color:var(--danger);margin-bottom:15px;">BOSS FINAL — El Ultimátum</h2>
+      <div style="background:rgba(239,68,68,0.1);padding:20px;border-radius:12px;border:2px solid var(--danger);margin:20px 0;text-align:left;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">📍 09:47 AM — Llamada directa de Roberto</div>
+        <p style="font-size:16px;font-style:italic;line-height:1.7;">
+          "¡${name}! La planta cierra el sistema en 5 minutos.
+          Necesito el <strong>Top 5 de los autos más caros</strong>
+          que sean marca 'Toyota', que <strong>NO sean de color 'Blanco'</strong>
+          y ordenados de <strong>mayor a menor precio</strong>. ¡YA!"
+        </p>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:15px 0;">Combina: SELECT con LIMIT 5, WHERE, AND, condición de color, ORDER BY DESC</p>
+      <button class="btn" onclick="closeModal('modalGeneric');startBoss();" style="width:100%;font-size:18px;">⚔️ Aceptar Desafío Final</button>
+    </div>`;
+  document.getElementById('modalGeneric').classList.add('active');
+};
+
+window.startBoss = function() {
+  window.gameState.currentSubExercise = 'BOSS';
+  document.getElementById('challengeTitle').textContent = '👹 BOSS FINAL — El Ultimátum de Roberto';
+  document.getElementById('challengeDesc').textContent = 'Top 5 Toyota más caros, NO blancos, ORDER BY DESC';
+  document.getElementById('npcDialogue').innerHTML = `
+    <div class="npc-dialogue">
+      <div class="npc-scene">
+        <div class="npc-location">📍 09:51 AM — Sistema en cuenta regresiva</div>
+        <div class="npc-message">
+          <span class="npc-avatar" style="font-size:48px;">👹</span>
+          <div class="npc-bubble" style="border-color:rgba(239,68,68,0.5);">
+            <div class="npc-name" style="color:var(--danger);">BOSS FINAL — ROBERTO</div>
+            <p>Top 5 Toyota más caros. NO blancos. Mayor a menor. ¡AHORA!</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('sqlEditor').value = '-- Escribe tu consulta BOSS aquí\n';
+  document.getElementById('results').innerHTML = '<strong>📊 Resultados</strong><p style="color:var(--muted);margin-top:10px;">Ejecuta tu consulta...</p>';
+  window.gameState.attempts = 0; updateAttemptCounter();
+};
+
+function checkBossSolution(userQuery, results) {
+  const u = normalize(userQuery);
+  const hasLimit = u.includes('limit 5') || u.includes('top 5');
+  const hasToyota = u.includes("'toyota'");
+  const hasNotWhite = u.includes("!= 'blanco'") || u.includes("<> 'blanco'") || (u.includes('not') && u.includes("'blanco'"));
+  const hasOrderDesc = u.includes('order by') && u.includes('desc');
+  const hasPrice = u.includes('c_precio');
+  if (hasLimit && hasToyota && hasNotWhite && hasOrderDesc && hasPrice && results && results[0] && results[0].values.length <= 5) {
+    completeBoss();
+  } else {
+    sounds.error(); window.gameState.attempts++; updateAttemptCounter();
     let hint = 'Verifica: ';
-    if (!hasTop5) hint += 'TOP 5, ';
+    if (!hasLimit) hint += 'LIMIT 5, ';
     if (!hasToyota) hint += "marca='Toyota', ";
-    if (!hasNotWhite) hint += "NOT color='Blanco', ";
-    if (!hasOrderDesc) hint += 'ORDER BY DESC, ';
+    if (!hasNotWhite) hint += "color != 'Blanco', ";
+    if (!hasOrderDesc) hint += 'ORDER BY ... DESC, ';
     alert(hint.slice(0, -2));
   }
 }
 
 function completeBoss() {
   sounds.success();
-  window.gameState.xp += 50;
-  window.gameState.coins += 1500;
-  window.gameState.unlockedBadges.push('boss1');
-  window.gameState.unlockedBadges.push('mundo1');
-  saveGameState();
-  
-  createCoinRain(1500);
-  
+  window.gameState.xp += 50; window.gameState.coins += 1500;
+  window.gameState.unlockedBadges.push('boss1'); window.gameState.unlockedBadges.push('mundo1');
+  window.gameState.rank = 'Analista SR';
+  createCoinRain(1500); saveGameState();
   const content = document.getElementById('modalGenericContent');
   content.innerHTML = `
-    <div style="text-align: center;">
-      <div style="font-size: 80px; margin-bottom: 20px;">👑</div>
-      <h2 style="color: var(--accent); margin-bottom: 15px;">¡BOSS DERROTADO!</h2>
-      <p style="font-size: 18px; margin: 20px 0;">Has salvado el Nodo GDL. Roberto puede despachar las unidades.</p>
-      <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--accent);">
-        <div style="font-size: 24px; font-weight: bold; margin-bottom: 15px;">🏆 RECOMPENSAS FINALES</div>
-        <div style="font-size: 32px; margin: 10px 0;">⭐ +50 XP</div>
-        <div style="font-size: 32px; margin: 10px 0;">🪙 +1,500 VC</div>
-        <div style="font-size: 20px; margin: 15px 0;">👑 Insignia: Vencedor de Roberto</div>
-        <div style="font-size: 20px; margin: 15px 0;">🏆 Insignia: Salvador de GDL</div>
+    <div style="text-align:center;">
+      <div style="font-size:80px;margin-bottom:20px;">👑</div>
+      <h2 style="color:var(--accent);margin-bottom:15px;">¡NODO GDL RESTAURADO!</h2>
+      <div style="background:rgba(0,217,255,0.08);border:1px solid var(--primary);border-radius:12px;padding:20px;margin:15px 0;text-align:left;">
+        <p style="font-style:italic;line-height:1.7;font-size:15px;">
+          "Lo lograste. Roberto puede despachar las unidades.
+          NexCorp Industries sobrevive otro día.
+          Acabas de demostrar que aprendes SQL más rápido de lo que
+          The Void destruye sistemas."
+        </p>
+        <p style="color:var(--primary);font-weight:bold;margin-top:10px;">— Ing. Ana</p>
       </div>
-      <p style="color: var(--muted); margin: 20px 0;">Módulo 1 - COMPLETO 100%</p>
-      <button class="btn" onclick="closeModal('modalGeneric'); location.reload();" style="width: 100%; margin-top: 20px; font-size: 18px;">🎊 Finalizar Módulo</button>
-    </div>
-  `;
+      <div style="background:linear-gradient(135deg,rgba(0,217,255,0.2),rgba(124,58,237,0.2));padding:25px;border-radius:12px;margin:20px 0;border:2px solid var(--accent);">
+        <div style="font-size:20px;font-weight:bold;margin-bottom:15px;">🏆 RECOMPENSAS DEL MÓDULO 1</div>
+        <div style="font-size:28px;margin:10px 0;">⭐ +50 XP</div>
+        <div style="font-size:28px;margin:10px 0;">🪙 +1,500 VC</div>
+        <div style="font-size:18px;margin:10px 0;">👑 Insignia: Vencedor de Roberto</div>
+        <div style="font-size:18px;margin:10px 0;">🏆 Insignia: Salvador de GDL</div>
+        <div style="font-size:16px;margin:15px 0;color:var(--accent);">📈 Ascenso de Rango: Analista SR</div>
+      </div>
+      <p style="color:var(--muted);margin:15px 0;">Módulo 1 — COMPLETO 100%</p>
+      <button class="btn" onclick="closeModal('modalGeneric');location.reload();" style="width:100%;margin-top:20px;font-size:18px;">🎊 Continuar Misión</button>
+    </div>`;
   document.getElementById('modalGeneric').classList.add('active');
+  updateStats(); updateProgressBar(); updateSkillBars();
 }
 
-function showRewardModal(xp, coins, challengeId, subExerciseId, results) {
+// ============================================
+// MODALES DE RECOMPENSA
+// ============================================
+function showRewardModal(xp, coins, cId, sId, results) {
   const content = document.getElementById('modalGenericContent');
-  
-  let resultSummary = '';
-  if (results && results.length > 0) {
-    resultSummary = `<p style="margin-top: 15px; font-size: 16px;">📋 Filas obtenidas: <strong>${results[0].values.length}</strong></p>`;
-  }
-  
+  let summary = '';
+  if (results && results.length > 0) summary = `<p style="margin-top:15px;font-size:16px;">📋 Filas obtenidas: <strong>${results[0].values.length}</strong></p>`;
   if (window.gameState.practiceMode) {
     content.innerHTML = `
-      <div style="text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
-        <h2 style="color: var(--primary); margin-bottom: 15px;">¡Correcto!</h2>
-        <p style="font-size: 18px; color: var(--muted);">Modo Práctica</p>
-        ${resultSummary}
-        <button class="btn btn-secondary" onclick="closeModal('modalGeneric')" style="width: 100%; margin-top: 30px; font-size: 18px;">Cerrar</button>
-      </div>
-    `;
+      <div style="text-align:center;">
+        <div style="font-size:64px;margin-bottom:20px;">✅</div>
+        <h2 style="color:var(--primary);">¡Correcto!</h2>
+        <p style="color:var(--muted);">Modo Práctica — sin recompensas adicionales</p>
+        ${summary}
+        <button class="btn btn-secondary" onclick="closeModal('modalGeneric')" style="width:100%;margin-top:30px;">Cerrar</button>
+      </div>`;
   } else {
     content.innerHTML = `
-      <div style="text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-        <h2 style="color: var(--primary); margin-bottom: 15px;">¡Ejercicio Completado!</h2>
-        <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%); padding: 25px; border-radius: 12px; margin: 20px 0; border: 2px solid var(--primary);">
-          <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">Recompensas Obtenidas</div>
-          <div style="font-size: 32px; margin: 15px 0;">⭐ +${xp} XP</div>
-          <div style="font-size: 32px; margin: 15px 0;">🪙 +${coins} VC</div>
+      <div style="text-align:center;">
+        <div style="font-size:64px;margin-bottom:20px;">🎉</div>
+        <h2 style="color:var(--primary);margin-bottom:15px;">¡Ejercicio ${cId}.${sId} completado!</h2>
+        <div style="background:linear-gradient(135deg,rgba(0,217,255,0.2),rgba(124,58,237,0.2));padding:25px;border-radius:12px;margin:20px 0;border:2px solid var(--primary);">
+          <div style="font-size:20px;font-weight:bold;margin-bottom:10px;">Recompensas</div>
+          <div style="font-size:32px;margin:10px 0;">⭐ +${xp} XP</div>
+          <div style="font-size:32px;margin:10px 0;">🪙 +${coins} VC</div>
         </div>
-        ${resultSummary}
-        ${subExerciseId < 10 ? `<button class="btn" onclick="nextExercise(${challengeId}, ${subExerciseId})" style="width: 100%; margin-top: 20px; font-size: 18px;">➡️ Siguiente Ejercicio</button>` : ''}
-      </div>
-    `;
-    
+        ${summary}
+        ${sId < 10 ? `<button class="btn" onclick="nextExercise(${cId},${sId})" style="width:100%;margin-top:20px;font-size:18px;">➡️ Siguiente</button>` : ''}
+      </div>`;
     createCoinRain(coins);
   }
-  
   document.getElementById('modalGeneric').classList.add('active');
 }
 
-window.nextExercise = function(challengeId, subExerciseId) {
+window.nextExercise = function(cId, sId) {
   closeModal('modalGeneric');
-  window.gameState.currentSubExercise = subExerciseId + 1;
-  loadChallenge(challengeId, subExerciseId + 1);
-  renderChallenges();
-  updateStats();
-  updateProgressBar();
-  updateSkillBars();
+  window.gameState.currentSubExercise = sId + 1;
+  loadChallenge(cId, sId + 1);
+  renderChallenges(); updateStats(); updateProgressBar(); updateSkillBars();
 };
 
+// ============================================
+// TUTORIAL
+// ============================================
+function showTutorial(cId) {
+  const tut = sqlTutorials[cId];
+  if (!tut || window.gameState.tutorialsSeen.includes(cId)) return;
+  const content = document.getElementById('modalGenericContent');
+  content.innerHTML = tut.content + `<button class="btn" onclick="closeTutorial(${cId})" style="width:100%;margin-top:20px;font-size:18px;">¡Entendido! Comenzar misión</button>`;
+  document.getElementById('modalGeneric').classList.add('active');
+  sounds.click();
+}
+
+window.closeTutorial = function(cId) {
+  window.gameState.tutorialsSeen.push(cId);
+  saveGameState(); closeModal('modalGeneric');
+};
+
+// ============================================
+// CONTROLES DE EDITOR
+// ============================================
 function updateAttemptCounter() {
   const counter = document.getElementById('attemptCounter');
-  const exampleBtn = document.getElementById('exampleBtn');
-  
+  const btn = document.getElementById('exampleBtn');
   if (window.gameState.attempts === 0) {
-    counter.style.display = 'none';
-    exampleBtn.disabled = true;
-    exampleBtn.innerHTML = '🔒 Ver Ejemplo';
+    if (counter) counter.style.display = 'none';
+    if (btn) { btn.disabled = true; btn.innerHTML = '🔒 Ver Ejemplo'; }
   } else if (window.gameState.attempts < 3) {
-    counter.style.display = 'flex';
-    document.getElementById('attemptText').textContent = `Intento ${window.gameState.attempts}/3`;
-    exampleBtn.disabled = true;
-    exampleBtn.innerHTML = `🔒 (${3 - window.gameState.attempts} más)`;
+    if (counter) { counter.style.display = 'flex'; document.getElementById('attemptText').textContent = `Intento ${window.gameState.attempts}/3`; }
+    if (btn) { btn.disabled = true; btn.innerHTML = `🔒 (${3 - window.gameState.attempts} más)`; }
   } else {
-    counter.style.display = 'flex';
-    document.getElementById('attemptText').textContent = `💡 Desbloqueado`;
-    exampleBtn.disabled = false;
-    exampleBtn.innerHTML = '💡 Ver Ejemplo';
-    window.gameState.exampleUnlocked = true;
+    if (counter) { counter.style.display = 'flex'; document.getElementById('attemptText').textContent = '💡 Desbloqueado'; }
+    if (btn) { btn.disabled = false; btn.innerHTML = '💡 Ver Ejemplo'; window.gameState.exampleUnlocked = true; }
   }
 }
 
 window.showExample = function() {
-  if (!window.gameState.exampleUnlocked) {
-    sounds.error();
-    alert('Necesitas 3 intentos');
-    return;
-  }
+  if (!window.gameState.exampleUnlocked) { sounds.error(); alert('Necesitas 3 intentos'); return; }
   sounds.click();
-  
-  if (window.gameState.currentSubExercise === 'BOSS') {
-    alert(`💡 PISTA BOSS:\n\nSELECT TOP 5 * FROM tabla\nWHERE condicion1 AND condicion2\nORDER BY columna DESC;`);
-    return;
-  }
-  
-  const challenge = challenges[window.gameState.currentChallenge];
-  const subExercise = challenge.subExercises.find(s => s.id === window.gameState.currentSubExercise);
-  alert(`💡 EJEMPLO:\n\n${subExercise.example}\n\nAdáptalo a lo que se pide.`);
+  if (window.gameState.currentSubExercise === 'BOSS') { alert('💡 PISTA BOSS:\n\nSELECT * FROM tabla\nWHERE condicion1 AND condicion2\nORDER BY columna DESC\nLIMIT 5;'); return; }
+  const sub = challenges[window.gameState.currentChallenge].subExercises.find(s => s.id === window.gameState.currentSubExercise);
+  alert(`💡 EJEMPLO:\n\n${sub.example}\n\nAdáptalo a lo que pide Roberto.`);
 };
 
 window.clearEditor = function() {
@@ -1285,92 +1345,94 @@ window.clearEditor = function() {
 
 window.showHints = function() {
   sounds.click();
-  
-  if (window.gameState.currentSubExercise === 'BOSS') {
-    const content = document.getElementById('modalGenericContent');
-    content.innerHTML = `
-      <h2>💡 Pista BOSS</h2>
-      <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; margin-top: 20px; border: 2px solid var(--accent);">
-        <p>Necesitas combinar:</p>
-        <p>1️⃣ SELECT TOP 5 *<br>
-        2️⃣ FROM T_Inventario_GDL<br>
-        3️⃣ WHERE C_Marca = 'Toyota' AND C_Color <> 'Blanco'<br>
-        4️⃣ ORDER BY C_Precio DESC;</p>
-      </div>
-      <button class="btn" onclick="closeModal('modalGeneric')" style="margin-top: 20px; width: 100%;">Cerrar</button>
-    `;
-    document.getElementById('modalGeneric').classList.add('active');
-    return;
-  }
-  
-  const challenge = challenges[window.gameState.currentChallenge];
-  const subExercise = challenge.subExercises.find(s => s.id === window.gameState.currentSubExercise);
   const content = document.getElementById('modalGenericContent');
-  content.innerHTML = `
-    <h2>💡 Pista</h2>
-    <div style="padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; margin-top: 20px; border: 2px solid var(--accent);">
-      <div style="margin-top: 10px;">${subExercise.hint}</div>
-    </div>
-    <button class="btn" onclick="closeModal('modalGeneric')" style="margin-top: 20px; width: 100%;">Cerrar</button>
-  `;
+  if (window.gameState.currentSubExercise === 'BOSS') {
+    content.innerHTML = `<h2>💡 Pista BOSS</h2>
+      <div style="padding:15px;background:rgba(245,158,11,0.1);border-radius:8px;margin-top:20px;border:2px solid var(--accent);">
+        <p>1️⃣ SELECT * FROM T_Inventario_GDL<br>
+        2️⃣ WHERE C_Marca = 'Toyota'<br>
+        3️⃣ AND C_Color != 'Blanco' (o &lt;&gt;)<br>
+        4️⃣ ORDER BY C_Precio DESC<br>
+        5️⃣ LIMIT 5;</p>
+      </div>
+      <button class="btn" onclick="closeModal('modalGeneric')" style="margin-top:20px;width:100%;">Cerrar</button>`;
+  } else {
+    const sub = challenges[window.gameState.currentChallenge].subExercises.find(s => s.id === window.gameState.currentSubExercise);
+    content.innerHTML = `<h2>💡 Pista del Sistema</h2>
+      <div style="padding:15px;background:rgba(245,158,11,0.1);border-radius:8px;margin-top:20px;border:2px solid var(--accent);">
+        <code style="font-size:14px;color:#00ff41;">${sub.hint}</code>
+      </div>
+      <button class="btn" onclick="closeModal('modalGeneric')" style="margin-top:20px;width:100%;">Cerrar</button>`;
+  }
   document.getElementById('modalGeneric').classList.add('active');
 };
 
-window.showTables = function() {
+// ============================================
+// TIENDA
+// ============================================
+window.showShop = function() {
   sounds.click();
   const content = document.getElementById('modalGenericContent');
-  content.innerHTML = `
-    <h2>📊 Mis Tablas</h2>
-    <div style="margin: 20px 0;">
-      <h3 style="color: var(--primary);">Tabla: T_Inventario_GDL</h3>
-      <ul style="margin-left: 20px; margin-top: 10px;">
-        <li><code>C_VIN</code> - TEXT (número de serie único)</li>
-        <li><code>C_Marca</code> - TEXT (marca del vehículo)</li>
-        <li><code>C_Modelo</code> - TEXT (modelo)</li>
-        <li><code>C_Anio</code> - INTEGER (año)</li>
-        <li><code>C_Color</code> - TEXT (color)</li>
-        <li><code>C_Precio</code> - INTEGER (precio en pesos)</li>
-        <li><code>C_Stock</code> - INTEGER (unidades disponibles)</li>
-      </ul>
-      <h3 style="color: var(--primary); margin-top: 20px;">Tabla: T_Clientes_GDL</h3>
-      <ul style="margin-left: 20px; margin-top: 10px;">
-        <li><code>C_ID_Cliente</code> - INTEGER</li>
-        <li><code>C_Nombre_Completo</code> - TEXT</li>
-        <li><code>C_Correo</code> - TEXT</li>
-        <li><code>C_Telefono</code> - TEXT</li>
-        <li><code>C_Ciudad_Registro</code> - TEXT</li>
-      </ul>
-      <h3 style="color: var(--primary); margin-top: 20px;">Tabla: T_Ventas_GDL</h3>
-      <ul style="margin-left: 20px; margin-top: 10px;">
-        <li><code>C_ID_Venta</code> - INTEGER</li>
-        <li><code>C_VIN</code> - TEXT</li>
-        <li><code>C_Fecha</code> - DATE</li>
-        <li><code>C_Metodo_Pago</code> - TEXT (puede ser NULL)</li>
-      </ul>
-      <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid var(--accent);">
-        <strong>💡 Recuerda:</strong><br>
-        - TEXT (texto) va entre 'comillas simples'<br>
-        - INTEGER (números) NO llevan comillas
-      </div>
-    </div>
-    <button class="btn" onclick="closeModal('modalGeneric')" style="width: 100%;">Cerrar</button>
-  `;
+  const gs = window.gameState;
+  let html = `<h2>🛍️ Tienda NEXUS — ${gs.coins} VC disponibles</h2>`;
+  const types = [
+    { key: 'avatar', label: '🥷 Skins de Operador' },
+    { key: 'office', label: '🏢 Mejoras de Oficina' },
+    { key: 'powerup', label: '⚡ Power-Ups' }
+  ];
+  types.forEach(({ key, label }) => {
+    html += `<h3 style="color:var(--primary);margin:20px 0 10px;">${label}</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">`;
+    shopItems.filter(item => item.type === key).forEach(item => {
+      const owned = gs.unlockedItems.includes(item.id);
+      const equipped = gs.equippedItems[item.type] === item.id;
+      html += `
+        <div style="background:var(--card);border:2px solid ${equipped?'var(--accent)':owned?'var(--primary)':'rgba(0,217,255,0.2)'};border-radius:12px;padding:15px;text-align:center;">
+          <div style="font-size:36px;margin-bottom:8px;">${item.icon}</div>
+          <div style="font-weight:bold;font-size:13px;margin-bottom:5px;">${item.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${item.desc}</div>
+          ${equipped
+            ? `<button class="btn" style="width:100%;font-size:12px;opacity:0.7;" disabled>✅ Equipado</button>`
+            : owned
+            ? `<button class="btn btn-ghost" onclick="equipItem('${item.id}','${item.type}')" style="width:100%;font-size:12px;">Equipar</button>`
+            : `<button class="btn btn-secondary" onclick="buyItem('${item.id}')" style="width:100%;font-size:12px;" ${gs.coins < item.price ? 'disabled' : ''}>🪙 ${item.price} VC</button>`}
+        </div>`;
+    });
+    html += '</div>';
+  });
+  html += `<button class="btn" onclick="closeModal('modalGeneric')" style="margin-top:25px;width:100%;">Cerrar</button>`;
+  content.innerHTML = html;
   document.getElementById('modalGeneric').classList.add('active');
 };
 
+window.buyItem = function(itemId) {
+  const item = shopItems.find(i => i.id === itemId);
+  if (!item || window.gameState.coins < item.price) { sounds.error(); alert('No tienes suficientes VC.'); return; }
+  sounds.success();
+  window.gameState.coins -= item.price;
+  window.gameState.unlockedItems.push(itemId);
+  saveGameState(); updateStats();
+  alert(`✅ ¡${item.name} desbloqueado! Ve a "Equipar" para usarlo.`);
+  showShop();
+};
+
+window.equipItem = function(itemId, type) {
+  sounds.click();
+  window.gameState.equippedItems[type] = itemId;
+  saveGameState(); updateAvatars(); updateStats();
+  showShop();
+};
+
+// ============================================
+// INSIGNIAS, TABLAS, DIARIO
+// ============================================
 window.toggleTables = function() {
   sounds.click();
   const panel = document.getElementById('tablesPanel');
   const toggle = document.getElementById('tablesToggle');
-  
   if (panel && toggle) {
-    if (panel.style.display === 'none' || panel.style.display === '') {
-      panel.style.display = 'block';
-      toggle.textContent = '▲';
-    } else {
-      panel.style.display = 'none';
-      toggle.textContent = '▼';
-    }
+    const show = panel.style.display === 'none' || panel.style.display === '';
+    panel.style.display = show ? 'block' : 'none';
+    toggle.textContent = show ? '▲' : '▼';
   }
 };
 
@@ -1384,46 +1446,13 @@ window.showBadges = function() {
     const unlocked = window.gameState.unlockedBadges.includes(badge.id);
     const div = document.createElement('div');
     div.className = `badge-item ${unlocked ? 'unlocked' : 'locked'}`;
-    div.innerHTML = `<div class="badge-icon">${badge.icon}</div><div style="font-weight: bold; font-size: 14px;">${badge.name}</div><div style="font-size: 12px; color: var(--muted); margin-top: 5px;">${badge.desc}</div>`;
+    div.innerHTML = `<div class="badge-icon">${badge.icon}</div><div style="font-weight:bold;font-size:14px;">${badge.name}</div><div style="font-size:12px;color:var(--muted);margin-top:5px;">${badge.desc}</div>`;
     grid.appendChild(div);
   });
   content.appendChild(grid);
   const btn = document.createElement('button');
-  btn.className = 'btn';
-  btn.textContent = 'Cerrar';
-  btn.style.cssText = 'margin-top: 20px; width: 100%;';
-  btn.onclick = () => closeModal('modalGeneric');
-  content.appendChild(btn);
-  document.getElementById('modalGeneric').classList.add('active');
-};
-
-window.showShop = function() {
-  sounds.click();
-  const content = document.getElementById('modalGenericContent');
-  content.innerHTML = `<h2>🛍️ Tienda VC</h2><p style="color: var(--muted); margin: 20px 0;">Próximamente: Avatares, Kits de Recuperación y más</p><button class="btn" onclick="closeModal('modalGeneric')" style="margin-top: 20px; width: 100%;">Cerrar</button>`;
-  document.getElementById('modalGeneric').classList.add('active');
-};
-
-window.showDiary = function() {
-  sounds.click();
-  const content = document.getElementById('modalGenericContent');
-  content.innerHTML = '<h2>📖 Mi Diario</h2>';
-  
-  if (window.gameState.diary.length === 0) {
-    content.innerHTML += '<p style="color: var(--muted); margin: 20px 0;">Tu misión comienza...</p>';
-  } else {
-    window.gameState.diary.forEach(entry => {
-      const div = document.createElement('div');
-      div.style.cssText = 'padding: 15px; margin-bottom: 15px; background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent); border-radius: 8px; border: 2px solid var(--accent);';
-      div.innerHTML = `<strong>Día ${entry.day}:</strong><br><div style="margin-top: 8px;">${entry.entry}</div>`;
-      content.appendChild(div);
-    });
-  }
-  
-  const btn = document.createElement('button');
-  btn.className = 'btn';
-  btn.textContent = 'Cerrar';
-  btn.style.cssText = 'margin-top: 20px; width: 100%;';
+  btn.className = 'btn'; btn.textContent = 'Cerrar';
+  btn.style.cssText = 'margin-top:20px;width:100%;';
   btn.onclick = () => closeModal('modalGeneric');
   content.appendChild(btn);
   document.getElementById('modalGeneric').classList.add('active');
@@ -1432,4 +1461,15 @@ window.showDiary = function() {
 window.closeModal = function(id) {
   sounds.click();
   document.getElementById(id).classList.remove('active');
+};
+
+window.switchUser = function(index) {
+  sounds.click();
+  window.currentUserIndex = index;
+  localStorage.setItem('nexusSQL_currentUser', index);
+  loadUserProfile(index);
+  closeModal('modalGeneric');
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  renderGame(); createParticles(); updateAvatars(); updateStats(); renderChallenges(); updateProgressBar(); updateSkillBars();
 };
