@@ -80,9 +80,18 @@
       <!-- Panel izquierdo -->
       <aside class="panel">
         <div class="panel-avatar">
-          <span id="panelAvatar" class="panel-avatar-icon">🎮</span>
+          <span id="panelAvatar" class="panel-avatar-icon">⚡</span>
           <div style="font-weight:bold;margin-top:10px;" id="playerNamePanel">Operador</div>
-          <div style="font-size:12px;color:var(--primary);letter-spacing:1px;margin-top:4px;" id="playerRankPanel">Analista JR</div>
+          <div style="margin-top:4px;" id="playerRankPanel">
+            <span style="color:var(--primary);font-family:var(--font-display);font-size:11px;letter-spacing:2px;">Analista JR</span>
+          </div>
+          <!-- Barra de progreso hacia siguiente rango -->
+          <div style="margin-top:12px;">
+            <div class="progress-bar-container" style="height:12px;">
+              <div id="rankProgressBar" class="progress-bar-fill" style="width:0%;min-width:0;"></div>
+            </div>
+            <div id="rankProgressLabel" style="font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--font-mono);">0 / 200 XP → Analista SR</div>
+          </div>
         </div>
 
         <div class="progress-world">
