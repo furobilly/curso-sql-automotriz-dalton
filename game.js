@@ -39,6 +39,33 @@ window.gameState = {
 };
 
 // ============================================
+// KITS DE INICIO — Beneficios reales en el juego
+// ============================================
+const starterKits = [
+  {
+    id: 0, name: 'Kit Gamer', sub: 'RGB Master', icon: 'kit_gamer',
+    desc: 'Modo agresivo. Más XP por ejercicio, empieza con monedas extra.',
+    benefits: { xpBonus: 1.25, coinsStart: 200, coinBonus: 1.0, hintsBonus: 0, extraAttempts: 0,
+      label: '+25% XP · 200 VC iniciales' },
+    accentColor: '#ff6d00'
+  },
+  {
+    id: 1, name: 'Kit Ejecutivo', sub: 'The Boss', icon: 'kit_ejecutivo',
+    desc: 'Modo estratégico. Más monedas por ejercicio y 1 pista gratis.',
+    benefits: { xpBonus: 1.0, coinsStart: 500, coinBonus: 1.5, hintsBonus: 1, extraAttempts: 0,
+      label: '+50% VC · 500 VC iniciales · 1 pista gratis' },
+    accentColor: '#ffa000'
+  },
+  {
+    id: 2, name: 'Kit Zen', sub: 'Minimalista', icon: 'kit_zen',
+    desc: 'Modo meditación. 3 pistas extra y más intentos antes de bloqueo.',
+    benefits: { xpBonus: 1.0, coinsStart: 100, coinBonus: 1.0, hintsBonus: 3, extraAttempts: 2,
+      label: '3 pistas gratis · +2 intentos extra' },
+    accentColor: '#00e676'
+  }
+];
+
+// ============================================
 // SISTEMA DE TIENDA Y SKINS
 // ============================================
 const shopItems = [
@@ -543,13 +570,23 @@ window.toggleTheme = function() {
   const newTheme = window.gameState.theme === 'light' ? 'dark' : 'light';
   window.gameState.theme = newTheme;
   document.documentElement.setAttribute('data-theme', newTheme);
-  document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.innerHTML = newTheme === 'light'
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="var(--primary)" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="var(--primary)" stroke-width="2" fill="none"/></svg>`;
+  }
   saveGameState();
 };
 
 window.toggleSound = function() {
   window.gameState.soundEnabled = !window.gameState.soundEnabled;
-  document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
+  const btn = document.getElementById('soundToggle');
+  if (btn) {
+    btn.innerHTML = window.gameState.soundEnabled
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" stroke="var(--primary)" stroke-width="2" fill="none"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" stroke="var(--muted)" stroke-width="2" fill="none"/><line x1="23" y1="9" x2="17" y2="15" stroke="var(--danger)" stroke-width="2"/><line x1="17" y1="9" x2="23" y2="15" stroke="var(--danger)" stroke-width="2"/></svg>`;
+  }
   if (window.gameState.soundEnabled) sounds.click();
   saveGameState();
 };
@@ -761,27 +798,64 @@ function showOnboardingStep(step) {
       <button class="btn" onclick="saveName()" style="width:100%;margin-top:15px;">Continuar →</button>`;
     setTimeout(() => document.getElementById('nameInput')?.focus(), 100);
   } else if (step === 3) {
+    const kitIcons = {
+      0: `<svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="14" width="40" height="28" rx="4" fill="#1a0a00" stroke="#ff6d00" stroke-width="2"/>
+        <rect x="10" y="20" width="28" height="16" rx="2" fill="#ff6d00" opacity="0.15"/>
+        <circle cx="24" cy="28" r="5" fill="none" stroke="#ff6d00" stroke-width="2"/>
+        <circle cx="24" cy="28" r="2" fill="#ff6d00"/>
+        <path d="M14 8h20l2 6H12z" fill="#ff6d00" opacity="0.6"/>
+        <rect x="8" y="40" width="6" height="3" rx="1" fill="#ff6d00" opacity="0.5"/>
+        <rect x="34" y="40" width="6" height="3" rx="1" fill="#ff6d00" opacity="0.5"/>
+      </svg>`,
+      1: `<svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="6" width="28" height="36" rx="3" fill="#1a1000" stroke="#ffa000" stroke-width="2"/>
+        <rect x="14" y="12" width="20" height="3" rx="1" fill="#ffa000" opacity="0.7"/>
+        <rect x="14" y="18" width="14" height="2" rx="1" fill="#ffa000" opacity="0.4"/>
+        <rect x="14" y="23" width="16" height="2" rx="1" fill="#ffa000" opacity="0.4"/>
+        <rect x="14" y="28" width="12" height="2" rx="1" fill="#ffa000" opacity="0.4"/>
+        <circle cx="33" cy="34" r="7" fill="#1a1000" stroke="#ffa000" stroke-width="2"/>
+        <path d="M30 34l2 2 4-4" stroke="#ffa000" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>`,
+      2: `<svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="20" r="12" fill="#001a0d" stroke="#00e676" stroke-width="2"/>
+        <circle cx="24" cy="20" r="6" fill="none" stroke="#00e676" stroke-width="1" opacity="0.5"/>
+        <circle cx="24" cy="20" r="2" fill="#00e676"/>
+        <path d="M24 8v-3M24 35v3M36 20h3M9 20H6" stroke="#00e676" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        <path d="M16 32 C12 38 8 42 6 44" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        <path d="M32 32 C36 38 40 42 42 44" stroke="#00e676" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        <rect x="14" y="43" width="20" height="3" rx="1.5" fill="#00e676" opacity="0.4"/>
+      </svg>`
+    };
+
     content.innerHTML = `
-      <h2 style="color:var(--primary);margin-bottom:8px;text-align:center;">Elige tu Kit de Inicio</h2>
-      <p style="color:var(--muted);text-align:center;font-size:13px;margin-bottom:25px;">Define tu perfil de Analista en NEXUS</p>
-      <div class="avatar-selector">
-        <div class="avatar-card active" onclick="selectAvatar(0)">
-          <div class="avatar-icon">🎮</div>
-          <div style="font-size:14px;font-weight:bold;">Kit Gamer</div>
-          <div style="font-size:11px;margin-top:5px;opacity:0.8;">RGB Master</div>
-        </div>
-        <div class="avatar-card" onclick="selectAvatar(1)">
-          <div class="avatar-icon">💼</div>
-          <div style="font-size:14px;font-weight:bold;">Kit Ejecutivo</div>
-          <div style="font-size:11px;margin-top:5px;opacity:0.8;">The Boss</div>
-        </div>
-        <div class="avatar-card" onclick="selectAvatar(2)">
-          <div class="avatar-icon">🧘</div>
-          <div style="font-size:14px;font-weight:bold;">Kit Zen</div>
-          <div style="font-size:11px;margin-top:5px;opacity:0.8;">Minimalista</div>
-        </div>
+      <h2 style="font-family:var(--font-display);color:var(--primary);margin-bottom:6px;text-align:center;letter-spacing:2px;">ELIGE TU KIT DE INICIO</h2>
+      <p style="color:var(--muted);text-align:center;font-size:13px;margin-bottom:24px;">Define tu estilo de juego — los beneficios son reales</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        ${starterKits.map(kit => `
+          <div class="kit-option ${kit.id === 0 ? 'kit-selected' : ''}" data-kit="${kit.id}"
+               onclick="selectKit(${kit.id})"
+               style="background:var(--bg2);border:2px solid ${kit.id === 0 ? kit.accentColor : 'var(--border)'};
+                      border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;
+                      display:flex;align-items:center;gap:16px;">
+            <div style="width:56px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+                        background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid ${kit.accentColor}33;">
+              ${kitIcons[kit.id]}
+            </div>
+            <div style="flex:1;text-align:left;">
+              <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:${kit.accentColor};
+                          letter-spacing:1px;margin-bottom:3px;">${kit.name} <span style="font-size:11px;opacity:0.7;">— ${kit.sub}</span></div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">${kit.desc}</div>
+              <div style="font-size:11px;font-family:var(--font-mono);color:${kit.accentColor};
+                          background:${kit.accentColor}15;padding:4px 10px;border-radius:4px;
+                          display:inline-block;letter-spacing:1px;">${kit.benefits.label}</div>
+            </div>
+          </div>`).join('')}
       </div>
-      <button class="btn" onclick="showOnboardingStep(4)" style="width:100%;margin-top:20px;">Continuar →</button>`;
+      <button class="btn" onclick="showOnboardingStep(4)" style="width:100%;">Continuar →</button>`;
+
+    // Marcar el primero como seleccionado por defecto
+    window.gameState.avatar = 0;
   } else if (step === 4) {
     const name = window.gameState.playerName;
     content.innerHTML = `
@@ -823,17 +897,33 @@ window.saveName = function() {
   showOnboardingStep(3);
 };
 
-window.selectAvatar = function(index) {
+window.selectKit = function(index) {
   sounds.click();
   window.gameState.avatar = index;
-  document.querySelectorAll('.avatar-card').forEach((c, i) => c.classList.toggle('active', i === index));
+  document.querySelectorAll('.kit-option').forEach(el => {
+    const kitId = parseInt(el.dataset.kit);
+    const kit = starterKits[kitId];
+    el.style.borderColor = kitId === index ? kit.accentColor : 'var(--border)';
+    el.style.background = kitId === index ? `${kit.accentColor}10` : 'var(--bg2)';
+  });
 };
+
+// Mantener selectAvatar como alias
+window.selectAvatar = window.selectKit;
 
 window.startAdventure = function() {
   sounds.success();
   window.gameState.lastVisit = new Date().toISOString();
   window.gameState.currentDay = 1;
-  window.gameState.diary.push({ day: 0, entry: 'Primer día en NexCorp. Acepté una misión que no pedí. The Void no sabe con quién se metió.' });
+
+  // Aplicar beneficios del Kit elegido
+  const kit = starterKits[window.gameState.avatar] || starterKits[0];
+  window.gameState.coins = kit.benefits.coinsStart;
+  window.gameState.kitBenefits = kit.benefits;
+  window.gameState.hintsRemaining = kit.benefits.hintsBonus;
+  window.gameState.attemptLimit = 3 + (kit.benefits.extraAttempts || 0);
+
+  window.gameState.diary.push({ day: 0, entry: `Primer día en NexCorp. Elegí el ${kit.name}. The Void no sabe con quién se metió.` });
   for (let i = 1; i <= 10; i++) window.gameState.completedSubExercises[i] = [];
   const snapshot = Object.assign({}, window.gameState);
   delete snapshot.db;
@@ -884,15 +974,33 @@ function renderGame() {
 
 function updateStats() {
   const gs = window.gameState;
+  const kit = starterKits[gs.avatar] || starterKits[0];
   const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   setTxt('playerName', gs.playerName || 'Operador');
   setTxt('playerNamePanel', gs.playerName || 'Operador');
   const rankEl = document.getElementById('playerRankPanel');
   if (rankEl) rankEl.textContent = gs.rank || 'Analista JR';
-  setTxt('playerXP', gs.xp);
-  setTxt('playerCoins', gs.coins);
-  setTxt('playerStreak', gs.streak);
   setTxt('playerRank', gs.rank || 'Analista JR');
+
+  const xpEl = document.getElementById('statXP');
+  const vcEl = document.getElementById('statVC');
+  const strEl = document.getElementById('statStreak');
+  if (xpEl) xpEl.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+        fill="${kit.accentColor}"/>
+    </svg><span>${gs.xp} XP</span>`;
+  if (vcEl) vcEl.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+      <circle cx="12" cy="12" r="9" stroke="#ffa000" stroke-width="2"/>
+      <circle cx="12" cy="12" r="5" fill="#ffa000" opacity="0.25"/>
+      <path d="M10 9h4M10 12h4M10 15h2" stroke="#ffa000" stroke-width="1.5" stroke-linecap="round"/>
+    </svg><span>${gs.coins} VC</span>`;
+  if (strEl) strEl.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+      <path d="M12 2C8 7 6 10 6 14a6 6 0 0012 0c0-4-2-7-6-12z" fill="#ff6d00" opacity="0.9"/>
+      <path d="M12 8C10 11 9 13 9 15a3 3 0 006 0c0-2-1-4-3-7z" fill="#ffcc80"/>
+    </svg><span>${gs.streak} días</span>`;
 }
 
 function renderChallenges() {
@@ -1080,6 +1188,11 @@ function completeSubExercise(cId, sId, results) {
     window.gameState.completedSubExercises[cId] = done;
     xpG = Math.ceil(ch.xp / 10);
     coinsG = Math.ceil(ch.coins / 10);
+
+    // Aplicar multiplicadores del Kit
+    const kb = window.gameState.kitBenefits || {};
+    xpG = Math.round(xpG * (kb.xpBonus || 1));
+    coinsG = Math.round(coinsG * (kb.coinBonus || 1));
     window.gameState.xp += xpG;
     window.gameState.coins += coinsG;
     window.gameState.skills[ch.skill] = Math.min(100, window.gameState.skills[ch.skill] + 10);
