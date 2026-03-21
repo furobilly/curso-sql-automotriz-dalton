@@ -66,6 +66,85 @@ const starterKits = [
 ];
 
 // ============================================
+// SISTEMA DE RANGOS — Avatar evoluciona con XP
+// ============================================
+const rankSystem = [
+  {
+    id: 'jr',       name: 'Analista JR',    minXP: 0,    maxXP: 199,
+    color: '#546e7a', glow: 'rgba(84,110,122,0.5)',
+    avatarSVG: `<svg viewBox="0 0 60 60" width="60" height="60" fill="none">
+      <circle cx="30" cy="30" r="28" stroke="#546e7a" stroke-width="2" fill="#0d1117"/>
+      <circle cx="30" cy="22" r="9" fill="#546e7a" opacity="0.8"/>
+      <path d="M14 48c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="#546e7a" opacity="0.6"/>
+    </svg>`
+  },
+  {
+    id: 'sr',       name: 'Analista SR',    minXP: 200,  maxXP: 499,
+    color: '#ffa000', glow: 'rgba(255,160,0,0.5)',
+    avatarSVG: `<svg viewBox="0 0 60 60" width="60" height="60" fill="none">
+      <circle cx="30" cy="30" r="28" stroke="#ffa000" stroke-width="2" fill="#0d1117"/>
+      <circle cx="30" cy="22" r="9" fill="#ffa000" opacity="0.9"/>
+      <path d="M14 48c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="#ffa000" opacity="0.7"/>
+      <polygon points="30,4 32,10 38,10 33,14 35,20 30,16 25,20 27,14 22,10 28,10" fill="#ffa000" opacity="0.6"/>
+    </svg>`
+  },
+  {
+    id: 'especialista', name: 'Especialista', minXP: 500, maxXP: 999,
+    color: '#ff6d00', glow: 'rgba(255,109,0,0.6)',
+    avatarSVG: `<svg viewBox="0 0 60 60" width="60" height="60" fill="none">
+      <circle cx="30" cy="30" r="28" stroke="#ff6d00" stroke-width="2.5" fill="#0d1117"/>
+      <circle cx="30" cy="30" r="24" stroke="#ff6d00" stroke-width="0.5" stroke-dasharray="4 4" opacity="0.4"/>
+      <circle cx="30" cy="22" r="9" fill="#ff6d00" opacity="0.9"/>
+      <path d="M14 48c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="#ff6d00" opacity="0.8"/>
+      <polygon points="30,2 32.5,9 40,9 34,13.5 36.5,21 30,16.5 23.5,21 26,13.5 20,9 27.5,9" fill="#ff6d00"/>
+    </svg>`
+  },
+  {
+    id: 'arquitecto',  name: 'Arquitecto SQL', minXP: 1000, maxXP: 1999,
+    color: '#00e676', glow: 'rgba(0,230,118,0.6)',
+    avatarSVG: `<svg viewBox="0 0 60 60" width="60" height="60" fill="none">
+      <circle cx="30" cy="30" r="28" stroke="#00e676" stroke-width="2.5" fill="#0d1117"/>
+      <circle cx="30" cy="30" r="22" stroke="#00e676" stroke-width="1" opacity="0.3"/>
+      <circle cx="30" cy="22" r="9" fill="#00e676" opacity="0.9"/>
+      <path d="M14 48c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="#00e676" opacity="0.8"/>
+      <path d="M20 8 L30 2 L40 8 L40 20 L30 26 L20 20Z" stroke="#00e676" stroke-width="1.5" fill="none" opacity="0.7"/>
+      <circle cx="30" cy="14" r="3" fill="#00e676"/>
+    </svg>`
+  },
+  {
+    id: 'maestro',     name: 'Maestro NEXUS', minXP: 2000, maxXP: Infinity,
+    color: '#e040fb', glow: 'rgba(224,64,251,0.7)',
+    avatarSVG: `<svg viewBox="0 0 60 60" width="60" height="60" fill="none">
+      <circle cx="30" cy="30" r="28" stroke="#e040fb" stroke-width="3" fill="#0d1117"/>
+      <circle cx="30" cy="30" r="22" stroke="#e040fb" stroke-width="1" opacity="0.4"/>
+      <circle cx="30" cy="30" r="16" stroke="#e040fb" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="30" cy="22" r="9" fill="#e040fb" opacity="0.9"/>
+      <path d="M14 48c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="#e040fb" opacity="0.8"/>
+      <polygon points="30,1 33,10 42,10 35,16 38,25 30,19 22,25 25,16 18,10 27,10" fill="#e040fb"/>
+      <circle cx="30" cy="30" r="4" fill="#e040fb" opacity="0.5"/>
+    </svg>`
+  }
+];
+
+function getRank(xp) {
+  return rankSystem.find(r => xp >= r.minXP && xp <= r.maxXP) || rankSystem[0];
+}
+
+function getNextRank(xp) {
+  const idx = rankSystem.findIndex(r => xp >= r.minXP && xp <= r.maxXP);
+  return rankSystem[idx + 1] || null;
+}
+
+function checkRankUp(oldXP, newXP) {
+  const oldRank = getRank(oldXP);
+  const newRank = getRank(newXP);
+  if (oldRank.id !== newRank.id) {
+    window.gameState.rank = newRank.name;
+    showRankUpAnimation(newRank);
+  }
+}
+
+// ============================================
 // SISTEMA DE TIENDA Y SKINS
 // ============================================
 const shopItems = [
@@ -544,22 +623,145 @@ function createCoinRain(amount) {
   setTimeout(() => container.remove(), 4000);
 }
 
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes coinFall { to { top:110%; transform:rotate(720deg); } }
-  @keyframes floatUp {
-    0% { opacity:0; transform:translateX(-50%) translateY(0); }
-    20% { opacity:1; } 80% { opacity:1; }
-    100% { opacity:0; transform:translateX(-50%) translateY(-100px); }
+// ============================================
+// NOTIFICACIONES FLOTANTES XP / VC
+// ============================================
+function showFloatingReward(xp, coins) {
+  const container = document.getElementById('floatingRewards') || createFloatingContainer();
+
+  if (xp > 0) {
+    const el = document.createElement('div');
+    el.className = 'floating-reward xp-reward';
+    el.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <polygon points="12,2 15,8 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,8" fill="#ffa000"/>
+      </svg>
+      +${xp} XP`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
   }
-  .npc-scene { padding: 5px 0; }
-  .npc-location { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-  .npc-message { display: flex; align-items: flex-start; gap: 12px; }
-  .npc-bubble { background: linear-gradient(135deg, rgba(0,217,255,0.08) 0%, rgba(124,58,237,0.08) 100%); border: 1px solid rgba(0,217,255,0.25); border-radius: 12px; padding: 16px; flex: 1; }
-  .npc-name { font-weight: bold; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .npc-bubble p { line-height: 1.7; color: var(--text); margin: 6px 0; }
-  .npc-whisper { font-size: 12px; color: var(--muted); border-top: 1px solid rgba(0,217,255,0.15); padding-top: 8px; margin-top: 8px; }
+
+  if (coins > 0) {
+    const el = document.createElement('div');
+    el.className = 'floating-reward vc-reward';
+    el.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="#00e676" stroke-width="2"/>
+        <circle cx="12" cy="12" r="4" fill="#00e676" opacity="0.5"/>
+      </svg>
+      +${coins} VC`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2200);
+  }
+}
+
+function createFloatingContainer() {
+  const div = document.createElement('div');
+  div.id = 'floatingRewards';
+  div.style.cssText = 'position:fixed;top:80px;right:20px;z-index:9998;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+  document.body.appendChild(div);
+  return div;
+}
+
+// ============================================
+// ANIMACIÓN DE RANK UP
+// ============================================
+function showRankUpAnimation(rank) {
+  sounds.success();
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(7,10,15,0.95);z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+    animation:fadeIn 0.3s ease;`;
+  overlay.innerHTML = `
+    <div style="text-align:center;animation:rankUpIn 0.5s cubic-bezier(0.16,1,0.3,1);">
+      <div style="margin-bottom:20px;filter:drop-shadow(0 0 30px ${rank.color});">
+        ${rank.avatarSVG.replace('width="60"','width="120"').replace('height="60"','height="120"')}
+      </div>
+      <div style="font-family:var(--font-display);font-size:12px;letter-spacing:3px;
+                  color:var(--muted);text-transform:uppercase;margin-bottom:8px;">
+        ASCENSO DE RANGO
+      </div>
+      <div style="font-family:var(--font-display);font-size:28px;font-weight:900;
+                  color:${rank.color};text-shadow:0 0 30px ${rank.color};
+                  letter-spacing:2px;margin-bottom:20px;">
+        ${rank.name.toUpperCase()}
+      </div>
+      <p style="color:var(--muted);max-width:320px;margin:0 auto 24px;font-size:14px;line-height:1.6;">
+        Tu avatar ha evolucionado. NexCorp reconoce tu nivel.
+      </p>
+      <button class="btn" onclick="this.closest('div[style*=fixed]').remove()" style="letter-spacing:2px;">
+        CONTINUAR MISIÓN →
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 6000);
+}
+
+// ============================================
+// ANIMACIÓN DE INSIGNIA DESBLOQUEADA
+// ============================================
+function showBadgeUnlock(badge) {
+  sounds.success();
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+    background:var(--card);border:2px solid var(--primary);
+    border-radius:14px;padding:16px 24px;z-index:9997;
+    display:flex;align-items:center;gap:14px;
+    box-shadow:0 0 40px rgba(255,160,0,0.3);
+    animation:badgeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+    min-width:280px;`;
+  el.innerHTML = `
+    <div style="font-size:36px;filter:drop-shadow(0 0 10px var(--primary));">${badge.icon}</div>
+    <div>
+      <div style="font-size:10px;letter-spacing:2px;color:var(--primary);
+                  font-family:var(--font-display);text-transform:uppercase;margin-bottom:3px;">
+        INSIGNIA DESBLOQUEADA
+      </div>
+      <div style="font-weight:700;color:var(--text-hi);font-size:15px;">${badge.name}</div>
+      <div style="font-size:12px;color:var(--muted);">${badge.desc}</div>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'badgeSlideDown 0.3s ease forwards';
+    setTimeout(() => el.remove(), 300);
+  }, 3500);
+}
+
+// Inyectar estilos de animaciones
+const rewardStyles = document.createElement('style');
+rewardStyles.textContent = `
+  .floating-reward {
+    display:flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:8px;
+    font-family:var(--font-display);font-size:13px;font-weight:700;
+    letter-spacing:1px;animation:rewardFloat 2s ease forwards;
+    pointer-events:none;white-space:nowrap;
+  }
+  .xp-reward { background:rgba(255,160,0,0.15);border:1px solid rgba(255,160,0,0.4);color:#ffa000; }
+  .vc-reward { background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);color:#00e676; }
+  @keyframes rewardFloat {
+    0%   { opacity:0; transform:translateY(10px) scale(0.8); }
+    20%  { opacity:1; transform:translateY(0) scale(1); }
+    70%  { opacity:1; transform:translateY(-20px); }
+    100% { opacity:0; transform:translateY(-40px); }
+  }
+  @keyframes rankUpIn {
+    from { opacity:0; transform:scale(0.8) translateY(30px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  @keyframes badgeSlideUp {
+    from { opacity:0; transform:translateX(-50%) translateY(20px); }
+    to   { opacity:1; transform:translateX(-50%) translateY(0); }
+  }
+  @keyframes badgeSlideDown {
+    from { opacity:1; transform:translateX(-50%) translateY(0); }
+    to   { opacity:0; transform:translateX(-50%) translateY(20px); }
+  }
 `;
+document.head.appendChild(rewardStyles);
+
 document.head.appendChild(style);
 
 // ============================================
@@ -671,13 +873,16 @@ function loadUserProfile(index) {
   const u = window.userProfiles[index];
   Object.assign(window.gameState, {
     playerName: u.playerName, avatar: u.avatar, xp: u.xp, coins: u.coins,
-    streak: u.streak, currentChallenge: u.currentChallenge || 1,
+    streak: u.streak || 0, currentChallenge: u.currentChallenge || 1,
     currentSubExercise: u.currentSubExercise || 1, currentDay: u.currentDay || 1,
     completedChallenges: u.completedChallenges || [],
     completedSubExercises: u.completedSubExercises || {},
     unlockedBadges: u.unlockedBadges || [],
     unlockedItems: u.unlockedItems || [],
     equippedItems: u.equippedItems || {},
+    kitBenefits: u.kitBenefits || starterKits[u.avatar || 0].benefits,
+    hintsRemaining: u.hintsRemaining || 0,
+    attemptLimit: u.attemptLimit || 3,
     reputation: u.reputation || { ana: 0, roberto: 0 },
     diary: u.diary || [],
     skills: u.skills || { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 },
@@ -686,15 +891,101 @@ function loadUserProfile(index) {
     theme: u.theme || 'dark',
     soundEnabled: u.soundEnabled !== false,
     triviaAnswered: u.triviaAnswered || false,
-    rank: u.rank || 'Analista JR'
+    rank: u.rank || 'Analista JR',
+    lastVisit: u.lastVisit || null
   });
+
+  // Sistema de streak — bonus por días consecutivos
+  checkAndUpdateStreak();
+
   if (window.SQL_CONSTRUCTOR) {
     window.gameState.db = new window.SQL_CONSTRUCTOR.Database();
     window.gameState.db.run(dbSeed);
   }
   document.documentElement.setAttribute('data-theme', window.gameState.theme);
-  document.getElementById('themeToggle').textContent = window.gameState.theme === 'light' ? '☀️' : '🌙';
-  document.getElementById('soundToggle').textContent = window.gameState.soundEnabled ? '🔊' : '🔇';
+}
+
+function checkAndUpdateStreak() {
+  const gs = window.gameState;
+  const today = new Date().toDateString();
+  const lastVisit = gs.lastVisit ? new Date(gs.lastVisit).toDateString() : null;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+  if (lastVisit === today) return; // Ya entró hoy, no cambia
+
+  if (lastVisit === yesterday) {
+    // Día consecutivo — aumenta streak
+    gs.streak += 1;
+    gs.lastVisit = new Date().toISOString();
+
+    // Bonus por racha
+    const bonusCoins = gs.streak >= 7 ? 100 : gs.streak >= 3 ? 50 : 20;
+    const bonusXP = gs.streak >= 7 ? 30 : gs.streak >= 3 ? 15 : 5;
+    gs.coins += bonusCoins;
+    gs.xp += bonusXP;
+
+    // Notificación de racha (se muestra después de render)
+    setTimeout(() => {
+      showStreakNotification(gs.streak, bonusCoins, bonusXP);
+    }, 1500);
+
+  } else if (!lastVisit) {
+    // Primera vez
+    gs.streak = 1;
+    gs.lastVisit = new Date().toISOString();
+  } else {
+    // Se rompió la racha
+    if (gs.streak > 1) {
+      setTimeout(() => showStreakBroken(gs.streak), 1500);
+    }
+    gs.streak = 1;
+    gs.lastVisit = new Date().toISOString();
+  }
+  saveUserProfile();
+}
+
+function showStreakNotification(streak, coins, xp) {
+  const el = document.createElement('div');
+  const medal = streak >= 7 ? '🔥' : streak >= 3 ? '⚡' : '✅';
+  el.style.cssText = `
+    position:fixed;top:100px;left:50%;transform:translateX(-50%);
+    background:var(--card);border:2px solid var(--primary);
+    border-radius:14px;padding:16px 28px;z-index:9997;text-align:center;
+    box-shadow:0 0 40px rgba(255,160,0,0.3);
+    animation:badgeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1);`;
+  el.innerHTML = `
+    <div style="font-size:32px;margin-bottom:6px;">${medal}</div>
+    <div style="font-family:var(--font-display);font-size:12px;letter-spacing:2px;
+                color:var(--primary);text-transform:uppercase;margin-bottom:4px;">
+      RACHA DE ${streak} DÍA${streak > 1 ? 'S' : ''}
+    </div>
+    <div style="font-size:13px;color:var(--muted);">
+      Bonus: <span style="color:#ffa000;">+${xp} XP</span> · 
+      <span style="color:#00e676;">+${coins} VC</span>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.animation='badgeSlideDown 0.3s ease forwards'; setTimeout(()=>el.remove(),300); }, 3500);
+}
+
+function showStreakBroken(oldStreak) {
+  const el = document.createElement('div');
+  el.style.cssText = `
+    position:fixed;top:100px;left:50%;transform:translateX(-50%);
+    background:var(--card);border:2px solid var(--danger);
+    border-radius:14px;padding:16px 28px;z-index:9997;text-align:center;
+    box-shadow:0 0 40px rgba(255,23,68,0.3);
+    animation:badgeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1);`;
+  el.innerHTML = `
+    <div style="font-size:32px;margin-bottom:6px;">💔</div>
+    <div style="font-family:var(--font-display);font-size:12px;letter-spacing:2px;
+                color:var(--danger);text-transform:uppercase;margin-bottom:4px;">
+      RACHA ROTA
+    </div>
+    <div style="font-size:13px;color:var(--muted);">
+      Tu racha de ${oldStreak} días se perdió. ¡Nueva oportunidad hoy!
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.animation='badgeSlideDown 0.3s ease forwards'; setTimeout(()=>el.remove(),300); }, 3000);
 }
 
 function saveUserProfile() {
@@ -974,33 +1265,41 @@ function renderGame() {
 
 function updateStats() {
   const gs = window.gameState;
-  const kit = starterKits[gs.avatar] || starterKits[0];
+  const rank = getRank(gs.xp);
+  const nextRank = getNextRank(gs.xp);
   const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
   setTxt('playerName', gs.playerName || 'Operador');
   setTxt('playerNamePanel', gs.playerName || 'Operador');
-  const rankEl = document.getElementById('playerRankPanel');
-  if (rankEl) rankEl.textContent = gs.rank || 'Analista JR';
-  setTxt('playerRank', gs.rank || 'Analista JR');
+  setTxt('playerRank', rank.name);
 
+  // Avatar SVG dinámico según rango
+  const panelAvatar = document.getElementById('panelAvatar');
+  if (panelAvatar) {
+    panelAvatar.innerHTML = rank.avatarSVG;
+    panelAvatar.style.cssText = `display:block;filter:drop-shadow(0 0 16px ${rank.color});`;
+  }
+  const rankPanel = document.getElementById('playerRankPanel');
+  if (rankPanel) rankPanel.innerHTML = `<span style="color:${rank.color};font-family:var(--font-display);font-size:11px;letter-spacing:2px;">${rank.name}</span>`;
+
+  // Barra de progreso al siguiente rango
+  const rankBar = document.getElementById('rankProgressBar');
+  const rankLabel = document.getElementById('rankProgressLabel');
+  if (rankBar) {
+    const pct = nextRank ? Math.round(((gs.xp - rank.minXP) / (nextRank.minXP - rank.minXP)) * 100) : 100;
+    rankBar.style.width = pct + '%';
+    rankBar.style.background = nextRank ? `linear-gradient(90deg,${rank.color},${nextRank.color})` : rank.color;
+    rankBar.style.boxShadow = `0 0 12px ${rank.color}80`;
+  }
+  if (rankLabel) rankLabel.textContent = nextRank ? `${gs.xp} / ${nextRank.minXP} XP → ${nextRank.name}` : `RANGO MÁXIMO — ${gs.xp} XP`;
+
+  // Stats SVG
   const xpEl = document.getElementById('statXP');
   const vcEl = document.getElementById('statVC');
   const strEl = document.getElementById('statStreak');
-  if (xpEl) xpEl.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
-      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
-        fill="${kit.accentColor}"/>
-    </svg><span>${gs.xp} XP</span>`;
-  if (vcEl) vcEl.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
-      <circle cx="12" cy="12" r="9" stroke="#ffa000" stroke-width="2"/>
-      <circle cx="12" cy="12" r="5" fill="#ffa000" opacity="0.25"/>
-      <path d="M10 9h4M10 12h4M10 15h2" stroke="#ffa000" stroke-width="1.5" stroke-linecap="round"/>
-    </svg><span>${gs.coins} VC</span>`;
-  if (strEl) strEl.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
-      <path d="M12 2C8 7 6 10 6 14a6 6 0 0012 0c0-4-2-7-6-12z" fill="#ff6d00" opacity="0.9"/>
-      <path d="M12 8C10 11 9 13 9 15a3 3 0 006 0c0-2-1-4-3-7z" fill="#ffcc80"/>
-    </svg><span>${gs.streak} días</span>`;
+  if (xpEl) xpEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><polygon points="12,2 15,8 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,8" fill="${rank.color}"/></svg><span>${gs.xp} XP</span>`;
+  if (vcEl) vcEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="9" stroke="#ffa000" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="#ffa000" opacity="0.3"/><path d="M10 9h4M10 12h3M10 15h2" stroke="#ffa000" stroke-width="1.5" stroke-linecap="round"/></svg><span>${gs.coins} VC</span>`;
+  if (strEl) strEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2C8 7 6 10 6 14a6 6 0 0012 0c0-4-2-7-6-12z" fill="#ff6d00"/><path d="M12 8C10.5 11 10 13 10 15a2 2 0 004 0c0-2-.5-4-2-7z" fill="#ffcc80"/></svg><span>${gs.streak} días</span>`;
 }
 
 function renderChallenges() {
@@ -1193,14 +1492,28 @@ function completeSubExercise(cId, sId, results) {
     const kb = window.gameState.kitBenefits || {};
     xpG = Math.round(xpG * (kb.xpBonus || 1));
     coinsG = Math.round(coinsG * (kb.coinBonus || 1));
+
+    const oldXP = window.gameState.xp;
     window.gameState.xp += xpG;
     window.gameState.coins += coinsG;
     window.gameState.skills[ch.skill] = Math.min(100, window.gameState.skills[ch.skill] + 10);
     window.gameState.reputation.ana = Math.min(3, window.gameState.reputation.ana + 0.3);
-    if (sId === 1) window.gameState.unlockedBadges.push('primera');
-    if (sId === 4) window.gameState.unlockedBadges.push('glitch');
-    if (sId === 7) window.gameState.unlockedBadges.push('domador');
-    if (sId === 8) window.gameState.unlockedBadges.push('between');
+
+    // Verificar rank up
+    checkRankUp(oldXP, window.gameState.xp);
+
+    // Insignias con animación
+    const badgesToUnlock = [];
+    if (sId === 1 && !window.gameState.unlockedBadges.includes('primera')) badgesToUnlock.push('primera');
+    if (sId === 4 && !window.gameState.unlockedBadges.includes('glitch'))  badgesToUnlock.push('glitch');
+    if (sId === 7 && !window.gameState.unlockedBadges.includes('domador')) badgesToUnlock.push('domador');
+    if (sId === 8 && !window.gameState.unlockedBadges.includes('between')) badgesToUnlock.push('between');
+    badgesToUnlock.forEach((bid, i) => {
+      window.gameState.unlockedBadges.push(bid);
+      const badge = allBadges.find(b => b.id === bid);
+      if (badge) setTimeout(() => showBadgeUnlock(badge), 500 + i * 1000);
+    });
+
     if (sId === 5 && ch.hasTrivia && !window.gameState.triviaAnswered) { saveGameState(); showTrivia(cId); return; }
     if (done.length === 10 && ch.hasBoss) {
       window.gameState.currentDay++;
@@ -1210,6 +1523,8 @@ function completeSubExercise(cId, sId, results) {
     saveGameState();
   }
   sounds.success();
+  // Mostrar flotantes de recompensa
+  if (!window.gameState.practiceMode) showFloatingReward(xpG, coinsG);
   showRewardModal(xpG, coinsG, cId, sId, results);
 }
 
