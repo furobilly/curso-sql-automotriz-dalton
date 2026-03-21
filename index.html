@@ -42,18 +42,35 @@
         </div>
       </div>
       <div class="stats-bar">
-        <span id="headerAvatar" class="header-avatar">🎮</span>
+        <span id="headerAvatar" class="header-avatar" style="font-size:28px;filter:drop-shadow(0 0 8px rgba(255,160,0,0.5));">⚡</span>
         <div>
-          <div id="playerName" style="font-weight:bold;font-size:16px;">Operador</div>
-          <div id="playerRank" style="font-size:11px;color:rgba(255,255,255,0.7);letter-spacing:1px;">Analista JR</div>
+          <div id="playerName" style="font-weight:700;font-size:15px;font-family:var(--font-display);letter-spacing:1px;color:var(--text-hi);">Operador</div>
+          <div id="playerRank" style="font-size:10px;color:var(--primary);letter-spacing:2px;text-transform:uppercase;opacity:0.8;">Analista JR</div>
         </div>
-        <button class="toggle-btn" onclick="logoutUser()" title="Cambiar operador" style="background:rgba(239,68,68,0.2);border:2px solid var(--danger);">👤</button>
-        <div class="stat-badge"><span class="stat-icon">⭐</span><span id="playerXP">0</span> XP</div>
-        <div class="stat-badge"><span class="stat-icon">🪙</span><span id="playerCoins">0</span> VC</div>
-        <div class="stat-badge"><span class="stat-icon">🔥</span><span id="playerStreak">0</span> días</div>
-        <button class="toggle-btn" onclick="showShop()">🛍️</button>
-        <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙</button>
-        <button class="toggle-btn" id="soundToggle" onclick="toggleSound()">🔊</button>
+        <button class="toggle-btn" onclick="logoutUser()" title="Cambiar operador" style="background:rgba(255,23,68,0.1);border-color:rgba(255,23,68,0.3);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#ff1744" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#ff1744" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="stat-badge" id="statXP" style="display:flex;align-items:center;gap:6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15,8 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,8" fill="#ffa000"/></svg>
+          <span>0 XP</span>
+        </div>
+        <div class="stat-badge" id="statVC" style="display:flex;align-items:center;gap:6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#ffa000" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="#ffa000" opacity="0.3"/><path d="M10 9h4M10 12h3M10 15h2" stroke="#ffa000" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>0 VC</span>
+        </div>
+        <div class="stat-badge" id="statStreak" style="display:flex;align-items:center;gap:6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2C8 7 6 10 6 14a6 6 0 0012 0c0-4-2-7-6-12z" fill="#ff6d00"/><path d="M12 8C10.5 11 10 13 10 15a2 2 0 004 0c0-2-.5-4-2-7z" fill="#ffcc80"/></svg>
+          <span>0 días</span>
+        </div>
+        <button class="toggle-btn" onclick="showShop()" title="Tienda NEXUS">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="var(--primary)" stroke-width="2" fill="none"/><line x1="3" y1="6" x2="21" y2="6" stroke="var(--primary)" stroke-width="2"/><path d="M16 10a4 4 0 01-8 0" stroke="var(--primary)" stroke-width="2"/></svg>
+        </button>
+        <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()" title="Cambiar tema">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="var(--primary)" stroke-width="2" fill="none"/></svg>
+        </button>
+        <button class="toggle-btn" id="soundToggle" onclick="toggleSound()" title="Sonido">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" id="soundIcon"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" stroke="var(--primary)" stroke-width="2" fill="none"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
       </div>
     </header>
 
