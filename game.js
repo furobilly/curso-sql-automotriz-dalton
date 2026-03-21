@@ -422,7 +422,7 @@ const sqlTutorials = {
 <div style="background: rgba(0,217,255,0.08); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin: 15px 0;">
   <div style="color: var(--primary); font-weight: bold; margin-bottom: 12px;">👩‍💻 Ing. Ana — Canal encriptado</div>
   <p style="font-style: italic; line-height: 1.8; color: var(--text);">
-    "Escucha bien, ${() => window.gameState.playerName}. El servidor de AXIOM Motors responde
+    "Escucha bien, ${window.gameState.playerName}. El servidor de AXIOM Motors responde
     a un idioma muy específico. No es inglés ni español — es <strong>SQL</strong>.
     Si lo hablas correctamente, el servidor te da lo que pides.
     Si cometes un error de sintaxis, te rechaza. Sin excepciones."
