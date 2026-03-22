@@ -493,53 +493,93 @@ const challenges = {
 const sqlTutorials = {
   1: {
     title: 'SELECT y FROM',
-    content: `
-<div style="text-align:center; margin-bottom: 20px;">
-  <div style="font-size: 48px;">📡</div>
-  <div style="font-size: 12px; color: var(--primary); letter-spacing: 2px; text-transform: uppercase;">NEXUS SQL — Transmisión entrante</div>
-</div>
-<div style="background: rgba(0,217,255,0.08); border: 1px solid var(--primary); border-radius: 12px; padding: 20px; margin: 15px 0;">
-  <div style="color: var(--primary); font-weight: bold; margin-bottom: 12px;">👩‍💻 Ing. Ana — Canal encriptado</div>
-  <p style="font-style: italic; line-height: 1.8; color: var(--text);">
-    "Escucha bien, ${window.gameState.playerName}. El servidor de AXIOM Motors responde
-    a un idioma muy específico. No es inglés ni español — es <strong>SQL</strong>.
-    Si lo hablas correctamente, el servidor te da lo que pides.
-    Si cometes un error de sintaxis, te rechaza. Sin excepciones."
-  </p>
-</div>
-
-<div style="background: rgba(245,158,11,0.08); border: 2px solid var(--accent); border-radius: 12px; padding: 20px; margin: 15px 0;">
-  <h3 style="color: var(--accent); margin-bottom: 12px;">⚡ EL HECHIZO BÁSICO: SELECT + FROM</h3>
-  <p><strong>SELECT</strong> = "Quiero ver estas columnas"<br>
-  <strong>FROM</strong> = "De esta tabla"</p>
-  <pre style="background: #0d1117; color: #00ff41; padding: 15px; border-radius: 8px; border: 1px solid var(--primary); margin-top: 12px; font-size: 14px;">SELECT columna1, columna2
+    slides: [
+      // SLIDE 1 — Contexto / Ana habla
+      {
+        icon: '📡',
+        tag: 'NEXUS SQL — TRANSMISIÓN ENTRANTE',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">📡</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">NEXUS SQL — Transmisión entrante</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">👩‍💻 ING. ANA — Canal encriptado</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "Escucha bien, <strong style="color:var(--primary);">${window.gameState.playerName}</strong>. 
+              El servidor de AXIOM Motors responde a un idioma muy específico. 
+              No es inglés ni español — es <strong>SQL</strong>."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Si lo hablas correctamente, el servidor te da lo que pides. 
+              Si cometes un error de sintaxis, te rechaza. 
+              <strong style="color:var(--accent);">Sin excepciones.</strong>"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El lenguaje del servidor
+          </div>`
+      },
+      // SLIDE 2 — SELECT + FROM + Reglas
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">⚡</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El hechizo básico</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;font-size:15px;">
+              <strong style="color:var(--primary);">SELECT</strong> = "Quiero ver <em>estas columnas</em>"<br>
+              <strong style="color:var(--primary);">FROM</strong> = "De <em>esta tabla</em>"
+            </p>
+            <pre style="background:#050709;color:#00e676;padding:14px;border-radius:8px;border:1px solid rgba(0,230,118,0.2);font-size:14px;line-height:1.8;">SELECT columna1, columna2
 FROM nombre_tabla;</pre>
-</div>
-
-<div style="background: rgba(0,217,255,0.05); border: 1px solid rgba(0,217,255,0.3); border-radius: 12px; padding: 20px; margin: 15px 0;">
-  <h3 style="color: var(--primary); margin-bottom: 12px;">🔑 REGLAS DEL SERVIDOR</h3>
-  <p>1️⃣ Las columnas se separan con <strong>comas (,)</strong><br>
-  2️⃣ Termina siempre con <strong>punto y coma (;)</strong><br>
-  3️⃣ Usa <strong>*</strong> para ver TODAS las columnas<br>
-  4️⃣ SQL no distingue mayúsculas/minúsculas</p>
-</div>
-
-<div style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 20px; margin: 15px 0;">
-  <h3 style="color: var(--accent); margin-bottom: 12px;">✏️ EJEMPLOS REALES DEL SISTEMA</h3>
-  <pre style="background: #0d1117; color: #00ff41; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 10px; font-size: 13px;">-- Ver solo los modelos
-SELECT C_Modelo
+          </div>
+          <div style="background:rgba(255,160,0,0.05);border:1px solid rgba(255,160,0,0.2);border-radius:12px;padding:18px;">
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">🔑 REGLAS DEL SERVIDOR</div>
+            <p style="line-height:2;font-size:14px;">
+              1️⃣ Las columnas se separan con <strong>comas (,)</strong><br>
+              2️⃣ Termina siempre con <strong>punto y coma (;)</strong><br>
+              3️⃣ Usa <strong>*</strong> para ver TODAS las columnas<br>
+              4️⃣ SQL no distingue mayúsculas/minúsculas
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Estructura del comando
+          </div>`
+      },
+      // SLIDE 3 — Ejemplos reales
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">✏️</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Ejemplos reales del sistema</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono);">// Solo los modelos:</div>
+              <pre style="background:#050709;color:#00e676;padding:12px;border-radius:8px;border:1px solid rgba(0,230,118,0.15);font-size:13px;margin:0;">SELECT C_Modelo
 FROM T_Inventario_GDL;</pre>
-  <pre style="background: #0d1117; color: #00ff41; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 10px; font-size: 13px;">-- Ver modelo Y marca (nota la coma)
-SELECT C_Modelo, C_Marca
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono);">// Modelo Y marca (nota la coma):</div>
+              <pre style="background:#050709;color:#00e676;padding:12px;border-radius:8px;border:1px solid rgba(0,230,118,0.15);font-size:13px;margin:0;">SELECT C_Modelo, C_Marca
 FROM T_Inventario_GDL;</pre>
-  <pre style="background: #0d1117; color: #00ff41; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); font-size: 13px;">-- Ver TODO el inventario
-SELECT *
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono);">// TODO el inventario con *:</div>
+              <pre style="background:#050709;color:#00e676;padding:12px;border-radius:8px;border:1px solid rgba(0,230,118,0.15);font-size:13px;margin:0;">SELECT *
 FROM T_Inventario_GDL;</pre>
-</div>
-<div style="background: rgba(124,58,237,0.15); border: 1px solid var(--secondary); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center;">
-  <p style="color: var(--muted); font-size: 14px;">💬 <em>"Roberto está esperando. El reloj corre."</em> — Ing. Ana</p>
-</div>
-`
+            </div>
+          </div>
+          <div style="background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Roberto está esperando. El reloj corre." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — Practica con datos reales
+          </div>`
+      }
+    ]
   }
 };
 
@@ -1727,10 +1767,39 @@ window.nextExercise = function(cId, sId) {
 function showTutorial(cId) {
   const tut = sqlTutorials[cId];
   if (!tut || window.gameState.tutorialsSeen.includes(cId)) return;
-  const content = document.getElementById('modalGenericContent');
-  content.innerHTML = tut.content + `<button class="btn" onclick="closeTutorial(${cId})" style="width:100%;margin-top:20px;font-size:18px;">¡Entendido! Comenzar misión</button>`;
+  showTutorialSlide(cId, 0);
   document.getElementById('modalGeneric').classList.add('active');
   sounds.click();
+}
+
+window.showTutorialSlide = function(cId, slideIndex) {
+  const tut = sqlTutorials[cId];
+  const slides = tut.slides;
+  const isLast = slideIndex === slides.length - 1;
+  const slide = slides[slideIndex];
+  const content = document.getElementById('modalGenericContent');
+
+  // Indicadores de progreso
+  const dots = slides.map((_, i) => `
+    <div style="width:${i === slideIndex ? '24px' : '8px'};height:8px;border-radius:4px;
+                background:${i === slideIndex ? 'var(--primary)' : 'rgba(255,160,0,0.2)'};
+                transition:all 0.3s;"></div>`).join('');
+
+  content.innerHTML = `
+    <div style="animation:fadeIn 0.25s ease;">
+      ${slide.content}
+      <div style="display:flex;justify-content:center;gap:8px;align-items:center;margin:20px 0 16px;">
+        ${dots}
+      </div>
+      <div style="display:flex;gap:10px;">
+        ${slideIndex > 0
+          ? `<button class="btn btn-ghost" onclick="showTutorialSlide(${cId},${slideIndex-1})" style="flex:1;">← Anterior</button>`
+          : ''}
+        ${isLast
+          ? `<button class="btn" onclick="closeTutorial(${cId})" style="flex:2;font-size:15px;letter-spacing:1px;">⚡ ¡Entendido! Comenzar Misión</button>`
+          : `<button class="btn" onclick="showTutorialSlide(${cId},${slideIndex+1})" style="flex:2;font-size:15px;">Siguiente →</button>`}
+      </div>
+    </div>`;
 }
 
 window.closeTutorial = function(cId) {
