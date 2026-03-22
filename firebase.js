@@ -606,10 +606,14 @@ window.createNewUser = async function(name, pinHash) {
 
   document.getElementById('authScreen')?.remove();
 
-  // Iniciar onboarding para usuario nuevo
+  // Iniciar onboarding desde el Kit (paso 3) — el nombre ya está capturado
   window.userProfiles = localUsers;
+  window.gameState.playerName = name;
+  window.currentUserIndex = localUsers.length - 1;
   document.getElementById('onboarding').classList.remove('hidden');
-  window.showOnboardingStep(2); // Ir directo al paso de nombre (ya lo tiene)
+  if (typeof window.showOnboardingStep === 'function') {
+    window.showOnboardingStep(3); // Directo al Kit de inicio
+  }
 };
 
 // ============================================
