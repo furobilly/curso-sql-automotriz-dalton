@@ -762,8 +762,6 @@ rewardStyles.textContent = `
 `;
 document.head.appendChild(rewardStyles);
 
-document.head.appendChild(style);
-
 // ============================================
 // TEMA Y SONIDO
 // ============================================
