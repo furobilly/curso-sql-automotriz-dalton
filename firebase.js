@@ -368,51 +368,64 @@ window.showPinEntry = function(localIndex, source, cloudUser) {
 
   content.innerHTML = `
     <div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:6px;">Bienvenido, <strong style="color:var(--primary)">${name}</strong></p>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Selecciona tus 4 iconos PIN en orden:</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">
+        Bienvenido, <strong style="color:var(--primary)">${name}</strong>
+      </p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Ingresa tu PIN de 4 dígitos:</p>
 
-      <div id="pinDisplay" style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;">
+      <div id="pinDisplay" style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;">
         ${[0,1,2,3].map(i => `
-          <div style="width:44px;height:44px;border-radius:8px;border:1px solid var(--border);
+          <div style="width:48px;height:56px;border-radius:10px;border:2px solid var(--border);
                       background:var(--bg2);display:flex;align-items:center;justify-content:center;
-                      font-size:22px;" id="pinSlot${i}">·</div>`).join('')}
+                      font-size:24px;font-family:var(--font-display);color:var(--primary);
+                      font-weight:700;" id="pinSlot${i}">·</div>`).join('')}
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
-        ${pinIcons.map(icon => `
-          <button onclick="enterPinIcon('${icon.id}')"
-                  style="padding:10px 6px;background:var(--bg2);border:1px solid var(--border);
-                         border-radius:8px;cursor:pointer;font-size:24px;transition:all 0.15s;"
-                  onmouseover="this.style.borderColor='var(--primary)';this.style.transform='scale(1.1)'"
-                  onmouseout="this.style.borderColor='var(--border)';this.style.transform='scale(1)'"
-                  title="${icon.label}">
-            ${icon.emoji}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;max-width:240px;margin-left:auto;margin-right:auto;">
+        ${[1,2,3,4,5,6,7,8,9].map(n => `
+          <button onclick="enterPinDigit(${n})"
+            style="padding:16px 10px;background:var(--bg2);border:1px solid var(--border);
+                   border-radius:10px;cursor:pointer;font-size:20px;font-weight:700;
+                   font-family:var(--font-display);color:var(--text-hi);transition:all 0.15s;"
+            onmouseover="this.style.borderColor='var(--primary)';this.style.background='rgba(255,160,0,0.1)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'">
+            ${n}
           </button>`).join('')}
+        <button onclick="clearPin()"
+          style="padding:16px 10px;background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.2);
+                 border-radius:10px;cursor:pointer;font-size:16px;color:var(--danger);transition:all 0.15s;"
+          onmouseover="this.style.background='rgba(255,23,68,0.2)'"
+          onmouseout="this.style.background='rgba(255,23,68,0.1)'">⌫</button>
+        <button onclick="enterPinDigit(0)"
+          style="padding:16px 10px;background:var(--bg2);border:1px solid var(--border);
+                 border-radius:10px;cursor:pointer;font-size:20px;font-weight:700;
+                 font-family:var(--font-display);color:var(--text-hi);transition:all 0.15s;"
+          onmouseover="this.style.borderColor='var(--primary)';this.style.background='rgba(255,160,0,0.1)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'">0</button>
+        <div></div>
       </div>
 
-      <button onclick="clearPin()" style="width:100%;padding:8px;background:transparent;
-        border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-bottom:8px;">
-        ← Borrar PIN
-      </button>
       <button onclick="window.showAuthScreen()" style="width:100%;padding:8px;background:transparent;
-        border:none;border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;opacity:0.6;">
-        ↩ Regresar a usuarios
+        border:none;color:var(--muted);font-size:12px;cursor:pointer;opacity:0.6;margin-top:4px;">
+        ↩ Regresar
       </button>
     </div>`;
 };
 
-// ── Ingresar icono al PIN ──
-window.enterPinIcon = async function(iconId) {
+// ── Ingresar dígito al PIN ──
+window.enterPinDigit = async function(digit) {
   const auth = window._pendingAuth;
   if (!auth || auth.enteredPin.length >= 4) return;
 
-  auth.enteredPin.push(iconId);
-  const icon = pinIcons.find(i => i.id === iconId);
+  auth.enteredPin.push(digit);
   const slot = document.getElementById('pinSlot' + (auth.enteredPin.length - 1));
-  if (slot) slot.textContent = icon.emoji;
+  if (slot) {
+    slot.textContent = '●';
+    slot.style.borderColor = 'var(--primary)';
+  }
 
   if (auth.enteredPin.length === 4) {
-    await verifyPin();
+    setTimeout(() => verifyPin(), 200);
   }
 };
 
@@ -420,11 +433,10 @@ window.enterPinIcon = async function(iconId) {
 window.clearPin = function() {
   const auth = window._pendingAuth;
   if (!auth) return;
-  auth.enteredPin = [];
-  [0,1,2,3].forEach(i => {
-    const slot = document.getElementById('pinSlot' + i);
-    if (slot) slot.textContent = '·';
-  });
+  if (auth.enteredPin.length === 0) return;
+  auth.enteredPin.pop();
+  const slot = document.getElementById('pinSlot' + auth.enteredPin.length);
+  if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--border)'; }
 };
 
 // ── Verificar PIN ──
@@ -442,25 +454,30 @@ window.verifyPin = async function() {
     user = auth.cloudUser;
   }
 
+  if (!user) {
+    window.showAuthScreen(); return;
+  }
+
   if (!user.pinHash) {
-    // Usuario antiguo sin PIN — configurar PIN ahora
     await setPinForUser(auth, enteredHash, user);
     return;
   }
 
   if (enteredHash === user.pinHash) {
-    // ✅ PIN correcto
     await loginSuccess(auth, user, localIndex);
   } else {
-    // ❌ PIN incorrecto
-    clearPin();
-    const content = document.getElementById('authContent');
-    const errMsg = document.createElement('p');
-    errMsg.style.cssText = 'color:var(--danger);font-size:13px;text-align:center;margin-bottom:8px;';
-    errMsg.textContent = '❌ PIN incorrecto. Intenta de nuevo.';
-    const pinDisplay = document.getElementById('pinDisplay');
-    if (pinDisplay) pinDisplay.parentNode.insertBefore(errMsg, pinDisplay);
-    setTimeout(() => errMsg.remove(), 2000);
+    // ❌ PIN incorrecto — limpiar todos los slots
+    auth.enteredPin = [];
+    [0,1,2,3].forEach(i => {
+      const slot = document.getElementById('pinSlot' + i);
+      if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--border)'; slot.style.color = 'var(--danger)'; }
+    });
+    setTimeout(() => {
+      [0,1,2,3].forEach(i => {
+        const slot = document.getElementById('pinSlot' + i);
+        if (slot) slot.style.color = 'var(--primary)';
+      });
+    }, 600);
   }
 };
 
@@ -477,36 +494,68 @@ async function setPinForUser(auth, hash, user) {
 // ── Login exitoso ──
 window.loginSuccess = async function(auth, user, localIndex) {
   const content = document.getElementById('authContent');
-  content.innerHTML = `<p style="color:var(--secondary);text-align:center;padding:20px;">✅ Verificando...</p>`;
+  if (content) content.innerHTML = `<p style="color:var(--secondary);text-align:center;padding:20px;">✅ Conectando...</p>`;
 
-  await waitForFirebase();
+  await waitForFirebase(4000);
 
-  // Si viene de la nube, guardar localmente
   if (auth.source === 'cloud' && auth.cloudUser) {
+    // Cargar progreso desde Firebase
     const cloudState = await window._loadUserById(auth.cloudUser.id);
+    const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+
+    let targetIndex;
+    const existingIdx = localUsers.findIndex(u => u.id === auth.cloudUser.id);
+
     if (cloudState) {
-      const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
-      const existingIdx = localUsers.findIndex(u => u.id === auth.cloudUser.id);
+      // Fusionar: prioridad a datos de la nube, conservar pinHash local
+      const merged = Object.assign({}, cloudState, { pinHash: auth.cloudUser.pinHash });
       if (existingIdx >= 0) {
-        localUsers[existingIdx] = Object.assign(localUsers[existingIdx], cloudState, { pinHash: auth.cloudUser.pinHash });
-        localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
-        localIndex = existingIdx;
+        localUsers[existingIdx] = merged;
+        targetIndex = existingIdx;
       } else {
-        cloudState.pinHash = auth.cloudUser.pinHash;
-        localUsers.push(cloudState);
-        localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
-        localIndex = localUsers.length - 1;
+        localUsers.push(merged);
+        targetIndex = localUsers.length - 1;
       }
-      window.currentUserIndex = localIndex;
-      localStorage.setItem('nexusSQL_currentUser', localIndex);
+    } else {
+      // Firebase no respondió — usar datos básicos del cloudUser
+      const fallback = {
+        id: auth.cloudUser.id,
+        playerName: auth.cloudUser.nick,
+        pinHash: auth.cloudUser.pinHash,
+        avatar: auth.cloudUser.avatar || 0,
+        xp: 0, coins: 0, streak: 0, rank: 'Analista JR'
+      };
+      if (existingIdx >= 0) {
+        localUsers[existingIdx] = Object.assign(localUsers[existingIdx], fallback);
+        targetIndex = existingIdx;
+      } else {
+        localUsers.push(fallback);
+        targetIndex = localUsers.length - 1;
+      }
     }
+
+    localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
+    window.userProfiles = localUsers;
+    window.currentUserIndex = targetIndex;
+    localStorage.setItem('nexusSQL_currentUser', targetIndex);
+
   } else {
+    // Login local — ya tiene datos
     window.currentUserIndex = localIndex;
     localStorage.setItem('nexusSQL_currentUser', localIndex);
   }
 
   document.getElementById('authScreen')?.remove();
-  window.switchUser(window.currentUserIndex);
+
+  // Verificar que el índice es válido antes de llamar switchUser
+  const profiles = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+  if (window.currentUserIndex >= 0 && profiles[window.currentUserIndex]) {
+    window.userProfiles = profiles;
+    window.switchUser(window.currentUserIndex);
+  } else {
+    // Fallback: recargar pantalla de auth
+    window.showAuthScreen();
+  }
 };
 
 // ── Setup PIN para nuevo usuario ──
@@ -515,7 +564,7 @@ window.startPinSetup = function(mode) {
   const name = nameInput?.value?.trim();
 
   if (!name || name.length < 3) {
-    nameInput.style.borderColor = 'var(--danger)';
+    if (nameInput) nameInput.style.borderColor = 'var(--danger)';
     return;
   }
 
@@ -525,54 +574,60 @@ window.startPinSetup = function(mode) {
   const content = document.getElementById('authContent');
   content.innerHTML = `
     <div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:6px;">Crea tu PIN visual, <strong style="color:var(--primary)">${name}</strong></p>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Elige 4 iconos en orden — los necesitarás para entrar:</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">
+        Crea tu PIN, <strong style="color:var(--primary)">${name}</strong>
+      </p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Elige 4 dígitos — los necesitarás para entrar:</p>
 
-      <div id="pinSetupDisplay" style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;">
+      <div id="pinSetupDisplay" style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;">
         ${[0,1,2,3].map(i => `
-          <div style="width:44px;height:44px;border-radius:8px;border:1px solid var(--border);
+          <div style="width:48px;height:56px;border-radius:10px;border:2px solid var(--border);
                       background:var(--bg2);display:flex;align-items:center;justify-content:center;
-                      font-size:22px;" id="setupSlot${i}">·</div>`).join('')}
+                      font-size:24px;font-family:var(--font-display);color:var(--primary);
+                      font-weight:700;" id="setupSlot${i}">·</div>`).join('')}
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
-        ${pinIcons.map(icon => `
-          <button onclick="addSetupPin('${icon.id}')"
-                  style="padding:10px 6px;background:var(--bg2);border:1px solid var(--border);
-                         border-radius:8px;cursor:pointer;font-size:24px;transition:all 0.15s;"
-                  onmouseover="this.style.borderColor='var(--primary)';this.style.transform='scale(1.1)'"
-                  onmouseout="this.style.borderColor='var(--border)';this.style.transform='scale(1)'"
-                  title="${icon.label}">
-            ${icon.emoji}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;max-width:240px;margin-left:auto;margin-right:auto;">
+        ${[1,2,3,4,5,6,7,8,9].map(n => `
+          <button onclick="addSetupDigit(${n})"
+            style="padding:16px 10px;background:var(--bg2);border:1px solid var(--border);
+                   border-radius:10px;cursor:pointer;font-size:20px;font-weight:700;
+                   font-family:var(--font-display);color:var(--text-hi);transition:all 0.15s;"
+            onmouseover="this.style.borderColor='var(--primary)';this.style.background='rgba(255,160,0,0.1)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg2)'">
+            ${n}
           </button>`).join('')}
+        <button onclick="clearSetupPin()"
+          style="padding:16px 10px;background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.2);
+                 border-radius:10px;cursor:pointer;font-size:16px;color:var(--danger);">⌫</button>
+        <button onclick="addSetupDigit(0)"
+          style="padding:16px 10px;background:var(--bg2);border:1px solid var(--border);
+                 border-radius:10px;cursor:pointer;font-size:20px;font-weight:700;
+                 font-family:var(--font-display);color:var(--text-hi);">0</button>
+        <div></div>
       </div>
-
-      <button onclick="clearSetupPin()" style="width:100%;padding:8px;background:transparent;
-        border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;">
-        ← Borrar
-      </button>
-    </div>`;
+    </div>`; 
 };
 
-window.addSetupPin = async function(iconId) {
+window.addSetupDigit = async function(digit) {
   if (window._pinSetupPin.length >= 4) return;
-  window._pinSetupPin.push(iconId);
-  const icon = pinIcons.find(i => i.id === iconId);
+  window._pinSetupPin.push(digit);
   const slot = document.getElementById('setupSlot' + (window._pinSetupPin.length - 1));
-  if (slot) slot.textContent = icon.emoji;
+  if (slot) { slot.textContent = '●'; slot.style.borderColor = 'var(--primary)'; }
 
   if (window._pinSetupPin.length === 4) {
-    const hash = await window.hashPin(window._pinSetupPin);
-    await createNewUser(window._newUserName, hash);
+    setTimeout(async () => {
+      const hash = await window.hashPin(window._pinSetupPin);
+      await createNewUser(window._newUserName, hash);
+    }, 300);
   }
 };
 
 window.clearSetupPin = function() {
-  window._pinSetupPin = [];
-  [0,1,2,3].forEach(i => {
-    const slot = document.getElementById('setupSlot' + i);
-    if (slot) slot.textContent = '·';
-  });
+  if (window._pinSetupPin.length === 0) return;
+  window._pinSetupPin.pop();
+  const slot = document.getElementById('setupSlot' + window._pinSetupPin.length);
+  if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--border)'; }
 };
 
 // ── Crear nuevo usuario ──
