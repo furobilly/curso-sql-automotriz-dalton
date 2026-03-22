@@ -53,6 +53,7 @@ const pinIcons = [
         const payload = {
           gameState: JSON.stringify(gameState),
           nick: gameState.playerName,
+          pinHash: gameState.pinHash || '',   // ← guardado separado para login en otro dispositivo
           updatedAt: Date.now()
         };
         await setDoc(ref, payload, { merge: true });
@@ -64,9 +65,13 @@ const pinIcons = [
     window._loadProgress = async (userId) => {
       try {
         const snap = await getDoc(doc(db, 'nexus_usuarios', userId));
-        if (snap.exists() && snap.data().gameState)
-          return JSON.parse(snap.data().gameState);
-        return null;
+        if (!snap.exists()) return null;
+        const data = snap.data();
+        if (!data.gameState) return null;
+        const gs = JSON.parse(data.gameState);
+        // Restaurar pinHash desde campo separado si no está en gameState
+        if (!gs.pinHash && data.pinHash) gs.pinHash = data.pinHash;
+        return gs;
       } catch(e) { console.warn('Firebase load error:', e); return null; }
     };
 
@@ -103,9 +108,13 @@ const pinIcons = [
     window._loadUserById = async (userId) => {
       try {
         const snap = await getDoc(doc(db, 'nexus_usuarios', userId));
-        if (snap.exists() && snap.data().gameState)
-          return JSON.parse(snap.data().gameState);
-        return null;
+        if (!snap.exists()) return null;
+        const data = snap.data();
+        if (!data.gameState) return null;
+        const gs = JSON.parse(data.gameState);
+        // Restaurar pinHash desde campo separado si no está en gameState
+        if (!gs.pinHash && data.pinHash) gs.pinHash = data.pinHash;
+        return gs;
       } catch(e) { return null; }
     };
 
@@ -700,7 +709,7 @@ window.saveProgressToCloud = async function() {
     const toSave = Object.assign({}, gs, {
       db: null,
       id: userId,
-      pinHash: localUsers[idx].pinHash
+      pinHash: localUsers[idx].pinHash || gs.pinHash || ''
     });
     await window._saveProgress(userId, toSave);
   }
