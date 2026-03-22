@@ -1267,15 +1267,35 @@ window.startAdventure = function() {
   window.gameState.kitBenefits = kit.benefits;
   window.gameState.hintsRemaining = kit.benefits.hintsBonus;
   window.gameState.attemptLimit = 3 + (kit.benefits.extraAttempts || 0);
-
   window.gameState.diary.push({ day: 0, entry: `Primer día en NexCorp. Elegí el ${kit.name}. The Void no sabe con quién se metió.` });
   for (let i = 1; i <= 10; i++) window.gameState.completedSubExercises[i] = [];
+
   const snapshot = Object.assign({}, window.gameState);
   delete snapshot.db;
-  window.userProfiles.push(snapshot);
-  window.currentUserIndex = window.userProfiles.length - 1;
+
+  // Si el usuario ya existe en userProfiles (viene de Firebase), actualizar — no duplicar
+  const existingIdx = window.userProfiles.findIndex(u =>
+    u.playerName === snapshot.playerName || u.id === snapshot.id
+  );
+
+  if (existingIdx >= 0) {
+    // Actualizar el usuario existente con los datos del Kit
+    window.userProfiles[existingIdx] = Object.assign(window.userProfiles[existingIdx], snapshot);
+    window.currentUserIndex = existingIdx;
+  } else {
+    // Usuario completamente nuevo (flujo original sin Firebase)
+    window.userProfiles.push(snapshot);
+    window.currentUserIndex = window.userProfiles.length - 1;
+  }
+
   localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
   localStorage.setItem('nexusSQL_currentUser', window.currentUserIndex);
+
+  // Guardar en Firebase si está disponible
+  if (typeof window.saveProgressToCloud === 'function') {
+    window.saveProgressToCloud();
+  }
+
   document.getElementById('onboarding').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
   renderGame(); createParticles(); updateAvatars();
@@ -1972,15 +1992,4 @@ window.showBadges = function() {
 window.closeModal = function(id) {
   sounds.click();
   document.getElementById(id).classList.remove('active');
-};
-
-window.switchUser = function(index) {
-  sounds.click();
-  window.currentUserIndex = index;
-  localStorage.setItem('nexusSQL_currentUser', index);
-  loadUserProfile(index);
-  closeModal('modalGeneric');
-  document.getElementById('onboarding').classList.add('hidden');
-  document.getElementById('mainApp').classList.remove('hidden');
-  renderGame(); createParticles(); updateAvatars(); updateStats(); renderChallenges(); updateProgressBar(); updateSkillBars();
 };
