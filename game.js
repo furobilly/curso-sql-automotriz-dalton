@@ -833,10 +833,15 @@ window.toggleSound = function() {
 
 window.logoutUser = function() {
   sounds.click();
-  if (confirm('¿Deseas cambiar de operador? Tu progreso está guardado.')) {
+  if (confirm('¿Deseas cambiar de operador? Tu progreso está guardado en la nube.')) {
     window.currentUserIndex = -1;
     localStorage.setItem('nexusSQL_currentUser', '-1');
-    location.reload();
+    document.getElementById('mainApp').classList.add('hidden');
+    if (typeof window.showAuthScreen === 'function') {
+      window.showAuthScreen();
+    } else {
+      location.reload();
+    }
   }
 };
 
@@ -1066,7 +1071,12 @@ async function init() {
             document.getElementById('mainApp').classList.remove('hidden');
             renderGame(); createParticles(); updateAvatars();
           } else {
-            showUserSelection();
+            // Mostrar pantalla de autenticación con Firebase + PIN
+            if (typeof window.showAuthScreen === 'function') {
+              window.showAuthScreen();
+            } else {
+              showUserSelection();
+            }
           }
         }, 3000);
       });
@@ -1080,7 +1090,13 @@ document.readyState === 'loading'
   ? document.addEventListener('DOMContentLoaded', init)
   : init();
 
-function saveGameState() { saveUserProfile(); }
+function saveGameState() {
+  saveUserProfile();
+  // Guardar en Firebase cada vez que hay cambio importante
+  if (typeof window.saveProgressToCloud === 'function') {
+    window.saveProgressToCloud();
+  }
+}
 
 // ============================================
 // ONBOARDING — Historia inmersiva
