@@ -73,10 +73,18 @@ const pinIcons = [
     // ── Guardar lista de usuarios (para login en otro dispositivo) ──
     window._saveUserList = async (users) => {
       try {
+        // Solo guardar usuarios que tienen id válido
+        const validUsers = users
+          .filter(u => u.id && u.playerName && u.id !== 'undefined')
+          .map(u => ({
+            id: u.id,
+            nick: u.playerName,
+            pinHash: u.pinHash || '',
+            avatar: u.avatar || 0
+          }));
+        if (validUsers.length === 0) return;
         await setDoc(doc(db, 'nexus_meta', 'users'), {
-          list: JSON.stringify(users.map(u => ({
-            id: u.id, nick: u.playerName, pinHash: u.pinHash, avatar: u.avatar
-          })))
+          list: JSON.stringify(validUsers)
         }, { merge: true });
       } catch(e) { console.warn('Firebase userlist error:', e); }
     };
@@ -575,7 +583,6 @@ window.createNewUser = async function(name, pinHash) {
   const newId = 'nx_' + Date.now();
   const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
 
-  // Gamestate inicial (el onboarding seguirá después)
   const newUser = {
     id: newId,
     playerName: name,
@@ -594,25 +601,23 @@ window.createNewUser = async function(name, pinHash) {
     isNewUser: true
   };
 
+  // Guardar solo localmente por ahora
+  // La sincronización con Firebase ocurre en startAdventure() después de elegir el Kit
   localUsers.push(newUser);
   localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
   window.currentUserIndex = localUsers.length - 1;
   localStorage.setItem('nexusSQL_currentUser', window.currentUserIndex);
 
-  // Guardar en Firebase
-  await waitForFirebase();
-  await window._saveProgress(newId, newUser);
-  await window._saveUserList(localUsers);
-
   document.getElementById('authScreen')?.remove();
 
-  // Iniciar onboarding desde el Kit (paso 3) — el nombre ya está capturado
+  // Ir al onboarding — Kit de inicio (paso 3)
   window.userProfiles = localUsers;
   window.gameState.playerName = name;
+  window.gameState.id = newId;
   window.currentUserIndex = localUsers.length - 1;
   document.getElementById('onboarding').classList.remove('hidden');
   if (typeof window.showOnboardingStep === 'function') {
-    window.showOnboardingStep(3); // Directo al Kit de inicio
+    window.showOnboardingStep(3);
   }
 };
 
@@ -627,12 +632,24 @@ window.saveProgressToCloud = async function() {
   const idx = window.currentUserIndex;
   if (idx < 0 || !localUsers[idx]) return;
 
-  const userId = localUsers[idx].id || ('nx_' + idx);
-  await waitForFirebase(2000);
+  // CRÍTICO: usar el id real del usuario, no inventar uno
+  const userId = localUsers[idx].id;
+  if (!userId || userId === 'undefined') {
+    console.warn('Usuario sin id válido, no se puede sincronizar:', localUsers[idx].playerName);
+    return;
+  }
+
+  await waitForFirebase(3000);
   if (window._saveProgress) {
-    window._saveProgress(userId, Object.assign({}, gs, { db: null }));
+    // Guardar gameState actual + pinHash del usuario local
+    const toSave = Object.assign({}, gs, {
+      db: null,
+      id: userId,
+      pinHash: localUsers[idx].pinHash
+    });
+    await window._saveProgress(userId, toSave);
   }
   if (window._saveUserList) {
-    window._saveUserList(localUsers);
+    await window._saveUserList(localUsers);
   }
 };
