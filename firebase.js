@@ -192,36 +192,68 @@ window.showAuthScreen = function() {
 window.showLocalUsers = function(users) {
   const content = document.getElementById('authContent');
   const avatarIcons = ['🎮', '💼', '🧘'];
-  let html = `<p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Selecciona tu operador:</p>`;
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <p style="font-size:13px;color:var(--muted);">Selecciona tu operador:</p>
+      <button onclick="confirmClearAll()"
+        style="font-size:11px;padding:4px 10px;background:rgba(255,23,68,0.1);
+               border:1px solid rgba(255,23,68,0.3);border-radius:6px;color:var(--danger);cursor:pointer;">
+        🗑️ Limpiar todo
+      </button>
+    </div>`;
 
   users.forEach((u, i) => {
     html += `
-      <div onclick="selectLocalUser(${i})"
-           style="display:flex;align-items:center;gap:14px;padding:14px;margin:8px 0;
-                  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
-                  cursor:pointer;transition:all 0.2s;"
-           onmouseover="this.style.borderColor='var(--primary)'"
-           onmouseout="this.style.borderColor='var(--border)'">
-        <span style="font-size:36px;">${avatarIcons[u.avatar || 0]}</span>
-        <div style="text-align:left;">
-          <div style="font-family:var(--font-display);font-size:14px;color:var(--text-hi);">${u.playerName}</div>
-          <div style="font-size:11px;color:var(--muted);">⭐ ${u.xp || 0} XP · 🪙 ${u.coins || 0} VC</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;margin:6px 0;
+                  background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+        <div onclick="selectLocalUser(${i})" style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer;"
+             onmouseover="this.parentNode.style.borderColor='var(--primary)'"
+             onmouseout="this.parentNode.style.borderColor='var(--border)'">
+          <span style="font-size:32px;">${avatarIcons[u.avatar || 0]}</span>
+          <div style="text-align:left;">
+            <div style="font-family:var(--font-display);font-size:13px;color:var(--text-hi);">${u.playerName}</div>
+            <div style="font-size:11px;color:var(--muted);">⭐ ${u.xp || 0} XP · 🪙 ${u.coins || 0} VC</div>
+          </div>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-left:auto;">
-          <path d="M9 18l6-6-6-6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+        <button onclick="deleteLocalUser(${i})"
+          style="padding:6px 8px;background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.2);
+                 border-radius:6px;color:var(--danger);cursor:pointer;font-size:14px;flex-shrink:0;"
+          title="Eliminar usuario">🗑️</button>
       </div>`;
   });
 
   html += `
-    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
       <button onclick="showLoginTab()" style="width:100%;padding:10px;background:transparent;
         border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;">
-        Buscar operador por nombre →
+        🔍 Buscar operador por nombre →
       </button>
     </div>`;
 
   content.innerHTML = html;
+};
+
+// ── Borrar usuario local ──
+window.deleteLocalUser = function(index) {
+  if (!confirm('¿Eliminar este operador localmente? Su progreso en la nube se mantiene.')) return;
+  const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+  localUsers.splice(index, 1);
+  localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
+  if (localUsers.length > 0) {
+    showLocalUsers(localUsers);
+  } else {
+    showLoginTab();
+  }
+};
+
+// ── Borrar todos los usuarios locales ──
+window.confirmClearAll = function() {
+  if (!confirm('¿Limpiar TODOS los operadores locales?\n\nSu progreso en Firebase se mantiene.\nPodrás recuperarlos con tu nombre.')) return;
+  localStorage.removeItem('nexusSQL_users');
+  localStorage.removeItem('nexusSQL_currentUser');
+  window.userProfiles = [];
+  window.currentUserIndex = -1;
+  showLoginTab();
 };
 
 // ── Tab: Entrar ──
@@ -351,8 +383,12 @@ window.showPinEntry = function(localIndex, source, cloudUser) {
       </div>
 
       <button onclick="clearPin()" style="width:100%;padding:8px;background:transparent;
-        border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;">
+        border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-bottom:8px;">
         ← Borrar PIN
+      </button>
+      <button onclick="window.showAuthScreen()" style="width:100%;padding:8px;background:transparent;
+        border:none;border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;opacity:0.6;">
+        ↩ Regresar a usuarios
       </button>
     </div>`;
 };
