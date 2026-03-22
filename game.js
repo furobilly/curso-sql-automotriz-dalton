@@ -915,6 +915,7 @@ function showUserSelection() {
 function loadUserProfile(index) {
   const u = window.userProfiles[index];
   Object.assign(window.gameState, {
+    id: u.id || null,          // ← CRÍTICO para sincronización Firebase
     playerName: u.playerName, avatar: u.avatar, xp: u.xp, coins: u.coins,
     streak: u.streak || 0, currentChallenge: u.currentChallenge || 1,
     currentSubExercise: u.currentSubExercise || 1, currentDay: u.currentDay || 1,
