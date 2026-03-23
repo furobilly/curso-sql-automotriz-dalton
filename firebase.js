@@ -529,9 +529,15 @@ window.loginSuccess = async function(auth, user, localIndex) {
     const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
     let targetIndex;
     const existingIdx = localUsers.findIndex(u => u.id === auth.cloudUser.id);
+    const localState = existingIdx >= 0 ? localUsers[existingIdx] : null;
 
     if (cloudState) {
-      const merged = Object.assign({}, cloudState, { pinHash: auth.cloudUser.pinHash });
+      // Comparar fechas — usar el estado más reciente
+      const cloudTime = cloudState.lastVisit ? new Date(cloudState.lastVisit).getTime() : 0;
+      const localTime = localState?.lastVisit ? new Date(localState.lastVisit).getTime() : 0;
+      const winner = cloudTime >= localTime ? cloudState : localState;
+      const merged = Object.assign({}, winner, { pinHash: auth.cloudUser.pinHash });
+
       if (existingIdx >= 0) {
         localUsers[existingIdx] = merged; targetIndex = existingIdx;
       } else {
