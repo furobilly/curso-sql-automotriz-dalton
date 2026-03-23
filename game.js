@@ -915,7 +915,8 @@ function showUserSelection() {
 function loadUserProfile(index) {
   const u = window.userProfiles[index];
   Object.assign(window.gameState, {
-    id: u.id || null,          // ← CRÍTICO para sincronización Firebase
+    id: u.id || null,
+    pinHash: u.pinHash || null,    // ← necesario para que Firebase lo guarde
     playerName: u.playerName, avatar: u.avatar, xp: u.xp, coins: u.coins,
     streak: u.streak || 0, currentChallenge: u.currentChallenge || 1,
     currentSubExercise: u.currentSubExercise || 1, currentDay: u.currentDay || 1,
@@ -1273,6 +1274,13 @@ window.startAdventure = function() {
 
   const snapshot = Object.assign({}, window.gameState);
   delete snapshot.db;
+
+  // Asegurar que pinHash del usuario local se conserva en el snapshot
+  const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+  const currentUser = localUsers[window.currentUserIndex];
+  if (currentUser?.pinHash && !snapshot.pinHash) {
+    snapshot.pinHash = currentUser.pinHash;
+  }
 
   // Si el usuario ya existe en userProfiles (viene de Firebase), actualizar — no duplicar
   const existingIdx = window.userProfiles.findIndex(u =>
