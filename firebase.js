@@ -526,11 +526,28 @@ window.verifyPin = async function() {
 
 // ── Configurar PIN para usuario existente sin PIN ──
 async function setPinForUser(auth, hash, user) {
+  window._dbg(`setPinForUser — source:${auth.source} localIndex:${auth.localIndex}`);
   const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
-  if (auth.localIndex >= 0) {
+
+  if (auth.source === 'cloud' && auth.cloudUser) {
+    // Usuario de nube sin pinHash — guardar el PIN que acaba de ingresar
+    auth.cloudUser.pinHash = hash;
+    window._dbg(`guardando pinHash en cloudUser y Firebase`);
+
+    // Guardar en Firebase
+    await waitForFirebase(3000);
+    if (window._saveProgress) {
+      const userId = auth.cloudUser.id;
+      const cloudState = await window._loadUserById(userId) || {};
+      cloudState.pinHash = hash;
+      await window._saveProgress(userId, cloudState);
+    }
+  } else if (auth.localIndex >= 0) {
     localUsers[auth.localIndex].pinHash = hash;
     localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
   }
+
+  window._dbg(`setPinForUser OK → loginSuccess`);
   await loginSuccess(auth, user, auth.localIndex);
 }
 
