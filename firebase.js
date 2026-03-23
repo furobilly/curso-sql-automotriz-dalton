@@ -448,10 +448,35 @@ window.clearPin = function() {
   if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--border)'; }
 };
 
+// ── Panel de debug visible en pantalla (temporal) ──
+window._dbg = function(msg) {
+  console.log('[NEXUS]', msg);
+  let panel = document.getElementById('debugPanel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'debugPanel';
+    panel.style.cssText = `position:fixed;bottom:0;left:0;right:0;max-height:180px;overflow-y:auto;
+      background:rgba(0,0,0,0.9);color:#00ff41;font-family:monospace;font-size:11px;
+      padding:8px;z-index:99999;border-top:1px solid #00ff41;`;
+    panel.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span style="color:#ffa000;">🔬 DEBUG NEXUS</span>
+      <button onclick="document.getElementById('debugPanel').remove()" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:14px;">✕</button>
+    </div>`;
+    document.body.appendChild(panel);
+  }
+  const line = document.createElement('div');
+  line.textContent = `${new Date().toLocaleTimeString()} → ${msg}`;
+  panel.appendChild(line);
+  panel.scrollTop = panel.scrollHeight;
+};
+
 // ── Verificar PIN ──
 window.verifyPin = async function() {
   const auth = window._pendingAuth;
+  window._dbg(`verifyPin start — source:${auth?.source} localIndex:${auth?.localIndex}`);
+
   const enteredHash = await window.hashPin(auth.enteredPin);
+  window._dbg(`hash calculado: ${enteredHash.slice(0,8)}...`);
 
   let user = null;
   let localIndex = auth.localIndex;
@@ -459,23 +484,30 @@ window.verifyPin = async function() {
   if (auth.source === 'local') {
     const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
     user = localUsers[localIndex];
+    window._dbg(`user local: ${user?.playerName} pinHash:${user?.pinHash ? 'SÍ' : 'NO'}`);
   } else {
     user = auth.cloudUser;
+    window._dbg(`user cloud: ${user?.nick} pinHash:${user?.pinHash ? 'SÍ' : 'NO'} id:${user?.id}`);
   }
 
   if (!user) {
+    window._dbg('ERROR: user es null → showAuthScreen');
     window.showAuthScreen(); return;
   }
 
   if (!user.pinHash) {
+    window._dbg('WARN: sin pinHash → setPinForUser');
     await setPinForUser(auth, enteredHash, user);
     return;
   }
 
+  window._dbg(`comparando: ${enteredHash.slice(0,8)} vs ${user.pinHash.slice(0,8)}`);
+
   if (enteredHash === user.pinHash) {
+    window._dbg('✅ PIN correcto → loginSuccess');
     await loginSuccess(auth, user, localIndex);
   } else {
-    // ❌ PIN incorrecto — limpiar todos los slots
+    window._dbg('❌ PIN incorrecto');
     auth.enteredPin = [];
     [0,1,2,3].forEach(i => {
       const slot = document.getElementById('pinSlot' + i);
@@ -490,6 +522,8 @@ window.verifyPin = async function() {
   }
 };
 
+
+
 // ── Configurar PIN para usuario existente sin PIN ──
 async function setPinForUser(auth, hash, user) {
   const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
@@ -502,44 +536,39 @@ async function setPinForUser(auth, hash, user) {
 
 // ── Login exitoso ──
 window.loginSuccess = async function(auth, user, localIndex) {
+  window._dbg(`loginSuccess start — source:${auth.source} localIndex:${localIndex}`);
   const content = document.getElementById('authContent');
   if (content) content.innerHTML = `<p style="color:var(--secondary);text-align:center;padding:20px;">✅ Conectando...</p>`;
 
-  await waitForFirebase(4000);
+  const fbReady = await waitForFirebase(4000);
+  window._dbg(`Firebase ready: ${fbReady}`);
 
   if (auth.source === 'cloud' && auth.cloudUser) {
-    // Cargar progreso desde Firebase
+    window._dbg(`cargando desde nube id:${auth.cloudUser.id}`);
     const cloudState = await window._loadUserById(auth.cloudUser.id);
+    window._dbg(`cloudState: ${cloudState ? 'OK pinHash:' + (cloudState.pinHash ? 'SÍ' : 'NO') : 'NULL'}`);
     const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
-
     let targetIndex;
     const existingIdx = localUsers.findIndex(u => u.id === auth.cloudUser.id);
 
     if (cloudState) {
-      // Fusionar: prioridad a datos de la nube, conservar pinHash local
       const merged = Object.assign({}, cloudState, { pinHash: auth.cloudUser.pinHash });
       if (existingIdx >= 0) {
-        localUsers[existingIdx] = merged;
-        targetIndex = existingIdx;
+        localUsers[existingIdx] = merged; targetIndex = existingIdx;
       } else {
-        localUsers.push(merged);
-        targetIndex = localUsers.length - 1;
+        localUsers.push(merged); targetIndex = localUsers.length - 1;
       }
     } else {
-      // Firebase no respondió — usar datos básicos del cloudUser
+      window._dbg('WARN: cloudState null → usando fallback');
       const fallback = {
-        id: auth.cloudUser.id,
-        playerName: auth.cloudUser.nick,
-        pinHash: auth.cloudUser.pinHash,
-        avatar: auth.cloudUser.avatar || 0,
+        id: auth.cloudUser.id, playerName: auth.cloudUser.nick,
+        pinHash: auth.cloudUser.pinHash, avatar: auth.cloudUser.avatar || 0,
         xp: 0, coins: 0, streak: 0, rank: 'Analista JR'
       };
       if (existingIdx >= 0) {
-        localUsers[existingIdx] = Object.assign(localUsers[existingIdx], fallback);
-        targetIndex = existingIdx;
+        localUsers[existingIdx] = Object.assign(localUsers[existingIdx], fallback); targetIndex = existingIdx;
       } else {
-        localUsers.push(fallback);
-        targetIndex = localUsers.length - 1;
+        localUsers.push(fallback); targetIndex = localUsers.length - 1;
       }
     }
 
@@ -547,22 +576,23 @@ window.loginSuccess = async function(auth, user, localIndex) {
     window.userProfiles = localUsers;
     window.currentUserIndex = targetIndex;
     localStorage.setItem('nexusSQL_currentUser', targetIndex);
+    window._dbg(`targetIndex: ${targetIndex}`);
 
   } else {
-    // Login local — ya tiene datos
     window.currentUserIndex = localIndex;
     localStorage.setItem('nexusSQL_currentUser', localIndex);
   }
 
   document.getElementById('authScreen')?.remove();
 
-  // Verificar que el índice es válido antes de llamar switchUser
   const profiles = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+  window._dbg(`switchUser index:${window.currentUserIndex} profiles:${profiles.length}`);
+
   if (window.currentUserIndex >= 0 && profiles[window.currentUserIndex]) {
     window.userProfiles = profiles;
     window.switchUser(window.currentUserIndex);
   } else {
-    // Fallback: recargar pantalla de auth
+    window._dbg('ERROR: índice inválido → showAuthScreen');
     window.showAuthScreen();
   }
 };
