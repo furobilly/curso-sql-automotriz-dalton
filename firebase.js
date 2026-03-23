@@ -448,35 +448,11 @@ window.clearPin = function() {
   if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--border)'; }
 };
 
-// ── Panel de debug visible en pantalla (temporal) ──
-window._dbg = function(msg) {
-  console.log('[NEXUS]', msg);
-  let panel = document.getElementById('debugPanel');
-  if (!panel) {
-    panel = document.createElement('div');
-    panel.id = 'debugPanel';
-    panel.style.cssText = `position:fixed;bottom:0;left:0;right:0;max-height:180px;overflow-y:auto;
-      background:rgba(0,0,0,0.9);color:#00ff41;font-family:monospace;font-size:11px;
-      padding:8px;z-index:99999;border-top:1px solid #00ff41;`;
-    panel.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-      <span style="color:#ffa000;">🔬 DEBUG NEXUS</span>
-      <button onclick="document.getElementById('debugPanel').remove()" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:14px;">✕</button>
-    </div>`;
-    document.body.appendChild(panel);
-  }
-  const line = document.createElement('div');
-  line.textContent = `${new Date().toLocaleTimeString()} → ${msg}`;
-  panel.appendChild(line);
-  panel.scrollTop = panel.scrollHeight;
-};
-
 // ── Verificar PIN ──
 window.verifyPin = async function() {
   const auth = window._pendingAuth;
-  window._dbg(`verifyPin start — source:${auth?.source} localIndex:${auth?.localIndex}`);
 
   const enteredHash = await window.hashPin(auth.enteredPin);
-  window._dbg(`hash calculado: ${enteredHash.slice(0,8)}...`);
 
   let user = null;
   let localIndex = auth.localIndex;
@@ -484,30 +460,23 @@ window.verifyPin = async function() {
   if (auth.source === 'local') {
     const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
     user = localUsers[localIndex];
-    window._dbg(`user local: ${user?.playerName} pinHash:${user?.pinHash ? 'SÍ' : 'NO'}`);
   } else {
     user = auth.cloudUser;
-    window._dbg(`user cloud: ${user?.nick} pinHash:${user?.pinHash ? 'SÍ' : 'NO'} id:${user?.id}`);
   }
 
   if (!user) {
-    window._dbg('ERROR: user es null → showAuthScreen');
     window.showAuthScreen(); return;
   }
 
   if (!user.pinHash) {
-    window._dbg('WARN: sin pinHash → setPinForUser');
     await setPinForUser(auth, enteredHash, user);
     return;
   }
 
-  window._dbg(`comparando: ${enteredHash.slice(0,8)} vs ${user.pinHash.slice(0,8)}`);
 
   if (enteredHash === user.pinHash) {
-    window._dbg('✅ PIN correcto → loginSuccess');
     await loginSuccess(auth, user, localIndex);
   } else {
-    window._dbg('❌ PIN incorrecto');
     auth.enteredPin = [];
     [0,1,2,3].forEach(i => {
       const slot = document.getElementById('pinSlot' + i);
@@ -526,16 +495,14 @@ window.verifyPin = async function() {
 
 // ── Configurar PIN para usuario existente sin PIN ──
 async function setPinForUser(auth, hash, user) {
-  window._dbg(`setPinForUser — source:${auth.source} localIndex:${auth.localIndex}`);
   const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
 
   if (auth.source === 'cloud' && auth.cloudUser) {
     // Usuario de nube sin pinHash — guardar el PIN que acaba de ingresar
     auth.cloudUser.pinHash = hash;
-    window._dbg(`guardando pinHash en cloudUser y Firebase`);
 
     // Guardar en Firebase
-    await waitForFirebase(3000);
+    await waitForFirebase(2000);
     if (window._saveProgress) {
       const userId = auth.cloudUser.id;
       const cloudState = await window._loadUserById(userId) || {};
@@ -547,23 +514,18 @@ async function setPinForUser(auth, hash, user) {
     localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
   }
 
-  window._dbg(`setPinForUser OK → loginSuccess`);
   await loginSuccess(auth, user, auth.localIndex);
 }
 
 // ── Login exitoso ──
 window.loginSuccess = async function(auth, user, localIndex) {
-  window._dbg(`loginSuccess start — source:${auth.source} localIndex:${localIndex}`);
   const content = document.getElementById('authContent');
   if (content) content.innerHTML = `<p style="color:var(--secondary);text-align:center;padding:20px;">✅ Conectando...</p>`;
 
-  const fbReady = await waitForFirebase(4000);
-  window._dbg(`Firebase ready: ${fbReady}`);
+  const fbReady = await waitForFirebase(2000);
 
   if (auth.source === 'cloud' && auth.cloudUser) {
-    window._dbg(`cargando desde nube id:${auth.cloudUser.id}`);
     const cloudState = await window._loadUserById(auth.cloudUser.id);
-    window._dbg(`cloudState: ${cloudState ? 'OK pinHash:' + (cloudState.pinHash ? 'SÍ' : 'NO') : 'NULL'}`);
     const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
     let targetIndex;
     const existingIdx = localUsers.findIndex(u => u.id === auth.cloudUser.id);
@@ -576,7 +538,6 @@ window.loginSuccess = async function(auth, user, localIndex) {
         localUsers.push(merged); targetIndex = localUsers.length - 1;
       }
     } else {
-      window._dbg('WARN: cloudState null → usando fallback');
       const fallback = {
         id: auth.cloudUser.id, playerName: auth.cloudUser.nick,
         pinHash: auth.cloudUser.pinHash, avatar: auth.cloudUser.avatar || 0,
@@ -593,7 +554,6 @@ window.loginSuccess = async function(auth, user, localIndex) {
     window.userProfiles = localUsers;
     window.currentUserIndex = targetIndex;
     localStorage.setItem('nexusSQL_currentUser', targetIndex);
-    window._dbg(`targetIndex: ${targetIndex}`);
 
   } else {
     window.currentUserIndex = localIndex;
@@ -603,13 +563,11 @@ window.loginSuccess = async function(auth, user, localIndex) {
   document.getElementById('authScreen')?.remove();
 
   const profiles = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
-  window._dbg(`switchUser index:${window.currentUserIndex} profiles:${profiles.length}`);
 
   if (window.currentUserIndex >= 0 && profiles[window.currentUserIndex]) {
     window.userProfiles = profiles;
     window.switchUser(window.currentUserIndex);
   } else {
-    window._dbg('ERROR: índice inválido → showAuthScreen');
     window.showAuthScreen();
   }
 };
@@ -750,7 +708,7 @@ window.saveProgressToCloud = async function() {
     return;
   }
 
-  await waitForFirebase(3000);
+  await waitForFirebase(2000);
   if (window._saveProgress) {
     // Guardar gameState actual + pinHash del usuario local
     const toSave = Object.assign({}, gs, {
