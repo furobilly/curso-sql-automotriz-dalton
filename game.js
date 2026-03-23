@@ -1066,14 +1066,34 @@ async function init() {
         window.gameState.db = new SQL.Database();
         window.gameState.db.run(dbSeed);
         clearInterval(interval);
-        setTimeout(() => {
+        setTimeout(async () => {
           document.getElementById('loadingScreen').classList.add('hidden');
           if (window.currentUserIndex >= 0 && window.userProfiles[window.currentUserIndex]) {
+            // Cargar local inmediatamente para no bloquear
             loadUserProfile(window.currentUserIndex);
             document.getElementById('mainApp').classList.remove('hidden');
             renderGame(); createParticles(); updateAvatars();
+
+            // En paralelo: verificar si Firebase tiene datos más recientes
+            const localUser = window.userProfiles[window.currentUserIndex];
+            if (localUser?.id && typeof window._loadUserById === 'function') {
+              await waitForFirebase(3000);
+              const cloudState = await window._loadUserById(localUser.id);
+              if (cloudState) {
+                const cloudTime = cloudState.lastVisit ? new Date(cloudState.lastVisit).getTime() : 0;
+                const localTime = localUser.lastVisit ? new Date(localUser.lastVisit).getTime() : 0;
+                if (cloudTime > localTime) {
+                  // Nube tiene datos más recientes — actualizar sin recargar
+                  const merged = Object.assign({}, cloudState, { pinHash: localUser.pinHash });
+                  window.userProfiles[window.currentUserIndex] = merged;
+                  localStorage.setItem('nexusSQL_users', JSON.stringify(window.userProfiles));
+                  loadUserProfile(window.currentUserIndex);
+                  renderGame(); updateAvatars(); updateStats();
+                  renderChallenges(); updateProgressBar(); updateSkillBars();
+                }
+              }
+            }
           } else {
-            // Mostrar pantalla de autenticación con Firebase + PIN
             if (typeof window.showAuthScreen === 'function') {
               window.showAuthScreen();
             } else {
