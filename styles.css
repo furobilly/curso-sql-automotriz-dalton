@@ -1045,21 +1045,96 @@ body::after {
 .hidden { display: none !important; }
 
 /* ============================================
-   RESPONSIVO
+   RESPONSIVO — TABLET
    ============================================ */
 @media (max-width: 1100px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
+  .content-grid { grid-template-columns: 1fr; }
   .panel { max-height: none; }
-  .header { flex-direction: column; gap: 12px; }
-  .stats-bar { flex-wrap: wrap; justify-content: center; }
+  .header { flex-direction: column; gap: 10px; padding: 12px 16px; }
+  .stats-bar { flex-wrap: wrap; justify-content: center; gap: 8px; }
 }
 
-@media (max-width: 600px) {
-  .avatar-selector { flex-direction: column; align-items: center; }
-  .editor-controls { flex-direction: column; }
-  .editor-controls .btn { width: 100%; justify-content: center; }
+/* ============================================
+   RESPONSIVO — MÓVIL
+   ============================================ */
+@media (max-width: 768px) {
+  /* App container sin padding lateral */
+  .app-container { padding: 8px; }
+
+  /* Header compacto en móvil */
+  .header { padding: 10px 12px; border-radius: 10px; margin-bottom: 10px; }
+  .header-title .title-text { font-size: 16px; letter-spacing: 2px; }
+  .header-title .title-sub { font-size: 9px; }
+  .header-title > span[style*="font-size:40px"] { font-size: 28px !important; }
+
+  /* Stats bar más compacta */
+  .stats-bar { gap: 6px; }
+  .stat-badge { padding: 5px 10px; font-size: 11px; }
+  .toggle-btn { padding: 6px 8px; font-size: 14px; }
+
+  /* Ocultar nombre en header en móvil pequeño, mostrar solo avatar */
+  #playerName { font-size: 13px !important; }
+  #playerRank { font-size: 9px !important; }
+
+  /* Grid: una sola columna, reordenar */
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Panel izquierdo: más compacto */
+  .panel { padding: 14px; border-radius: 10px; }
+  .panel-avatar-icon { font-size: 40px !important; }
+  .panel h3 { font-size: 10px; }
+
+  /* Panel izquierdo — colapsar módulos */
+  #challengeList .challenge-item { padding: 10px 12px; font-size: 12px; }
+
+  /* Panel central — editor más pequeño */
+  .sql-editor { min-height: 120px; font-size: 13px; padding: 12px; }
+  .editor-controls { flex-wrap: wrap; gap: 6px; }
+  .editor-controls .btn { flex: 1; min-width: 80px; font-size: 11px; padding: 10px 8px; }
+
+  /* Resultados */
+  .results { padding: 12px; }
+  .results table { font-size: 11px; }
+  .results th, .results td { padding: 6px 8px; }
+
+  /* Ocultar panel derecho por default en móvil — se muestra como acordeón */
+  .content-grid > aside:last-child {
+    order: 3;
+  }
+  .content-grid > main { order: 1; }
+  .content-grid > aside:first-child { order: 2; }
+
+  /* Onboarding más compacto */
+  .onboarding-content { padding: 24px 20px; }
+  .logo-animation { width: 120px; height: 120px; }
+
+  /* Progress bars */
+  .progress-bar-container { height: 16px; }
+  .progress-bar-fill { font-size: 9px; }
+
+  /* Skill bars */
+  .skill-bar-fill { font-size: 8px; }
+
+  /* Auth screen */
+  #authScreen > div > div {
+    padding: 24px 20px !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Muy pequeño — simplificar aún más */
+  .header-title .title-text { font-size: 14px; letter-spacing: 1px; }
+  .stat-badge { padding: 4px 8px; font-size: 10px; }
+
+  /* En pantallas muy pequeñas, ocultar algunos stats */
+  #statStreak { display: none !important; }
+
+  .avatar-selector { flex-direction: column; align-items: center; gap: 10px; }
+  .editor-controls .btn { font-size: 10px; padding: 9px 6px; }
 }
 
 /* ============================================
