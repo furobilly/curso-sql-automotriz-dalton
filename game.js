@@ -168,7 +168,11 @@ const allBadges = [
   { id: 'domador', name: 'Domador de WHERE', icon: '⚔️', desc: 'Completar ejercicio 1.7' },
   { id: 'between', name: 'Maestro del Rango', icon: '📊', desc: 'Completar ERROR DE NODO 1.8' },
   { id: 'boss1', name: 'Vencedor de Roberto', icon: '👑', desc: 'Completar Boss Final Módulo 1' },
-  { id: 'mundo1', name: 'Salvador de GDL', icon: '🏆', desc: '100% Módulo 1' }
+  { id: 'mundo1', name: 'Salvador de GDL', icon: '🏆', desc: '100% Módulo 1' },
+  { id: 'boss2', name: 'Precisión Quirúrgica', icon: '🎯', desc: 'Completar Boss Final Módulo 2' },
+  { id: 'mundo2', name: 'Salvador de SLP', icon: '🚚', desc: '100% Módulo 2' },
+  { id: 'boss3', name: 'Rey de los Rankings', icon: '⛰️', desc: 'Completar Boss Final Módulo 3' },
+  { id: 'mundo3', name: 'Salvador de MTY', icon: '👑', desc: '100% Módulo 3' }
 ];
 
 // ============================================
@@ -235,6 +239,97 @@ const dbSeed = `
   (6, 'AX006TY', 6, '2024-02-10', 'Crédito', 520000),
   (7, 'AX004TY', 7, '2024-02-15', 'Efectivo', 700000),
   (8, 'AX010TY', 8, '2024-02-20', NULL, 850000);
+
+  -- ============ MÓDULO 2: SAN LUIS POTOSÍ (Honda/Kia) ============
+  CREATE TABLE T_Inventario_SLP (
+    C_VIN TEXT PRIMARY KEY,          -- VIN único de la unidad
+    C_Marca TEXT,                    -- Honda, Kia, Toyota (distractor)
+    C_Modelo TEXT,                   -- Modelos para practicar LIKE
+    C_Anio INTEGER,
+    C_Color TEXT,                    -- Algunos NULL (borrados por The Void)
+    C_Precio INTEGER,                -- Algunos NULL (para IS NOT NULL del Boss)
+    C_Numero_Motor TEXT,             -- Algunos NULL (reto de validación)
+    C_ID_Lote INTEGER                -- Para BETWEEN 500-750
+  );
+
+  INSERT INTO T_Inventario_SLP VALUES
+  ('SL7001X', 'Honda', 'CR-V',     2024, 'Gris',   720000, 'NM-8891', 510),
+  ('SL7002X', 'Honda', 'City',     2024, 'Azul',   380000, 'NM-8892', 505),
+  ('SLP003A', 'Honda', 'Civic',    2024, 'Gris',   NULL,   'NM-8893', 600),
+  ('SLP004B', 'Honda', 'Pilot',    2024, 'Blanco', 890000, NULL,      701),
+  ('SLP005C', 'Honda', 'Accord',   2024, 'Plata',  640000, 'NM-8895', 480),
+  ('SLP006D', 'Kia',   'Korte',    2024, 'Rojo',   350000, 'NM-8896', 520),
+  ('SLP007E', 'Kia',   'Kicks',    2024, 'Negro',  330000, 'NM-8897', 760),
+  ('SLP008F', 'Kia',   'Sportage', 2024, 'Azul',   560000, NULL,      730),
+  ('SLP009G', 'Kia',   'Rio',      2024, NULL,     290000, 'NM-8899', 540),
+  ('SLP010H', 'Kia',   'K5',       2024, 'Blanco', 495000, 'NM-8900', 495),
+  ('SLP011J', 'Toyota','Yaris',    2024, NULL,     310000, 'NM-8901', 610),
+  ('SLP012K', 'Toyota','Corolla',  2024, 'Negro',  450000, 'NM-8902', 655);
+
+  CREATE TABLE T_Clientes_SLP (
+    C_ID_Cliente INTEGER PRIMARY KEY,
+    C_Nombre_Completo TEXT,          -- Incluye cuentas 'Admin' fantasma (reto LIKE)
+    C_Correo TEXT,
+    C_Telefono TEXT,
+    C_Ciudad_Registro TEXT
+  );
+
+  INSERT INTO T_Clientes_SLP VALUES
+  (1, 'Patricia Salinas',    'paty@slp.mx',        '4441112233', 'San Luis Potosí'),
+  (2, 'Admin_Fantasma01',    'void@nexus.err',     '0000000000', 'Desconocida'),
+  (3, 'Jorge Admin Torres',  'jadmin@nexcorp.mx',  '4442223344', 'San Luis Potosí'),
+  (4, 'Lucía Ramos',         'lucia@gmail.com',    '4443334455', 'Soledad'),
+  (5, 'Sofía Delgado',       'sofia.d@nexcorp.mx', '4444445566', 'San Luis Potosí');
+
+  -- ============ MÓDULO 3: MONTERREY (Don Víctor - Alta Gama) ============
+  CREATE TABLE T_Inventario_MTY (
+    C_VIN TEXT PRIMARY KEY,
+    C_Marca TEXT,                    -- Algunas NULL (borradas por The Void, reto CASE)
+    C_Modelo TEXT,
+    C_Anio INTEGER,                  -- Mezcla <2024 y 2024 (reto de descuentos)
+    C_Color TEXT,
+    C_Precio INTEGER,                -- >800k y <800k (reto Premium/Comercial)
+    C_Stock INTEGER,                 -- 0, <3 y >=3 (reto semáforo)
+    C_Kilometraje INTEGER            -- Para Top 5 VIP (km más bajo)
+  );
+
+  INSERT INTO T_Inventario_MTY VALUES
+  ('MT001LX', 'Lexus',  'LX600',       2024, 'Negro',  2100000, 1, 5),
+  ('MT002LX', 'Lexus',  'RX500',       2024, 'Blanco', 1450000, 0, 12),
+  ('MT003LX', 'Lexus',  'NX350',       2023, 'Gris',    980000, 3, 8000),
+  ('MT004LX', 'Lexus',  'ES300',       2022, 'Plata',   890000, 2, 15000),
+  ('MT005LX', 'Lexus',  'UX250',       2021, 'Azul',    720000, 4, 22000),
+  ('MT006TY', 'Toyota', 'LandCruiser', 2024, 'Negro',  1890000, 0, 10),
+  ('MT007TY', 'Toyota', 'Sequoia',     2024, 'Blanco', 1350000, 1, 20),
+  ('MT008TY', 'Toyota', 'Tundra',      2023, 'Rojo',   1100000, 2, 9000),
+  ('MT009TY', 'Toyota', 'Sienna',      2024, 'Gris',    860000, 5, 15),
+  ('MT010TY', 'Toyota', 'Prado',       2022, 'Verde',   790000, 0, 18000),
+  ('MT011TY', 'Toyota', 'Crown',       2024, 'Azul',    750000, 3, 25),
+  ('MT012BD', 'BYD',    'Tang',        2024, 'Negro',   820000, 2, 30),
+  ('MT013BD', 'BYD',    'Han',         2023, 'Blanco',  640000, 6, 7000),
+  ('MT014BD', 'BYD',    'Seal',        2024, 'Azul',    560000, 0, 40),
+  ('MT015BD', 'BYD',    'Yuan',        2024, 'Rojo',    430000, 8, 12),
+  ('MT016KA', 'Kia',    'EV9',         2024, 'Gris',   1050000, 1, 18),
+  ('MT017KA', 'Kia',    'Carnival',    2023, 'Blanco',  780000, 4, 11000),
+  ('MT018KA', 'Kia',    'Stinger',     2022, 'Rojo',    690000, 0, 19000),
+  ('MT019XX', NULL,     'Fantasma-01', 2024, NULL,      500000, 1, 0),
+  ('MT020XX', NULL,     'Fantasma-02', 2023, 'Gris',    470000, 2, 5000);
+
+  CREATE TABLE T_Clientes_MTY (
+    C_ID_Cliente INTEGER PRIMARY KEY,
+    C_Nombre_Completo TEXT,          -- Para ordenar A-Z
+    C_Correo TEXT,
+    C_Telefono TEXT,
+    C_Ciudad_Registro TEXT
+  );
+
+  INSERT INTO T_Clientes_MTY VALUES
+  (1, 'Ricardo Elizondo',  'relizondo@acero.mx',   '8181112233', 'Monterrey'),
+  (2, 'Alejandra Garza',   'agarza@vip.mx',        '8182223344', 'San Pedro'),
+  (3, 'Mauricio Treviño',  'mtrevino@norte.mx',    '8183334455', 'Monterrey'),
+  (4, 'Bárbara Villarreal','bvilla@gmail.com',     '8184445566', 'Apodaca'),
+  (5, 'Gerardo Cantú',     'gcantu@outlook.com',   '8185556677', 'Monterrey'),
+  (6, 'Daniela Sada',      'dsada@nexcorp.mx',     '8186667788', 'San Pedro');
 `;
 
 // ============================================
@@ -484,6 +579,158 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  2: {
+    title: 'El Rastreo Quirúrgico (SLP)',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>IN (a, b)</code> — busca en una lista (sustituye muchos OR)<br>
+      <code>NOT</code> — excluye lo que estorba<br>
+      <code>LIKE '%'</code> — % = cualquier cantidad de caracteres<br>
+      <code>LIKE '_'</code> — _ = exactamente UN carácter<br>
+      <code>IS NULL / IS NOT NULL</code> — datos vacíos o completos<br><br>
+      <em>Tip: Sofía es perfeccionista. Filtros exactos, no aproximaciones.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '📦 Filtro Selectivo (IN)',
+        expected: "SELECT * FROM T_Inventario_SLP WHERE C_Marca IN ('Honda', 'Kia')",
+        hint: "SELECT * FROM T_Inventario_SLP WHERE C_Marca IN ('Honda', 'Kia');",
+        example: "SELECT * FROM T_Inventario_SLP WHERE C_Color IN ('Gris', 'Azul');"
+      },
+      {
+        id: 2, desc: '🚫 Exclusión Crítica (NOT)',
+        expected: "SELECT * FROM T_Inventario_SLP WHERE NOT C_Color = 'Negro'",
+        hint: "SELECT * FROM T_Inventario_SLP WHERE NOT C_Color = 'Negro';",
+        example: "SELECT * FROM T_Inventario_SLP WHERE NOT C_Marca = 'Toyota';"
+      },
+      {
+        id: 3, desc: '🔤 El Carácter Perdido (LIKE K____)',
+        expected: "SELECT * FROM T_Inventario_SLP WHERE C_Modelo LIKE 'K____'",
+        hint: "SELECT * FROM T_Inventario_SLP WHERE C_Modelo LIKE 'K____';",
+        example: "SELECT * FROM T_Inventario_SLP WHERE C_Modelo LIKE 'C%';"
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: VIN Fantasma (posición 3 = 7, termina en X)',
+        expected: "SELECT * FROM T_Inventario_SLP WHERE C_VIN LIKE '__7%X'",
+        hint: "SELECT * FROM T_Inventario_SLP WHERE C_VIN LIKE '__7%X';",
+        example: "SELECT * FROM T_Inventario_SLP WHERE C_VIN LIKE 'SL%';"
+      },
+      {
+        id: 5, desc: '✅ Validación de Salida (motor registrado)',
+        expected: 'SELECT * FROM T_Inventario_SLP WHERE C_Numero_Motor IS NOT NULL',
+        hint: 'SELECT * FROM T_Inventario_SLP WHERE C_Numero_Motor IS NOT NULL;',
+        example: 'SELECT * FROM T_Inventario_SLP WHERE C_Numero_Motor IS NULL;'
+      },
+      {
+        id: 6, desc: '🎨 Multi-Filtro (Honda Blanco u Plata)',
+        expected: "SELECT * FROM T_Inventario_SLP WHERE C_Marca = 'Honda' AND (C_Color = 'Blanco' OR C_Color = 'Plata')",
+        hint: "SELECT * FROM T_Inventario_SLP WHERE C_Marca = 'Honda' AND (C_Color = 'Blanco' OR C_Color = 'Plata');",
+        example: "SELECT * FROM T_Inventario_SLP WHERE C_Marca = 'Kia' AND (C_Color = 'Rojo' OR C_Color = 'Negro');"
+      },
+      {
+        id: 7, desc: '🚛 Rango Logístico (Lote 500-750)',
+        expected: 'SELECT * FROM T_Inventario_SLP WHERE C_ID_Lote BETWEEN 500 AND 750',
+        hint: 'SELECT * FROM T_Inventario_SLP WHERE C_ID_Lote BETWEEN 500 AND 750;',
+        example: 'SELECT * FROM T_Inventario_SLP WHERE C_Precio BETWEEN 300000 AND 500000;'
+      },
+      {
+        id: 8, desc: "⚠️ ERROR DE NODO: Clientes 'Admin' encriptados",
+        expected: "SELECT * FROM T_Clientes_SLP WHERE C_Nombre_Completo LIKE '%Admin%'",
+        hint: "SELECT * FROM T_Clientes_SLP WHERE C_Nombre_Completo LIKE '%Admin%';",
+        example: "SELECT * FROM T_Clientes_SLP WHERE C_Correo LIKE '%nexcorp%';"
+      },
+      {
+        id: 9, desc: '🧹 Limpieza de Sofía (sin color registrado)',
+        expected: 'SELECT * FROM T_Inventario_SLP WHERE C_Color IS NULL',
+        hint: 'SELECT * FROM T_Inventario_SLP WHERE C_Color IS NULL;',
+        example: 'SELECT * FROM T_Inventario_SLP WHERE C_Precio IS NULL;'
+      },
+      {
+        id: 10, desc: '🔀 Doble Negación (no Honda, no más de 400k)',
+        expected: "SELECT * FROM T_Inventario_SLP WHERE C_Marca != 'Honda' AND C_Precio <= 400000",
+        hint: "SELECT * FROM T_Inventario_SLP WHERE C_Marca != 'Honda' AND C_Precio <= 400000;",
+        example: "SELECT * FROM T_Inventario_SLP WHERE C_Marca != 'Kia' AND C_Precio >= 600000;"
+      }
+    ],
+    xp: 150, coins: 1200, difficulty: 2, skill: 'WHERE',
+    diaryEntry: 'Día 2: SLP restaurado. Sofía despachó los camiones a la frontera sin una sola multa. Los filtros quirúrgicos funcionan.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
+  },
+  3: {
+    title: 'El Altar de la Exclusividad (MTY)',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>ORDER BY col ASC/DESC</code> — ordena (A-Z / mayor a menor)<br>
+      <code>LIMIT n</code> — solo las primeras n filas (en SQL Server: TOP n)<br>
+      <code>CASE WHEN ... THEN ... ELSE ... END</code> — crea columnas con lógica<br><br>
+      <em>Tip: Don Víctor no quiere "todos los datos", quiere "los mejores".</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '💎 El Más Caro (ORDER BY DESC + LIMIT)',
+        expected: 'SELECT C_Modelo, C_Precio FROM T_Inventario_MTY ORDER BY C_Precio DESC LIMIT 1',
+        hint: 'SELECT C_Modelo, C_Precio FROM T_Inventario_MTY ORDER BY C_Precio DESC LIMIT 1;',
+        example: 'SELECT C_Modelo, C_Precio FROM T_Inventario_MTY ORDER BY C_Precio ASC LIMIT 1;'
+      },
+      {
+        id: 2, desc: '🔤 Alfabeto de Ventas (A-Z)',
+        expected: 'SELECT * FROM T_Clientes_MTY ORDER BY C_Nombre_Completo ASC',
+        hint: 'SELECT * FROM T_Clientes_MTY ORDER BY C_Nombre_Completo ASC;',
+        example: 'SELECT * FROM T_Clientes_MTY ORDER BY C_Ciudad_Registro ASC;'
+      },
+      {
+        id: 3, desc: '🏁 El Top 5 VIP (menor kilometraje)',
+        expected: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Kilometraje ASC LIMIT 5',
+        hint: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Kilometraje ASC LIMIT 5;',
+        example: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Kilometraje DESC LIMIT 5;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: Doble Orden (Marca A-Z, Precio DESC)',
+        expected: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Marca ASC, C_Precio DESC',
+        hint: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Marca ASC, C_Precio DESC;',
+        example: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Anio DESC, C_Modelo ASC;'
+      },
+      {
+        id: 5, desc: '🏷️ Categorización Simple (CASE Premium/Comercial)',
+        expected: "SELECT C_Modelo, C_Precio, CASE WHEN C_Precio > 800000 THEN 'Premium' ELSE 'Comercial' END AS M_Segmento FROM T_Inventario_MTY",
+        hint: "SELECT C_Modelo, C_Precio, CASE WHEN C_Precio > 800000 THEN 'Premium' ELSE 'Comercial' END AS M_Segmento FROM T_Inventario_MTY;",
+        example: "SELECT C_Modelo, CASE WHEN C_Anio = 2024 THEN 'Nuevo' ELSE 'Anterior' END AS M_Tipo FROM T_Inventario_MTY;"
+      },
+      {
+        id: 6, desc: '🚦 Semáforo de Stock (CASE de 3 niveles)',
+        expected: "SELECT C_Modelo, C_Stock, CASE WHEN C_Stock = 0 THEN 'AGOTADO' WHEN C_Stock < 3 THEN 'CRITICO' ELSE 'OK' END AS M_Estado FROM T_Inventario_MTY",
+        hint: "SELECT C_Modelo, C_Stock, CASE WHEN C_Stock = 0 THEN 'AGOTADO' WHEN C_Stock < 3 THEN 'CRITICO' ELSE 'OK' END AS M_Estado FROM T_Inventario_MTY;",
+        example: "SELECT C_Modelo, CASE WHEN C_Kilometraje = 0 THEN 'CERO KM' WHEN C_Kilometraje < 100 THEN 'DEMO' ELSE 'USADO' END AS M_Uso FROM T_Inventario_MTY;"
+      },
+      {
+        id: 7, desc: '👑 El 10% de Élite (2 de 20 autos)',
+        expected: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Precio DESC LIMIT 2',
+        hint: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Precio DESC LIMIT 2; -- En SQL Server: SELECT TOP 10 PERCENT',
+        example: 'SELECT * FROM T_Inventario_MTY ORDER BY C_Precio ASC LIMIT 2;'
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: Marcas borradas (CASE + IS NULL)',
+        expected: "SELECT CASE WHEN C_Marca IS NULL THEN 'POR CLASIFICAR' ELSE C_Marca END AS M_Marca, C_Modelo FROM T_Inventario_MTY",
+        hint: "SELECT CASE WHEN C_Marca IS NULL THEN 'POR CLASIFICAR' ELSE C_Marca END AS M_Marca, C_Modelo FROM T_Inventario_MTY;",
+        example: "SELECT CASE WHEN C_Color IS NULL THEN 'SIN COLOR' ELSE C_Color END AS M_Color, C_Modelo FROM T_Inventario_MTY;"
+      },
+      {
+        id: 9, desc: '📅 Ranking de Antigüedad (solo Lexus, recientes arriba)',
+        expected: "SELECT * FROM T_Inventario_MTY WHERE C_Marca = 'Lexus' ORDER BY C_Anio DESC",
+        hint: "SELECT * FROM T_Inventario_MTY WHERE C_Marca = 'Lexus' ORDER BY C_Anio DESC;",
+        example: "SELECT * FROM T_Inventario_MTY WHERE C_Marca = 'Toyota' ORDER BY C_Anio DESC;"
+      },
+      {
+        id: 10, desc: '💸 Lógica de Descuentos (CASE con cálculo)',
+        expected: 'SELECT C_Modelo, C_Precio, CASE WHEN C_Anio < 2024 THEN C_Precio * 0.9 ELSE C_Precio END AS M_Precio_Final FROM T_Inventario_MTY',
+        hint: 'SELECT C_Modelo, C_Precio, CASE WHEN C_Anio < 2024 THEN C_Precio * 0.9 ELSE C_Precio END AS M_Precio_Final FROM T_Inventario_MTY;',
+        example: 'SELECT C_Modelo, CASE WHEN C_Stock = 0 THEN C_Precio * 1.05 ELSE C_Precio END AS M_Precio_Pedido FROM T_Inventario_MTY;'
+      }
+    ],
+    xp: 200, coins: 1500, difficulty: 3, skill: 'ORDER',
+    diaryEntry: 'Día 3: Monterrey en línea. Don Víctor tiene sus rankings y sus clientes VIP sus camionetas. "No estás tan mal, muchacho", dijo. Viniendo de él, es un trofeo.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -577,6 +824,139 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — Practica con datos reales
+          </div>`
+      }
+    ]
+  },
+  2: {
+    title: 'Filtros de Precisión: IN, NOT, LIKE, NULL',
+    slides: [
+      // SLIDE 1 — Contexto / Sofía habla
+      {
+        icon: '🚚',
+        tag: 'NEXUS SQL — NODO SLP',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">🚚</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Centro de Logística — San Luis Potosí</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">👷‍♀️ SOFÍA — Jefa de Patio</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "El virus borró las etiquetas de los embarques de <strong>Honda</strong> y <strong>Kia</strong>.
+              Tengo camiones listos para la frontera y no sé cuáles llevan equipo de lujo."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Si mando el cargamento equivocado, la multa de la aduana nos hunde.
+              Necesito <strong style="color:var(--accent);">filtros perfectos, no aproximaciones.</strong>"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El laberinto de Sofía
+          </div>`
+      },
+      // SLIDE 2 — IN y NOT
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🎯</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El lente de precisión</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">IN ('Honda', 'Kia')</code> — busca en una <strong>lista</strong>. Sustituye escribir muchos OR.</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">SELECT * FROM T_Inventario_SLP<br>WHERE C_Marca IN ('Honda', 'Kia');</div>
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">NOT</code> — <strong>excluye</strong> lo que estorba.</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;">SELECT * FROM T_Inventario_SLP<br>WHERE NOT C_Color = 'Negro';</div>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Listas y exclusiones
+          </div>`
+      },
+      // SLIDE 3 — LIKE con comodines + NULL
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🔍</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Comodines y datos vacíos</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">%</code> — sustituye <strong>cualquier cantidad</strong> de caracteres → <code>LIKE 'K%'</code> = empieza con K</p>
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">_</code> — sustituye <strong>exactamente UN</strong> carácter → <code>LIKE 'K____'</code> = 5 letras, empieza con K</p>
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">IS NULL</code> — el dato está <strong>vacío</strong> (el virus lo borró)</p>
+            <p><code style="color:var(--primary);">IS NOT NULL</code> — el dato <strong>sí existe</strong> (información completa)</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "NULL no es cero ni texto vacío. Es ausencia total de dato." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — Los camiones esperan
+          </div>`
+      }
+    ]
+  },
+  3: {
+    title: 'Jerarquía y Lógica: ORDER BY, LIMIT, CASE',
+    slides: [
+      // SLIDE 1 — Contexto / Don Víctor habla
+      {
+        icon: '⛰️',
+        tag: 'NEXUS SQL — NODO MTY',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">⛰️</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Corporativo Norte — Monterrey</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">🚬 DON VÍCTOR — Director del Norte</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "Escucha bien, muchacho. En Monterrey no perdemos el tiempo con minucias.
+              El virus me revolvió los precios y las prioridades.
+              No sé quién es mi cliente #1 ni cuál es el auto más caro que tengo en piso."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "<strong style="color:var(--accent);">Arregla mis rankings</strong> o te enviaré de regreso a GDL a pie."
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El orgullo de Monterrey
+          </div>`
+      },
+      // SLIDE 2 — ORDER BY y LIMIT
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">📊</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El arte del orden</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">ORDER BY col ASC</code> — de menor a mayor / A-Z (es el <strong>default</strong>)</p>
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">ORDER BY col DESC</code> — de mayor a menor / Z-A</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">SELECT * FROM T_Inventario_MTY<br>ORDER BY C_Precio DESC<br>LIMIT 5;</div>
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">LIMIT n</code> — solo las primeras n filas del resultado ordenado.</p>
+            <p style="color:var(--muted);font-size:13px;">⚠️ En SQL Server (tu trabajo real) se escribe <code>SELECT TOP 5 ...</code> — mismo concepto, otra sintaxis. Aquí practicamos con LIMIT.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Solo la crema y nata
+          </div>`
+      },
+      // SLIDE 3 — CASE WHEN
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🧠</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El cerebro de SQL</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">CASE WHEN</code> crea <strong>columnas nuevas con lógica</strong>, sobre la marcha:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">CASE<br>&nbsp;&nbsp;WHEN C_Precio > 800000 THEN 'Premium'<br>&nbsp;&nbsp;ELSE 'Comercial'<br>END AS M_Segmento</div>
+            <p style="margin-bottom:8px;">Se evalúa <strong>de arriba hacia abajo</strong>: la primera condición que se cumpla, gana.</p>
+            <p style="color:var(--muted);font-size:13px;">La columna calculada lleva prefijo <code>M_</code> — la convención NEXUS que ya conoces.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Si el precio pasa de un millón, etiquétalo 'Lujo'. Si no, 'Estándar'. Así piensa un CASE." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — Don Víctor espera su Top 10
           </div>`
       }
     ]
@@ -1408,9 +1788,27 @@ function updateStats() {
 function renderChallenges() {
   const list = document.getElementById('challengeList');
   list.innerHTML = '';
-  for (let i = 1; i <= 1; i++) {
+  const moduleIds = Object.keys(challenges).map(Number).sort((a, b) => a - b); // Todos los módulos definidos, en orden
+  for (const i of moduleIds) {
     const ch = challenges[i];
     const completed = window.gameState.completedSubExercises[i] || [];
+    // Candado: el módulo N se desbloquea al completar los 10 ejercicios del N-1
+    const prevDone = (window.gameState.completedSubExercises[i - 1] || []).length === 10;
+    const isLocked = i > 1 && !prevDone;
+    if (isLocked) {
+      const lockDiv = document.createElement('div');
+      lockDiv.className = 'challenge-item';
+      lockDiv.style.opacity = '0.45';
+      lockDiv.style.cursor = 'not-allowed';
+      lockDiv.innerHTML = `
+        <div style="display:flex;justify-content:space-between;">
+          <div style="font-weight:bold;">🔒 ${i}. ${ch.title}</div>
+          <div style="font-size:11px;">[0/10]</div>
+        </div>
+        <div style="font-size:11px;margin-top:4px;color:var(--muted);">Completa el Módulo ${i - 1} para desbloquear</div>`;
+      list.appendChild(lockDiv);
+      continue;                                                       // Bloqueado: sin expansión ni clicks
+    }
     const isCurrent = window.gameState.currentChallenge === i;
     const isExpanded = window.gameState.expandedChallenges.includes(i);
     const isFullDone = completed.length === 10;
@@ -1475,11 +1873,13 @@ function loadChallenge(cId, sId) {
 
 function updateProgressBar() {
   let total = 0;
-  for (let i = 1; i <= 1; i++) total += (window.gameState.completedSubExercises[i] || []).length;
-  const pct = Math.round((total / 10) * 100);
+  const ids = Object.keys(challenges).map(Number);                    // Todos los módulos definidos
+  for (const i of ids) total += (window.gameState.completedSubExercises[i] || []).length;
+  const grandTotal = ids.length * 10;                                 // 10 ejercicios por módulo
+  const pct = Math.round((total / grandTotal) * 100);
   const el = document.getElementById('worldProgress');
   const bar = document.getElementById('worldProgressBar');
-  if (el) el.textContent = `${total}/10`;
+  if (el) el.textContent = `${total}/${grandTotal}`;
   if (bar) { bar.style.width = pct + '%'; bar.textContent = pct + '%'; }
   const stars = document.getElementById('lorenzoRep');
   if (stars) {
@@ -1632,43 +2032,76 @@ function completeSubExercise(cId, sId, results) {
 }
 
 // ============================================
-// TRIVIA
+// TRIVIA — DATA-DRIVEN (un objeto por módulo)
+// Para agregar trivia de un módulo nuevo: solo agregar entrada aquí.
 // ============================================
+const triviaData = {
+  1: {
+    npc: 'La Ing. Ana te evalúa en tiempo real',                     // Quién pregunta
+    question: "Si Roberto te pide ver los autos que NO son de color 'Rojo', ¿qué operador de comparación usarías en el WHERE?",
+    options: { A: '==', B: '&lt;&gt; o !=', C: 'NOT LIKE' },          // Opciones mostradas
+    correct: 'B',                                                     // Letra correcta
+    explanation: '<strong>&lt;&gt;</strong> o <strong>!=</strong> significa "diferente de".',
+    coins: 200, xp: 20                                                // Recompensa
+  },
+  2: {
+    npc: 'Sofía te lanza la pregunta mientras sella un manifiesto',
+    question: 'Si quieres buscar todos los modelos que terminen con la letra "o" (como "Civic\u200bo" o "Ri\u200bo"), ¿cuál es el patrón correcto en el LIKE?',
+    options: { A: "'o%'", B: "'%o'", C: "'_o'" },
+    correct: 'B',
+    explanation: "<strong>'%o'</strong>: el % va ANTES porque sustituye todo lo que hay antes de la 'o' final.",
+    coins: 300, xp: 30
+  },
+  3: {
+    npc: 'Don Víctor te mide con la mirada desde su escritorio de mármol',
+    question: 'Si usas ORDER BY C_Precio sin especificar ASC ni DESC, ¿cómo ordenará SQL los datos por defecto?',
+    options: { A: 'De mayor a menor (DESC)', B: 'De menor a mayor (ASC)', C: 'De forma aleatoria' },
+    correct: 'B',
+    explanation: '<strong>ASC</strong> es el orden por defecto: si no dices nada, SQL ordena de menor a mayor (A-Z).',
+    coins: 400, xp: 40
+  }
+};
+
 window.showTrivia = function(cId) {
+  const t = triviaData[cId];                                          // Datos del módulo actual
+  if (!t) return;                                                     // Sin trivia definida → no romper
   const content = document.getElementById('modalGenericContent');
+  // Botones generados desde las opciones (A/B/C) del objeto de datos
+  const btns = Object.entries(t.options).map(([k, v]) =>
+    `<button class="btn btn-secondary" onclick="answerTrivia('${k}',${cId})" style="width:100%;margin:8px 0;font-size:15px;">${k}) ${v}</button>`
+  ).join('');
   content.innerHTML = `
     <div style="text-align:center;">
       <div style="font-size:48px;margin-bottom:15px;">⚡</div>
       <h2 style="color:var(--accent);margin-bottom:5px;">TRIVIA DE VELOCIDAD</h2>
-      <p style="color:var(--muted);margin-bottom:20px;">La Ing. Ana te evalúa en tiempo real</p>
+      <p style="color:var(--muted);margin-bottom:20px;">${t.npc}</p>
       <div style="background:rgba(245,158,11,0.1);padding:20px;border-radius:12px;border:2px solid var(--accent);margin:20px 0;text-align:left;">
-        <p style="font-size:16px;margin-bottom:20px;font-style:italic;">"Si Roberto te pide ver los autos que NO son de color 'Rojo', ¿qué operador de comparación usarías en el WHERE?"</p>
-        <button class="btn btn-secondary" onclick="answerTrivia('A')" style="width:100%;margin:8px 0;font-size:15px;">A) ==</button>
-        <button class="btn btn-secondary" onclick="answerTrivia('B')" style="width:100%;margin:8px 0;font-size:15px;">B) &lt;&gt; o !=</button>
-        <button class="btn btn-secondary" onclick="answerTrivia('C')" style="width:100%;margin:8px 0;font-size:15px;">C) NOT LIKE</button>
+        <p style="font-size:16px;margin-bottom:20px;font-style:italic;">"${t.question}"</p>
+        ${btns}
       </div>
-      <p style="font-size:14px;color:var(--accent);">💰 Premio: +200 VC si aciertas a la primera</p>
+      <p style="font-size:14px;color:var(--accent);">💰 Premio: +${t.coins} VC si aciertas a la primera</p>
     </div>`;
   document.getElementById('modalGeneric').classList.add('active');
 };
 
-window.answerTrivia = function(ans) {
+window.answerTrivia = function(ans, cId) {
+  const t = triviaData[cId];                                          // Datos del módulo (respuesta correcta, premios)
   window.gameState.triviaAnswered = true;
   const content = document.getElementById('modalGenericContent');
-  if (ans === 'B') {
+  if (ans === t.correct) {
     sounds.success();
-    window.gameState.coins += 200; window.gameState.xp += 20;
-    createCoinRain(200); saveGameState();
+    window.gameState.coins += t.coins; window.gameState.xp += t.xp;   // Recompensa según el módulo
+    createCoinRain(t.coins); saveGameState();
     content.innerHTML = `
       <div style="text-align:center;">
         <div style="font-size:64px;margin-bottom:20px;">✅</div>
         <h2 style="color:var(--primary);">¡CORRECTO!</h2>
-        <p style="margin:20px 0;font-size:16px;"><strong>&lt;&gt;</strong> o <strong>!=</strong> significa "diferente de".</p>
+        <p style="margin:20px 0;font-size:16px;">${t.explanation}</p>
         <div style="background:linear-gradient(135deg,rgba(0,217,255,0.2),rgba(124,58,237,0.2));padding:25px;border-radius:12px;margin:20px 0;border:2px solid var(--accent);">
-          <div style="font-size:32px;margin:10px 0;">🪙 +200 VC</div>
-          <div style="font-size:32px;margin:10px 0;">⭐ +20 XP</div>
+          <div style="font-size:32px;margin:10px 0;">🪙 +${t.coins} VC</div>
+          <div style="font-size:32px;margin:10px 0;">⭐ +${t.xp} XP</div>
         </div>
-        <button class="btn" onclick="closeModal('modalGeneric');loadChallenge(1,6);" style="width:100%;margin-top:20px;">Continuar →</button>
+        <button class="btn" onclick="closeModal('modalGeneric');loadChallenge(${cId},6);" style="width:100%;margin-top:20px;">Continuar →</button>
       </div>`;
   } else {
     sounds.error();
@@ -1676,51 +2109,153 @@ window.answerTrivia = function(ans) {
       <div style="text-align:center;">
         <div style="font-size:64px;margin-bottom:20px;">❌</div>
         <h2 style="color:var(--danger);">Incorrecto</h2>
-        <p style="margin:20px 0;">Respuesta: <strong>B) &lt;&gt; o !=</strong></p>
+        <p style="margin:20px 0;">Respuesta: <strong>${t.correct}) ${t.options[t.correct]}</strong></p>
         <p style="color:var(--muted);">Sin recompensa esta vez. Sigue adelante.</p>
-        <button class="btn btn-secondary" onclick="closeModal('modalGeneric');loadChallenge(1,6);" style="width:100%;margin-top:20px;">Continuar →</button>
+        <button class="btn btn-secondary" onclick="closeModal('modalGeneric');loadChallenge(${cId},6);" style="width:100%;margin-top:20px;">Continuar →</button>
       </div>`;
   }
 };
 
 // ============================================
-// BOSS FINAL
+// BOSS FINAL — DATA-DRIVEN (un objeto por módulo)
+// checks: cada regla valida tokens en la query normalizada (any = al menos uno debe estar)
 // ============================================
+const bossData = {
+  1: {
+    bossName: 'BOSS FINAL — ROBERTO',
+    introTime: '📍 09:47 AM — Llamada directa de Roberto',
+    introText: `"¡{NAME}! La planta cierra el sistema en 5 minutos.
+      Necesito el <strong>Top 5 de los autos más caros</strong>
+      que sean marca 'Toyota', que <strong>NO sean de color 'Blanco'</strong>
+      y ordenados de <strong>mayor a menor precio</strong>. ¡YA!"`,
+    comboHint: 'Combina: SELECT con LIMIT 5, WHERE, AND, condición de color, ORDER BY DESC',
+    title: '👹 BOSS FINAL — El Ultimátum de Roberto',
+    descShort: 'Top 5 Toyota más caros, NO blancos, ORDER BY DESC',
+    battleCry: 'Top 5 Toyota más caros. NO blancos. Mayor a menor. ¡AHORA!',
+    checks: [
+      { any: ['limit 5', 'top 5'], hint: 'LIMIT 5' },
+      { any: ["'toyota'"], hint: "marca='Toyota'" },
+      { any: ["!= 'blanco'", "<> 'blanco'", "not"], extra: "'blanco'", hint: "color != 'Blanco'" },
+      { any: ['order by'], extra: 'desc', hint: 'ORDER BY ... DESC' },
+      { any: ['c_precio'], hint: 'usar C_Precio' }
+    ],
+    maxRows: 5,                                                       // Máximo de filas esperadas en el resultado
+    xp: 50, coins: 1500,
+    badges: ['boss1', 'mundo1'],
+    newRank: 'Analista SR',
+    victoryTitle: '¡NODO GDL RESTAURADO!',
+    victoryText: `"Lo lograste. Roberto puede despachar las unidades.
+      NexCorp Industries sobrevive otro día.
+      Acabas de demostrar que aprendes SQL más rápido de lo que
+      The Void destruye sistemas."`,
+    victoryNPC: '— Ing. Ana',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 1',
+    victoryBadgeLines: ['👑 Insignia: Vencedor de Roberto', '🏆 Insignia: Salvador de GDL'],
+    moduleLabel: 'Módulo 1 — COMPLETO 100%'
+  },
+  2: {
+    bossName: 'BOSS FINAL — SOFÍA',
+    introTime: '📍 06:58 PM — Barrera de salida, último camión',
+    introText: `"¡{NAME}, el último camión se va! Necesito la lista de todas las camionetas
+      (<strong>modelos que empiecen con 'C'</strong>) de la marca <strong>'Honda'</strong>,
+      que sean de color <strong>'Gris' o 'Azul'</strong>,
+      y que tengan el <strong>C_Precio registrado</strong>.
+      ¡Si el reporte es exacto, desbloqueamos el paso a SLP!"`,
+    comboHint: "Combina: LIKE 'C%', marca Honda, IN ('Gris','Azul') u OR, y C_Precio IS NOT NULL",
+    title: '👹 BOSS FINAL — El Despacho Fronterizo',
+    descShort: "Honda, modelo LIKE 'C%', color Gris/Azul, precio registrado",
+    battleCry: "Camionetas 'C%' Honda, Gris o Azul, con precio. ¡El camión no espera!",
+    checks: [
+      { any: ["'honda'"], hint: "marca = 'Honda'" },
+      { any: ["like 'c%'"], hint: "C_Modelo LIKE 'C%'" },
+      { any: ["'gris'"], hint: "color 'Gris'" },
+      { any: ["'azul'"], hint: "color 'Azul'" },
+      { any: ['is not null'], hint: 'C_Precio IS NOT NULL' }
+    ],
+    maxRows: 10,
+    xp: 80, coins: 1800,
+    badges: ['boss2', 'mundo2'],
+    newRank: null,                                                    // El rango sube por XP, no forzado aquí
+    victoryTitle: '¡NODO SLP RESTAURADO!',
+    victoryText: `"El camión cruzó la barrera con el manifiesto perfecto. Ni una multa.
+      Roberto tenía razón sobre ti: no apruebas aproximaciones, entregas precisión.
+      El Nodo 3 (MTY) ya detecta tu firma digital... Don Víctor te espera."`,
+    victoryNPC: '— Sofía, Jefa de Patio',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 2',
+    victoryBadgeLines: ['🎯 Insignia: Precisión Quirúrgica', '🚚 Insignia: Salvador de SLP'],
+    moduleLabel: 'Módulo 2 — COMPLETO 100%'
+  },
+  3: {
+    bossName: 'BOSS FINAL — DON VÍCTOR',
+    introTime: '📍 08:12 PM — Oficina de mármol, el CEO de la acerera en la línea',
+    introText: `"¡{NAME}! Necesito el <strong>Top 10 de los vehículos más caros</strong>
+      que sean <strong>'Lexus' o 'Toyota'</strong>, pero escúchame bien:
+      quiero una columna extra que diga <strong>'DISPONIBILIDAD INMEDIATA'</strong> si el auto tiene
+      C_Stock mayor a 0, y <strong>'BAJO PEDIDO'</strong> si no tiene.
+      ¡Y ordénalos por precio de forma descendente!"`,
+    comboHint: "Combina: CASE WHEN C_Stock > 0, IN ('Lexus','Toyota'), ORDER BY C_Precio DESC, LIMIT 10",
+    title: '👹 BOSS FINAL — La Gala VIP de Don Víctor',
+    descShort: "Top 10 Lexus/Toyota más caros + columna CASE de disponibilidad, ORDER DESC",
+    battleCry: 'Top 10 más caros. Lexus o Toyota. Columna de disponibilidad. ¡El CEO no espera!',
+    checks: [
+      { any: ['limit 10', 'top 10'], hint: 'LIMIT 10' },
+      { any: ["'lexus'"], hint: "marca 'Lexus'" },
+      { any: ["'toyota'"], hint: "marca 'Toyota'" },
+      { any: ['case when'], hint: 'CASE WHEN para la disponibilidad' },
+      { any: ["'disponibilidad inmediata'"], hint: "etiqueta 'DISPONIBILIDAD INMEDIATA'" },
+      { any: ["'bajo pedido'"], hint: "etiqueta 'BAJO PEDIDO'" },
+      { any: ['order by'], extra: 'desc', hint: 'ORDER BY ... DESC' }
+    ],
+    maxRows: 10,
+    xp: 100, coins: 2000,
+    badges: ['boss3', 'mundo3'],
+    newRank: null,
+    victoryTitle: '¡NODO MTY RESTAURADO!',
+    victoryText: `"El CEO de la acerera firmó por tres blindadas y un LX600.
+      En Monterrey no regalamos elogios, muchacho, pero esto...
+      esto fue trabajo de Especialista. El Nodo 4 (CDMX) te espera.
+      Cuidado con Don Carlos: el CFO no perdona un decimal."`,
+    victoryNPC: '— Don Víctor, Director del Norte',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 3',
+    victoryBadgeLines: ['⛰️ Insignia: Rey de los Rankings', '👑 Insignia: Salvador de MTY'],
+    moduleLabel: 'Módulo 3 — COMPLETO 100%'
+  }
+};
+
 window.showBossFight = function(cId) {
+  const b = bossData[cId];                                            // Datos del boss del módulo
+  if (!b) return;
   const name = window.gameState.playerName;
   const content = document.getElementById('modalGenericContent');
   content.innerHTML = `
     <div style="text-align:center;">
       <div style="font-size:64px;margin-bottom:15px;">👹</div>
-      <h2 style="color:var(--danger);margin-bottom:15px;">BOSS FINAL — El Ultimátum</h2>
+      <h2 style="color:var(--danger);margin-bottom:15px;">${b.title}</h2>
       <div style="background:rgba(239,68,68,0.1);padding:20px;border-radius:12px;border:2px solid var(--danger);margin:20px 0;text-align:left;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">📍 09:47 AM — Llamada directa de Roberto</div>
-        <p style="font-size:16px;font-style:italic;line-height:1.7;">
-          "¡${name}! La planta cierra el sistema en 5 minutos.
-          Necesito el <strong>Top 5 de los autos más caros</strong>
-          que sean marca 'Toyota', que <strong>NO sean de color 'Blanco'</strong>
-          y ordenados de <strong>mayor a menor precio</strong>. ¡YA!"
-        </p>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${b.introTime}</div>
+        <p style="font-size:16px;font-style:italic;line-height:1.7;">${b.introText.replace('{NAME}', name)}</p>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin:15px 0;">Combina: SELECT con LIMIT 5, WHERE, AND, condición de color, ORDER BY DESC</p>
-      <button class="btn" onclick="closeModal('modalGeneric');startBoss();" style="width:100%;font-size:18px;">⚔️ Aceptar Desafío Final</button>
+      <p style="font-size:13px;color:var(--muted);margin:15px 0;">${b.comboHint}</p>
+      <button class="btn" onclick="closeModal('modalGeneric');startBoss(${cId});" style="width:100%;font-size:18px;">⚔️ Aceptar Desafío Final</button>
     </div>`;
   document.getElementById('modalGeneric').classList.add('active');
 };
 
-window.startBoss = function() {
+window.startBoss = function(cId) {
+  cId = cId || window.gameState.currentChallenge;                     // Compatibilidad con llamadas antiguas
+  const b = bossData[cId];
   window.gameState.currentSubExercise = 'BOSS';
-  document.getElementById('challengeTitle').textContent = '👹 BOSS FINAL — El Ultimátum de Roberto';
-  document.getElementById('challengeDesc').textContent = 'Top 5 Toyota más caros, NO blancos, ORDER BY DESC';
+  document.getElementById('challengeTitle').textContent = b.title;
+  document.getElementById('challengeDesc').textContent = b.descShort;
   document.getElementById('npcDialogue').innerHTML = `
     <div class="npc-dialogue">
       <div class="npc-scene">
-        <div class="npc-location">📍 09:51 AM — Sistema en cuenta regresiva</div>
+        <div class="npc-location">${b.introTime}</div>
         <div class="npc-message">
           <span class="npc-avatar" style="font-size:48px;">👹</span>
           <div class="npc-bubble" style="border-color:rgba(239,68,68,0.5);">
-            <div class="npc-name" style="color:var(--danger);">BOSS FINAL — ROBERTO</div>
-            <p>Top 5 Toyota más caros. NO blancos. Mayor a menor. ¡AHORA!</p>
+            <div class="npc-name" style="color:var(--danger);">${b.bossName}</div>
+            <p>${b.battleCry}</p>
           </div>
         </div>
       </div>
@@ -1731,54 +2266,50 @@ window.startBoss = function() {
 };
 
 function checkBossSolution(userQuery, results) {
+  const cId = window.gameState.currentChallenge;
+  const b = bossData[cId];
   const u = normalize(userQuery);
-  const hasLimit = u.includes('limit 5') || u.includes('top 5');
-  const hasToyota = u.includes("'toyota'");
-  const hasNotWhite = u.includes("!= 'blanco'") || u.includes("<> 'blanco'") || (u.includes('not') && u.includes("'blanco'"));
-  const hasOrderDesc = u.includes('order by') && u.includes('desc');
-  const hasPrice = u.includes('c_precio');
-  if (hasLimit && hasToyota && hasNotWhite && hasOrderDesc && hasPrice && results && results[0] && results[0].values.length <= 5) {
-    completeBoss();
+  // Evaluar cada regla: al menos un token de 'any' debe estar (y 'extra' si existe)
+  const failed = b.checks.filter(c => {
+    const anyOk = c.any.some(tok => u.includes(tok));
+    const extraOk = !c.extra || u.includes(c.extra);
+    return !(anyOk && extraOk);
+  });
+  const rowsOk = results && results[0] && results[0].values.length > 0 && results[0].values.length <= b.maxRows;
+  if (failed.length === 0 && rowsOk) {
+    completeBoss(cId);
   } else {
     sounds.error(); window.gameState.attempts++; updateAttemptCounter();
-    let hint = 'Verifica: ';
-    if (!hasLimit) hint += 'LIMIT 5, ';
-    if (!hasToyota) hint += "marca='Toyota', ";
-    if (!hasNotWhite) hint += "color != 'Blanco', ";
-    if (!hasOrderDesc) hint += 'ORDER BY ... DESC, ';
-    alert(hint.slice(0, -2));
+    let hint = failed.length ? 'Verifica: ' + failed.map(c => c.hint).join(', ') : 'Revisa que la consulta regrese filas (y no más de ' + b.maxRows + ')';
+    alert(hint);
   }
 }
 
-function completeBoss() {
+function completeBoss(cId) {
+  const b = bossData[cId];
   sounds.success();
-  window.gameState.xp += 50; window.gameState.coins += 1500;
-  window.gameState.unlockedBadges.push('boss1'); window.gameState.unlockedBadges.push('mundo1');
-  window.gameState.rank = 'Analista SR';
-  createCoinRain(1500); saveGameState();
+  window.gameState.xp += b.xp; window.gameState.coins += b.coins;     // Recompensas del módulo
+  b.badges.forEach(bid => { if (!window.gameState.unlockedBadges.includes(bid)) window.gameState.unlockedBadges.push(bid); });
+  if (b.newRank) window.gameState.rank = b.newRank;                    // Ascenso forzado solo si el módulo lo define
+  createCoinRain(b.coins); saveGameState();
+  const badgeLines = b.victoryBadgeLines.map(l => `<div style="font-size:18px;margin:10px 0;">${l}</div>`).join('');
   const content = document.getElementById('modalGenericContent');
   content.innerHTML = `
     <div style="text-align:center;">
       <div style="font-size:80px;margin-bottom:20px;">👑</div>
-      <h2 style="color:var(--accent);margin-bottom:15px;">¡NODO GDL RESTAURADO!</h2>
+      <h2 style="color:var(--accent);margin-bottom:15px;">${b.victoryTitle}</h2>
       <div style="background:rgba(0,217,255,0.08);border:1px solid var(--primary);border-radius:12px;padding:20px;margin:15px 0;text-align:left;">
-        <p style="font-style:italic;line-height:1.7;font-size:15px;">
-          "Lo lograste. Roberto puede despachar las unidades.
-          NexCorp Industries sobrevive otro día.
-          Acabas de demostrar que aprendes SQL más rápido de lo que
-          The Void destruye sistemas."
-        </p>
-        <p style="color:var(--primary);font-weight:bold;margin-top:10px;">— Ing. Ana</p>
+        <p style="font-style:italic;line-height:1.7;font-size:15px;">${b.victoryText}</p>
+        <p style="color:var(--primary);font-weight:bold;margin-top:10px;">${b.victoryNPC}</p>
       </div>
       <div style="background:linear-gradient(135deg,rgba(0,217,255,0.2),rgba(124,58,237,0.2));padding:25px;border-radius:12px;margin:20px 0;border:2px solid var(--accent);">
-        <div style="font-size:20px;font-weight:bold;margin-bottom:15px;">🏆 RECOMPENSAS DEL MÓDULO 1</div>
-        <div style="font-size:28px;margin:10px 0;">⭐ +50 XP</div>
-        <div style="font-size:28px;margin:10px 0;">🪙 +1,500 VC</div>
-        <div style="font-size:18px;margin:10px 0;">👑 Insignia: Vencedor de Roberto</div>
-        <div style="font-size:18px;margin:10px 0;">🏆 Insignia: Salvador de GDL</div>
-        <div style="font-size:16px;margin:15px 0;color:var(--accent);">📈 Ascenso de Rango: Analista SR</div>
+        <div style="font-size:20px;font-weight:bold;margin-bottom:15px;">${b.victoryRewardsTitle}</div>
+        <div style="font-size:28px;margin:10px 0;">⭐ +${b.xp} XP</div>
+        <div style="font-size:28px;margin:10px 0;">🪙 +${b.coins.toLocaleString()} VC</div>
+        ${badgeLines}
+        ${b.newRank ? `<div style="font-size:16px;margin:15px 0;color:var(--accent);">📈 Ascenso de Rango: ${b.newRank}</div>` : ''}
       </div>
-      <p style="color:var(--muted);margin:15px 0;">Módulo 1 — COMPLETO 100%</p>
+      <p style="color:var(--muted);margin:15px 0;">${b.moduleLabel}</p>
       <button class="btn" onclick="closeModal('modalGeneric');location.reload();" style="width:100%;margin-top:20px;font-size:18px;">🎊 Continuar Misión</button>
     </div>`;
   document.getElementById('modalGeneric').classList.add('active');
