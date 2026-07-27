@@ -186,7 +186,9 @@ const allBadges = [
   { id: 'boss9', name: 'Arquitecto del Núcleo', icon: '🏗️', desc: 'Completar Boss Final Módulo 9' },
   { id: 'mundo9', name: 'Señor de las Vistas', icon: '🪟', desc: '100% Módulo 9' },
   { id: 'boss10', name: 'Vencedor del CEO', icon: '👑', desc: 'Derrotar a THE BOSS del Módulo 10' },
-  { id: 'mundo10', name: 'Liberador del NEXUS', icon: '💠', desc: 'Completar la aventura principal' }
+  { id: 'mundo10', name: 'Liberador del NEXUS', icon: '💠', desc: 'Completar la aventura principal' },
+  { id: 'boss11', name: 'El Oráculo', icon: '🔮', desc: 'Completar la Ceremonia de Dalton' },
+  { id: 'mundo11', name: 'Consultor Legendario', icon: '🎓', desc: '100% del juego (Aventura + Bonus)' }
 ];
 
 // ============================================
@@ -1621,6 +1623,81 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  11: {
+    title: '💎 BONUS: El Oráculo del NEXUS',
+    concept: `<strong>📜 La Ciencia de la Velocidad</strong><br><br>
+      <code>CREATE INDEX nombre ON tabla (col)</code> — búsqueda instantánea<br>
+      <code>CREATE TRIGGER</code> — reglas que se disparan solas<br>
+      <code>EXPLAIN QUERY PLAN</code> — ver cómo piensa el motor<br><br>
+      <em>En SQL Server además existen STORED PROCEDURES (EXEC) — aquí los simulamos con vistas.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '⚡ Turbo Cargado (índice en C_VIN)',
+        expected: 'CREATE INDEX IX_Inventario_VIN ON T_Inventario (C_VIN)',
+        hint: 'CREATE INDEX IX_Inventario_VIN ON T_Inventario (C_VIN); -- Sin índice, SQL lee el "libro" entero; con índice, va directo a la página',
+        example: 'CREATE INDEX IX_Clientes_Nombre ON T_Clientes (C_Nombre_Completo);'
+      },
+      {
+        id: 2, desc: '🔴 El Botón de Pánico (cierre diario guardado)',
+        expected: 'CREATE VIEW V_Cierre_Diario AS SELECT C_Fecha, COUNT(*) AS M_Ventas, SUM(C_Monto) AS M_Total FROM T_Ventas GROUP BY C_Fecha',
+        hint: "CREATE VIEW V_Cierre_Diario AS SELECT C_Fecha, COUNT(*) AS M_Ventas, SUM(C_Monto) AS M_Total FROM T_Ventas GROUP BY C_Fecha; -- En SQL Server sería un SP: CREATE PROCEDURE M_Cierre_Diario AS ... y lo ejecutas con EXEC M_Cierre_Diario",
+        example: 'CREATE VIEW V_Cierre_Mensual AS SELECT C_Anio, SUM(C_Monto) AS M_Total FROM T_Ventas GROUP BY C_Anio;'
+      },
+      {
+        id: 3, desc: '🛡️ Seguridad de Hierro (trigger anti-DELETE en pagos)',
+        expected: "CREATE TRIGGER TR_Proteger_Pagos BEFORE DELETE ON T_Pagos BEGIN SELECT RAISE(ABORT, 'Bloqueado por el Auditor'); END",
+        hint: "CREATE TRIGGER TR_Proteger_Pagos BEFORE DELETE ON T_Pagos BEGIN SELECT RAISE(ABORT, 'Bloqueado por el Auditor'); END; -- El disparador corre SOLO cuando alguien intenta el DELETE, y lo aborta",
+        example: "CREATE TRIGGER TR_Demo BEFORE DELETE ON T_Modelos BEGIN SELECT RAISE(ABORT, 'Protegido'); END;"
+      },
+      {
+        id: 4, desc: '📊 Integración Power BI (medidas M_ agregadas, sin SELECT *)',
+        expected: 'SELECT C_Marca, C_Sucursal, SUM(C_Monto) AS M_Total_Ventas, COUNT(*) AS M_Unidades FROM T_Ventas GROUP BY C_Marca, C_Sucursal',
+        hint: 'SELECT C_Marca, C_Sucursal, SUM(C_Monto) AS M_Total_Ventas, COUNT(*) AS M_Unidades FROM T_Ventas GROUP BY C_Marca, C_Sucursal; -- Power BI agradece: solo columnas necesarias + medidas pre-calculadas = tablero que no se traba',
+        example: 'SELECT C_Vendedor, SUM(C_Monto) AS M_Total, AVG(C_Monto) AS M_Ticket FROM T_Ventas GROUP BY C_Vendedor;'
+      },
+      {
+        id: 5, desc: '📖 Documentación del Maestro (crear el diccionario)',
+        expected: 'CREATE TABLE T_Diccionario_Nexus (C_Prefijo TEXT, C_Significado TEXT)',
+        hint: 'CREATE TABLE T_Diccionario_Nexus (C_Prefijo TEXT, C_Significado TEXT);',
+        example: 'CREATE TABLE T_Notas_Equipo (C_Tema TEXT, C_Nota TEXT);'
+      },
+      {
+        id: 6, desc: '✍️ El Legado Escrito (poblar la convención T_/C_/M_/V_)',
+        expected: "INSERT INTO T_Diccionario_Nexus VALUES ('T_', 'Tabla'), ('C_', 'Columna'), ('M_', 'Medida calculada'), ('V_', 'Vista')",
+        hint: "INSERT INTO T_Diccionario_Nexus VALUES ('T_', 'Tabla'), ('C_', 'Columna'), ('M_', 'Medida calculada'), ('V_', 'Vista');",
+        example: "INSERT INTO T_Diccionario_Nexus VALUES ('IX_', 'Indice'), ('TR_', 'Trigger');"
+      },
+      {
+        id: 7, desc: '🔬 Rayos X del Motor (EXPLAIN QUERY PLAN)',
+        expected: "EXPLAIN QUERY PLAN SELECT * FROM T_Inventario WHERE C_VIN = 'NX001'",
+        hint: "EXPLAIN QUERY PLAN SELECT * FROM T_Inventario WHERE C_VIN = 'NX001'; -- Verás 'USING INDEX': tu índice del reto 1 en acción. En SQL Server: el Execution Plan de SSMS",
+        example: "EXPLAIN QUERY PLAN SELECT * FROM T_Ventas WHERE C_Marca = 'Toyota';"
+      },
+      {
+        id: 8, desc: '🧬 Índice Compuesto (dos columnas que siempre viajan juntas)',
+        expected: 'CREATE INDEX IX_Ventas_Marca_Anio ON T_Ventas (C_Marca, C_Anio)',
+        hint: 'CREATE INDEX IX_Ventas_Marca_Anio ON T_Ventas (C_Marca, C_Anio); -- El orden importa: sirve para filtrar por marca, o por marca+año — pero NO por año solo',
+        example: 'CREATE INDEX IX_Inv_Suc_Marca ON T_Inventario (C_Sucursal, C_Marca);'
+      },
+      {
+        id: 9, desc: '🚫 Adiós SELECT * (solo lo que el tablero necesita)',
+        expected: "SELECT C_VIN, C_Modelo, C_Precio FROM T_Inventario WHERE C_Sucursal = 'CDMX'",
+        hint: "SELECT C_VIN, C_Modelo, C_Precio FROM T_Inventario WHERE C_Sucursal = 'CDMX'; -- SELECT * arrastra columnas que nadie usa: ancho de banda y memoria desperdiciados",
+        example: "SELECT C_Vendedor, C_Monto FROM T_Ventas WHERE C_Sucursal = 'GDL';"
+      },
+      {
+        id: 10, desc: '♻️ Ciclo de Vida (eliminar un índice que ya no aporta)',
+        expected: 'DROP INDEX IX_Ventas_Marca_Anio',
+        hint: 'DROP INDEX IX_Ventas_Marca_Anio; -- Un índice acelera lecturas pero encarece cada INSERT/UPDATE: si nadie lo usa, es puro costo',
+        example: 'DROP INDEX IX_Inventario_VIN;'
+      }
+    ],
+    xp: 800, coins: 6000, difficulty: 5, skill: 'ADVANCED',
+    diaryEntry: 'Día 11: Optimicé mi propia obra — índices, triggers, consultas que vuelan. Y escribí el diccionario para los que vengan después. Un arquitecto construye; un maestro deja el mapa.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -2318,6 +2395,72 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — El último duelo
+          </div>`
+      }
+    ]
+  },
+  11: {
+    title: 'La Ciencia de la Velocidad: Índices, SPs y Triggers',
+    slides: [
+      // SLIDE 1 — Contexto / el CEO y la tarjeta de titanio
+      {
+        icon: '💎',
+        tag: 'NEXUS SQL — EL SERVIDOR ESPEJO',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">💎</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Sección oculta — solo maestría absoluta</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">🕴️ EL CEO — te entrega una tarjeta de titanio</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "Has salvado la empresa. Pero un buen arquitecto no solo construye:
+              asegura que su obra dure mil años. Con miles de millones de filas,
+              hasta tus consultas del Módulo 1 podrían volverse lentas."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "<strong style="color:var(--accent);">Haz que este motor corra como un BYD Seal en pista.</strong>"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El legado del Arquitecto
+          </div>`
+      },
+      // SLIDE 2 — Índices
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">⚡</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El índice del libro</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;">T_Ventas es un libro de 1,000 páginas. Sin índice, SQL <strong>lee todo</strong> para encontrar un VIN. Con índice, va directo a la página:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">CREATE INDEX IX_Inventario_VIN<br>ON T_Inventario (C_VIN);<br><br>EXPLAIN QUERY PLAN<br>SELECT * FROM T_Inventario WHERE C_VIN = 'NX001';<br><span style="color:#546e7a;">-- resultado: SEARCH ... USING INDEX ✓</span></div>
+            <p style="margin-bottom:8px;">⚖️ <strong>Trade-off:</strong> las lecturas vuelan, pero cada INSERT/UPDATE paga el costo de mantener el índice. Indexa lo que se busca, no todo.</p>
+            <p style="color:var(--muted);font-size:13px;">Convención NEXUS: prefijo <code>IX_</code>. En un índice compuesto (marca, año), el <strong>orden de columnas importa</strong>.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Leer sin leerlo todo
+          </div>`
+      },
+      // SLIDE 3 — SPs y Triggers
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🤖</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Automatizar y blindar</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><strong>Stored Procedure</strong> (SQL Server): una misión entera guardada en un botón — <code>EXEC M_Cierre_Diario</code> en vez de 50 líneas. Los SPs de Dalton que analizarás en el Modo Tutor son exactamente esto.</p>
+            <p style="margin-bottom:12px;"><strong>Trigger</strong>: código que se dispara SOLO ante un evento (INSERT/UPDATE/DELETE):</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#00ff41;margin-bottom:12px;">CREATE TRIGGER TR_Proteger_Pagos<br>BEFORE DELETE ON T_Pagos<br>BEGIN<br>&nbsp;&nbsp;SELECT RAISE(ABORT, 'Bloqueado por el Auditor');<br>END;</div>
+            <p style="color:var(--muted);font-size:13px;">Y el estándar de oro: tu convención <code>T_ / C_ / M_ / V_ / IX_ / TR_</code> documentada es lo que permitirá que otros analistas no se pierdan. Ese es tu verdadero legado.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Que SQL no tenga que leer todo el libro para encontrar una página." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — Post-graduación
           </div>`
       }
     ]
@@ -3476,6 +3619,14 @@ const triviaData = {
     correct: 'B',
     explanation: 'La CTE es <strong>organización</strong>: nombra bloques lógicos y los apila arriba, como mini-planos antes del rascacielos. El motor suele ejecutarlas igual que una subconsulta — la ganancia es para el humano que mantiene el código.',
     coins: 2000, xp: 200
+  },
+  11: {
+    npc: 'La Ing. Ana, por primera vez en persona, te entrega un café',
+    question: 'La tabla T_Ventas tiene millones de filas. ¿Qué hace exactamente un índice en C_VIN?',
+    options: { A: 'Duplica la tabla para leer más rápido', B: 'Crea una estructura ordenada que apunta a las filas, como el índice de un libro', C: 'Comprime los datos para que ocupen menos' },
+    correct: 'B',
+    explanation: 'Un índice es <strong>el índice de un libro</strong>: una estructura ordenada aparte que apunta a la página exacta. SQL deja de leer las 1,000 páginas y va directo. El costo: cada INSERT/UPDATE también debe actualizar el índice.',
+    coins: 2500, xp: 250
   }
 };
 
@@ -3880,6 +4031,39 @@ const bossData = {
     victoryRewardsTitle: '👑 RECOMPENSAS FINALES',
     victoryBadgeLines: ['👑 Insignia: Vencedor del CEO', '💠 Insignia: Liberador del NEXUS'],
     moduleLabel: '🎓 AVENTURA PRINCIPAL COMPLETADA — 10/10 módulos'
+  },
+  11: {
+    bossName: 'LA ÚLTIMA CONSULTA — ING. ANA',
+    introTime: '📍 Atardecer — Helipuerto de la Torre Velocity, la gala está por comenzar',
+    introText: `"Roberto, Sofía, Don Víctor, Don Carlos y Mariana ya están arriba, {NAME}.
+      Antes de subir, una última consulta — la más simple y la más importante de todas:
+      <strong>lee tu propio diccionario</strong>. T_Diccionario_Nexus.
+      Porque el código es solo una herramienta...
+      pero el orden que dejaste es tu verdadero legado."`,
+    comboHint: 'Una consulta simple sobre la tabla que documenta tu convención de nombres',
+    title: '🎊 LA CEREMONIA DE DALTON — La Consulta de Despedida',
+    descShort: 'Lee tu legado: consulta T_Diccionario_Nexus',
+    battleCry: 'La consulta más simple del curso. Y la que más importa.',
+    checks: [
+      { any: ['select'], hint: 'un SELECT' },
+      { any: ['t_diccionario_nexus'], hint: 'sobre T_Diccionario_Nexus' }
+    ],
+    maxRows: 10,
+    xp: 500, coins: 9000,
+    badges: ['boss11', 'mundo11'],
+    newRank: 'Consultor Legendario',
+    victoryTitle: '🎊 LA CEREMONIA DE DALTON',
+    victoryText: `"T_ Tabla. C_ Columna. M_ Medida. V_ Vista. Cuatro filas... y todo un sistema de pensamiento.
+      Toño, el código es solo una herramienta, pero la lógica que desarrollaste
+      es lo que salvó a la empresa. Ahora, cada vez que veas un auto en la calle,
+      sabrás que detrás hay una fila en una tabla, un precio filtrado
+      y un Arquitecto que puso orden al caos. ¡Felicidades, Maestro!"
+      <br><br>🏆 <strong>Resumen final:</strong> 11 nodos restaurados · The Void comprimido para siempre ·
+      Habilidad especial desbloqueada: <strong>Arquitectura de Datos Relacionales Automotrices</strong>.`,
+    victoryNPC: '— Ing. Ana, tu mentora',
+    victoryRewardsTitle: '💎 RECOMPENSAS DE POST-GRADUACIÓN',
+    victoryBadgeLines: ['🔮 Insignia: El Oráculo', '🎓 Insignia: Consultor Legendario'],
+    moduleLabel: '💯 JUEGO COMPLETADO AL 100% — 11/11 módulos (Aventura + Bonus)'
   }
 };
 
