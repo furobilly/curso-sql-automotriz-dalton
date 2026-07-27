@@ -182,7 +182,9 @@ const allBadges = [
   { id: 'boss7', name: 'Cazador de Fantasmas', icon: '🌑', desc: 'Completar Boss Final Módulo 7' },
   { id: 'mundo7', name: 'Revelador del Vacío', icon: '🔦', desc: '100% Módulo 7' },
   { id: 'boss8', name: 'Pulso de Cirujano', icon: '🛡️', desc: 'Completar Boss Final Módulo 8' },
-  { id: 'mundo8', name: 'Purgador del Void', icon: '⚔️', desc: '100% Módulo 8' }
+  { id: 'mundo8', name: 'Purgador del Void', icon: '⚔️', desc: '100% Módulo 8' },
+  { id: 'boss9', name: 'Arquitecto del Núcleo', icon: '🏗️', desc: 'Completar Boss Final Módulo 9' },
+  { id: 'mundo9', name: 'Señor de las Vistas', icon: '🪟', desc: '100% Módulo 9' }
 ];
 
 // ============================================
@@ -1466,6 +1468,81 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  9: {
+    title: 'El Arquitecto del NEXUS (Infraestructura)',
+    concept: `<strong>📜 Comandos de este ejercicio (DDL)</strong><br><br>
+      <code>CREATE TABLE (col TIPO, ...)</code> — diseñar contenedores<br>
+      <code>CREATE VIEW nombre AS SELECT ...</code> — tabla virtual con lógica guardada<br>
+      <code>WHERE col > (SELECT AVG(...) ...)</code> — subconsulta como filtro<br><br>
+      <em>Tip de Aranda: deja de ser usuario. Empieza a ser Creador.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '🏗️ Fundación (tabla de las agencias de Cancún)',
+        expected: 'CREATE TABLE T_Nuevas_Agencias_Movil (C_ID_Agencia INT, C_Ciudad VARCHAR(50), C_Apertura DATE)',
+        hint: 'CREATE TABLE T_Nuevas_Agencias_Movil (C_ID_Agencia INT, C_Ciudad VARCHAR(50), C_Apertura DATE);',
+        example: 'CREATE TABLE T_Demo (C_ID INT, C_Nombre VARCHAR(50));'
+      },
+      {
+        id: 2, desc: '🪟 La Ventana de Roberto (vista con JOIN guardado)',
+        expected: 'CREATE VIEW V_Inventario_Rapido AS SELECT I.C_VIN, I.C_Modelo, M.C_Marca FROM T_Inventario AS I INNER JOIN T_Modelos AS M ON I.C_Modelo = M.C_Modelo',
+        hint: 'CREATE VIEW V_Inventario_Rapido AS SELECT I.C_VIN, I.C_Modelo, M.C_Marca FROM T_Inventario AS I INNER JOIN T_Modelos AS M ON I.C_Modelo = M.C_Modelo;',
+        example: 'CREATE VIEW V_Ventas_Simple AS SELECT C_ID_Venta, C_Monto FROM T_Ventas;'
+      },
+      {
+        id: 3, desc: '🎯 Subconsulta Simple (más caros que el promedio global)',
+        expected: 'SELECT * FROM T_Inventario WHERE C_Precio > (SELECT AVG(C_Precio) FROM T_Inventario)',
+        hint: 'SELECT * FROM T_Inventario WHERE C_Precio > (SELECT AVG(C_Precio) FROM T_Inventario);',
+        example: 'SELECT * FROM T_Ventas WHERE C_Monto > (SELECT AVG(C_Monto) FROM T_Ventas);'
+      },
+      {
+        id: 4, desc: "⚠️ GLITCH: Caché de Emergencia (CREATE TABLE ... AS SELECT)",
+        expected: "CREATE TABLE T_Cache_Precios AS SELECT C_VIN, C_Precio FROM T_Inventario WHERE C_Marca = 'Lexus'",
+        hint: "CREATE TABLE T_Cache_Precios AS SELECT C_VIN, C_Precio FROM T_Inventario WHERE C_Marca = 'Lexus'; -- En SQL Server: SELECT C_VIN, C_Precio INTO T_Cache_Precios FROM ...",
+        example: "CREATE TABLE T_Cache_BYD AS SELECT C_VIN, C_Precio FROM T_Inventario WHERE C_Marca = 'BYD';"
+      },
+      {
+        id: 5, desc: '🔐 Seguridad de Vista (VIP > $1,000,000 para Don Víctor)',
+        expected: 'CREATE VIEW V_Clientes_VIP AS SELECT C_Nombre_Completo, SUM(C_Monto) AS M_Total FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente GROUP BY C_Nombre_Completo HAVING SUM(C_Monto) > 1000000',
+        hint: 'CREATE VIEW V_Clientes_VIP AS SELECT C_Nombre_Completo, SUM(C_Monto) AS M_Total FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente GROUP BY C_Nombre_Completo HAVING SUM(C_Monto) > 1000000;',
+        example: 'CREATE VIEW V_Compradores AS SELECT C_Nombre_Completo, COUNT(*) AS M_Compras FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente GROUP BY C_Nombre_Completo;'
+      },
+      {
+        id: 6, desc: "👑 El Elegido (subconsulta IN: compradores de 'Hilux')",
+        expected: "SELECT C_Nombre_Completo FROM T_Clientes WHERE C_ID_Cliente IN (SELECT C_ID_Cliente FROM T_Ventas WHERE C_VIN IN (SELECT C_VIN FROM T_Inventario WHERE C_Modelo = 'Hilux'))",
+        hint: "SELECT C_Nombre_Completo FROM T_Clientes WHERE C_ID_Cliente IN (SELECT C_ID_Cliente FROM T_Ventas WHERE C_VIN IN (SELECT C_VIN FROM T_Inventario WHERE C_Modelo = 'Hilux')); -- Subconsulta dentro de subconsulta: de adentro hacia afuera",
+        example: "SELECT C_Nombre_Completo FROM T_Clientes WHERE C_ID_Cliente IN (SELECT C_ID_Cliente FROM T_Ventas WHERE C_Marca = 'Lexus');"
+      },
+      {
+        id: 7, desc: '🧱 Estructura de Ventas (columna NOT NULL)',
+        expected: 'CREATE TABLE T_Metodos_Pago (C_ID_Metodo INTEGER PRIMARY KEY, C_Nombre_Metodo TEXT NOT NULL)',
+        hint: 'CREATE TABLE T_Metodos_Pago (C_ID_Metodo INTEGER PRIMARY KEY, C_Nombre_Metodo TEXT NOT NULL);',
+        example: 'CREATE TABLE T_Estados (C_ID_Estado INTEGER PRIMARY KEY, C_Nombre_Estado TEXT NOT NULL);'
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: Vista de 4 tablas (sin ORDER BY)',
+        expected: 'CREATE VIEW V_Reporte_Completo AS SELECT C.C_Nombre_Completo, I.C_Modelo, VE.C_Nombre_Vendedor, V.C_Monto FROM T_Ventas AS V INNER JOIN T_Clientes AS C ON V.C_ID_Cliente = C.C_ID_Cliente INNER JOIN T_Inventario AS I ON V.C_VIN = I.C_VIN INNER JOIN T_Vendedores AS VE ON V.C_Vendedor = VE.C_Nombre_Vendedor',
+        hint: "CREATE VIEW V_Reporte_Completo AS SELECT C.C_Nombre_Completo, I.C_Modelo, VE.C_Nombre_Vendedor, V.C_Monto FROM T_Ventas AS V INNER JOIN T_Clientes AS C ON V.C_ID_Cliente = C.C_ID_Cliente INNER JOIN T_Inventario AS I ON V.C_VIN = I.C_VIN INNER JOIN T_Vendedores AS VE ON V.C_Vendedor = VE.C_Nombre_Vendedor; -- En SQL Server un ORDER BY dentro de una vista lanza error (salvo con TOP 100 PERCENT). El orden se pide al CONSULTAR la vista.",
+        example: 'SELECT * FROM V_Reporte_Completo ORDER BY C_Monto DESC;'
+      },
+      {
+        id: 9, desc: '🔄 Filtro Dinámico (correlacionada: ventas sobre el promedio de SU sucursal)',
+        expected: 'SELECT C_Vendedor, C_Monto FROM T_Ventas AS V1 WHERE C_Monto > (SELECT AVG(C_Monto) FROM T_Ventas AS V2 WHERE V2.C_Sucursal = V1.C_Sucursal)',
+        hint: 'SELECT C_Vendedor, C_Monto FROM T_Ventas AS V1 WHERE C_Monto > (SELECT AVG(C_Monto) FROM T_Ventas AS V2 WHERE V2.C_Sucursal = V1.C_Sucursal); -- La subconsulta se recalcula por cada fila usando SU sucursal: eso la hace "correlacionada"',
+        example: 'SELECT C_Vendedor, C_Monto FROM T_Ventas AS V1 WHERE C_Monto > (SELECT AVG(C_Monto) FROM T_Ventas AS V2 WHERE V2.C_Marca = V1.C_Marca);'
+      },
+      {
+        id: 10, desc: '⏰ La Gran Expansión (fecha automática con DEFAULT)',
+        expected: 'CREATE TABLE T_Auditoria_Maestra (C_ID_Evento INTEGER PRIMARY KEY, C_Descripcion TEXT, C_Fecha DATE DEFAULT CURRENT_TIMESTAMP)',
+        hint: 'CREATE TABLE T_Auditoria_Maestra (C_ID_Evento INTEGER PRIMARY KEY, C_Descripcion TEXT, C_Fecha DATE DEFAULT CURRENT_TIMESTAMP); -- En SQL Server: DEFAULT GETDATE()',
+        example: 'CREATE TABLE T_Bitacora (C_ID INTEGER PRIMARY KEY, C_Nota TEXT, C_Registro DATE DEFAULT CURRENT_TIMESTAMP);'
+      }
+    ],
+    xp: 500, coins: 4000, difficulty: 5, skill: 'ADVANCED',
+    diaryEntry: 'Día 9: Dejé de ser usuario. Creé tablas, vistas y filtros que piensan solos. Aranda dice que el sistema NEXUS ya no es un laberinto: ahora tiene ventanas. Yo las construí.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -2027,6 +2104,75 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — El Auditor te observa
+          </div>`
+      }
+    ]
+  },
+  9: {
+    title: 'El Plano de la Realidad: DDL, Vistas y Subconsultas',
+    slides: [
+      // SLIDE 1 — Contexto / Ing. Aranda
+      {
+        icon: '🏗️',
+        tag: 'NEXUS SQL — NÚCLEO DE DATOS',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">🏗️</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Data Center de Grupo Velocity</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">👷 ING. ARANDA — rodeado de planos digitales</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "Compramos tres agencias de lujo en Cancún y hay que integrarlas YA.
+              No puedo pedirle a los gerentes que escriban JOINs de 20 líneas
+              cada vez que quieran un reporte."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Necesito estructuras sólidas y ventanas mágicas.
+              <strong style="color:var(--accent);">Es hora de dejar de ser usuario y empezar a ser Creador.</strong>"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — La nueva era
+          </div>`
+      },
+      // SLIDE 2 — CREATE TABLE y CREATE VIEW
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🪟</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">DDL: definir la estructura</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">CREATE TABLE</code> — diseña el contenedor: cada columna con su tipo (INT, VARCHAR, DATE) y reglas (<code>NOT NULL</code>, <code>DEFAULT</code>).</p>
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">CREATE VIEW</code> — guarda una consulta compleja como "tabla virtual":</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#00ff41;margin-bottom:12px;">CREATE VIEW V_Inventario_Rapido AS<br>SELECT I.C_VIN, I.C_Modelo, M.C_Marca<br>FROM T_Inventario AS I<br>INNER JOIN T_Modelos AS M<br>&nbsp;&nbsp;ON I.C_Modelo = M.C_Modelo;</div>
+            <p style="margin-bottom:8px;">Roberto solo escribe <code>SELECT * FROM V_Inventario_Rapido</code> — y SQL corre el JOIN por detrás. La vista <strong>no guarda datos</strong>: es una ventana viva a las tablas.</p>
+            <p style="color:var(--muted);font-size:13px;">Prefijo de la convención NEXUS para vistas: <code>V_</code>.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Ventanas mágicas
+          </div>`
+      },
+      // SLIDE 3 — Subconsultas
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🎯</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Consultas dentro de consultas</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;">Una <strong>subconsulta</strong> usa el resultado de una query como filtro de otra:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#00ff41;margin-bottom:12px;">SELECT * FROM T_Inventario<br>WHERE C_Precio > (<br>&nbsp;&nbsp;SELECT AVG(C_Precio) FROM T_Inventario<br>);&nbsp;<span style="color:#546e7a;">-- "más caros que el promedio"</span></div>
+            <p style="margin-bottom:8px;">• Con <code>IN (SELECT ...)</code> filtras contra una <strong>lista</strong> calculada.</p>
+            <p style="margin-bottom:8px;">• Una subconsulta <strong>correlacionada</strong> se recalcula por cada fila (usa columnas de la consulta externa) — poderosa, pero costosa en tablas grandes.</p>
+            <p style="color:var(--muted);font-size:13px;">SQL siempre resuelve de <strong>adentro hacia afuera</strong>: primero el paréntesis, luego el resto.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Una vista bien diseñada es un regalo para el equipo entero. Un JOIN repetido 50 veces es deuda técnica." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — Los planos están listos
           </div>`
       }
     ]
@@ -3169,6 +3315,14 @@ const triviaData = {
     correct: 'B',
     explanation: '<strong>DELETE</strong> acepta WHERE y registra cada fila borrada (reversible en transacción). <strong>TRUNCATE</strong> vacía la tabla completa de golpe, más rápido, sin WHERE. La estructura sobrevive en ambos.',
     coins: 1000, xp: 100
+  },
+  9: {
+    npc: 'El Ing. Aranda gira un plano holográfico del nuevo Data Center',
+    question: 'Si borras datos a través de una Vista, ¿qué sucede con la tabla original?',
+    options: { A: 'Nada, la vista es solo una copia', B: 'Los datos también se borran en la tabla original (si la vista es simple)', C: 'La vista se rompe y deja de funcionar' },
+    correct: 'B',
+    explanation: 'Una vista <strong>no guarda datos</strong>: es una ventana a la tabla real. Si la vista es simple (una tabla, sin agregaciones), un DELETE a través de ella <strong>borra en la tabla original</strong>. Por eso las vistas también son un tema de seguridad.',
+    coins: 1500, xp: 150
   }
 };
 
@@ -3500,6 +3654,42 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 8',
     victoryBadgeLines: ['🛡️ Insignia: Pulso de Cirujano', '⚔️ Insignia: Purgador del Void'],
     moduleLabel: 'Módulo 8 — COMPLETO 100%'
+  },
+  9: {
+    bossName: 'BOSS FINAL — ING. ARANDA',
+    introTime: '📍 06:45 PM — El CEO está entrando a la sala de juntas',
+    introText: `"¡{NAME}, es el plano final! Crea una <strong>Vista Maestra</strong> llamada
+      <strong>V_Master_Global</strong> que una <strong>Clientes, Ventas, Inventario y Sucursales</strong>
+      (las sucursales se alcanzan a través de T_Vendedores).
+      El truco: solo debe mostrar autos cuyo precio sea <strong>superior al precio promedio
+      de la marca 'Toyota'</strong> (subconsulta en el WHERE).
+      ¡Si encapsulas esa lógica, el sistema NEXUS será eterno!"`,
+    comboHint: "CREATE VIEW V_Master_Global AS SELECT ... 4 INNER JOIN ... WHERE I.C_Precio > (SELECT AVG(C_Precio) FROM T_Inventario WHERE C_Marca = 'Toyota')",
+    title: '👹 BOSS FINAL — El Nexus Core',
+    descShort: "Vista V_Master_Global: 5 tablas unidas + subconsulta del promedio Toyota en el WHERE",
+    battleCry: 'Una vista que lo une todo, filtrada por el promedio Toyota. El CEO ya está sentado.',
+    checks: [
+      { any: ['create view'], extra: 'v_master_global', hint: 'CREATE VIEW V_Master_Global AS ...' },
+      { any: ['inner join', 'join'], hint: 'INNER JOINs entre las tablas' },
+      { any: ['t_sucursales'], hint: 'incluir T_Sucursales (vía T_Vendedores)' },
+      { any: ['t_clientes'], hint: 'incluir T_Clientes' },
+      { any: ['select avg ('], extra: "'toyota'", hint: "subconsulta: (SELECT AVG(C_Precio) ... WHERE C_Marca = 'Toyota')" }
+    ],
+    maxRows: 99,
+    allowNoRows: true,
+    xp: 300, coins: 6000,
+    badges: ['boss9', 'mundo9'],
+    newRank: null,
+    victoryTitle: '¡EL NEXUS CORE ESTÁ EN LÍNEA!',
+    victoryText: `"El CEO consultó tu vista con un solo SELECT... y detrás corrieron
+      cinco tablas y una subconsulta sin que él lo supiera. Eso es arquitectura:
+      complejidad encapsulada, simplicidad entregada.
+      Ya no arreglas sistemas, {NAME}. Ahora los diseñas.
+      Queda una sola cita: el Trono de Datos. El CEO quiere verte... personalmente."`,
+    victoryNPC: '— Ing. Aranda, Jefe de Infraestructura',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 9',
+    victoryBadgeLines: ['🏗️ Insignia: Arquitecto del Núcleo', '🪟 Insignia: Señor de las Vistas'],
+    moduleLabel: 'Módulo 9 — COMPLETO 100%'
   }
 };
 
