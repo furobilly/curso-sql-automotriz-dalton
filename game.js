@@ -172,7 +172,9 @@ const allBadges = [
   { id: 'boss2', name: 'Precisión Quirúrgica', icon: '🎯', desc: 'Completar Boss Final Módulo 2' },
   { id: 'mundo2', name: 'Salvador de SLP', icon: '🚚', desc: '100% Módulo 2' },
   { id: 'boss3', name: 'Rey de los Rankings', icon: '⛰️', desc: 'Completar Boss Final Módulo 3' },
-  { id: 'mundo3', name: 'Salvador de MTY', icon: '👑', desc: '100% Módulo 3' }
+  { id: 'mundo3', name: 'Salvador de MTY', icon: '👑', desc: '100% Módulo 3' },
+  { id: 'boss4', name: 'Ábaco de Agregación', icon: '🧮', desc: 'Completar Boss Final Módulo 4' },
+  { id: 'mundo4', name: 'Salvador de CDMX', icon: '🏦', desc: '100% Módulo 4' }
 ];
 
 // ============================================
@@ -330,6 +332,56 @@ const dbSeed = `
   (4, 'Bárbara Villarreal','bvilla@gmail.com',     '8184445566', 'Apodaca'),
   (5, 'Gerardo Cantú',     'gcantu@outlook.com',   '8185556677', 'Monterrey'),
   (6, 'Daniela Sada',      'dsada@nexcorp.mx',     '8186667788', 'San Pedro');
+
+  -- ============ MÓDULO 4: CDMX (Don Carlos - Agregaciones) ============
+  CREATE TABLE T_Inventario_CDMX (
+    C_VIN TEXT PRIMARY KEY,
+    C_Marca TEXT,                    -- 5 marcas distintas (reto COUNT DISTINCT)
+    C_Modelo TEXT,
+    C_Anio INTEGER,                  -- Mezcla 2024/2025 (reto AVG filtrado)
+    C_Color TEXT,                    -- 3 NULL (reto conteo de vacíos)
+    C_Precio INTEGER
+  );
+
+  INSERT INTO T_Inventario_CDMX VALUES
+  ('CX001TY', 'Toyota', 'Corolla',  2025, 'Blanco', 480000),
+  ('CX002TY', 'Toyota', 'RAV4',     2025, 'Negro',  740000),
+  ('CX003TY', 'Toyota', 'Hilux',    2024, NULL,     670000),
+  ('CX004TY', 'Toyota', 'Camry',    2024, 'Gris',   540000),
+  ('CX005KA', 'Kia',    'Rio',      2024, 'Rojo',   350000),
+  ('CX006KA', 'Kia',    'EV9',      2025, 'Gris',   980000),
+  ('CX007KA', 'Kia',    'Sportage', 2025, NULL,     590000),
+  ('CX008BD', 'BYD',    'Seal',     2025, 'Azul',   560000),
+  ('CX009BD', 'BYD',    'Dolphin',  2024, 'Verde',  390000),
+  ('CX010BD', 'BYD',    'Tang',     2025, 'Negro',  830000),
+  ('CX011HN', 'Honda',  'CR-V',     2024, 'Gris',   710000),
+  ('CX012HN', 'Honda',  'City',     2025, NULL,     395000),
+  ('CX013LX', 'Lexus',  'RX500',    2025, 'Blanco', 1450000),
+  ('CX014LX', 'Lexus',  'NX350',    2024, 'Negro',  990000);
+
+  CREATE TABLE T_Ventas_CDMX (
+    C_ID_Venta INTEGER PRIMARY KEY,
+    C_VIN TEXT,
+    C_Marca TEXT,                    -- Denormalizada a propósito: los JOINs llegan en el siguiente módulo
+    C_Vendedor TEXT,                 -- 3 vendedores (reto ventas por vendedor)
+    C_Sucursal TEXT,                 -- 3 sucursales (reto resumen de región)
+    C_Fecha DATE,
+    C_Monto INTEGER
+  );
+
+  INSERT INTO T_Ventas_CDMX VALUES
+  (1,  'CX002TY', 'Toyota', 'Laura Ortiz',    'Santa Fe', '2025-03-02',  850000),
+  (2,  'CX003TY', 'Toyota', 'Miguel Paredes', 'Polanco',  '2025-03-05',  780000),
+  (3,  'CX004TY', 'Toyota', 'Julio Ramos',    'Coyoacan', '2025-03-09',  650000),
+  (4,  'CX013LX', 'Lexus',  'Laura Ortiz',    'Santa Fe', '2025-03-11', 1450000),
+  (5,  'CX014LX', 'Lexus',  'Miguel Paredes', 'Polanco',  '2025-03-14',  980000),
+  (6,  'CX006KA', 'Kia',    'Julio Ramos',    'Coyoacan', '2025-03-16',  495000),
+  (7,  'CX005KA', 'Kia',    'Laura Ortiz',    'Santa Fe', '2025-03-18',  430000),
+  (8,  'CX008BD', 'BYD',    'Miguel Paredes', 'Polanco',  '2025-03-20',  560000),
+  (9,  'CX009BD', 'BYD',    'Julio Ramos',    'Coyoacan', '2025-03-22',  520000),
+  (10, 'CX010BD', 'BYD',    'Laura Ortiz',    'Santa Fe', '2025-03-25',  330000),
+  (11, 'CX011HN', 'Honda',  'Miguel Paredes', 'Polanco',  '2025-03-27',  380000),
+  (12, 'CX012HN', 'Honda',  'Julio Ramos',    'Coyoacan', '2025-03-29',  420000);
 `;
 
 // ============================================
@@ -731,6 +783,83 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  4: {
+    title: 'El Cálculo del Destino (CDMX)',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>COUNT(*)</code> — cuenta registros<br>
+      <code>SUM(col)</code> — suma valores<br>
+      <code>AVG(col)</code> — promedio &nbsp;|&nbsp; <code>MIN/MAX</code> — extremos<br>
+      <code>GROUP BY col</code> — agrupa por categoría<br>
+      <code>HAVING</code> — filtra DESPUÉS de agrupar<br><br>
+      <em>Tip: para Don Carlos los datos individuales son ruido. Él quiere una sola cifra.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '🔢 Conteo de Inventario (COUNT)',
+        expected: 'SELECT COUNT(*) FROM T_Inventario_CDMX',
+        hint: 'SELECT COUNT(*) FROM T_Inventario_CDMX;',
+        example: 'SELECT COUNT(*) FROM T_Ventas_CDMX;'
+      },
+      {
+        id: 2, desc: '💰 El Tesoro Total (SUM + alias M_)',
+        expected: 'SELECT SUM(C_Precio) AS M_Valor_Total FROM T_Inventario_CDMX',
+        hint: 'SELECT SUM(C_Precio) AS M_Valor_Total FROM T_Inventario_CDMX;',
+        example: 'SELECT SUM(C_Monto) AS M_Ingresos FROM T_Ventas_CDMX;'
+      },
+      {
+        id: 3, desc: '🎫 Ticket Promedio (AVG)',
+        expected: 'SELECT AVG(C_Monto) FROM T_Ventas_CDMX',
+        hint: 'SELECT AVG(C_Monto) FROM T_Ventas_CDMX;',
+        example: 'SELECT AVG(C_Precio) FROM T_Inventario_CDMX;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: Marcas reales (COUNT DISTINCT)',
+        expected: 'SELECT COUNT(DISTINCT C_Marca) FROM T_Inventario_CDMX',
+        hint: 'SELECT COUNT(DISTINCT C_Marca) FROM T_Inventario_CDMX;',
+        example: 'SELECT COUNT(DISTINCT C_Sucursal) FROM T_Ventas_CDMX;'
+      },
+      {
+        id: 5, desc: '↕️ Extremos Kia (MIN y MAX)',
+        expected: "SELECT MIN(C_Precio), MAX(C_Precio) FROM T_Inventario_CDMX WHERE C_Marca = 'Kia'",
+        hint: "SELECT MIN(C_Precio), MAX(C_Precio) FROM T_Inventario_CDMX WHERE C_Marca = 'Kia';",
+        example: "SELECT MIN(C_Precio), MAX(C_Precio) FROM T_Inventario_CDMX WHERE C_Marca = 'Toyota';"
+      },
+      {
+        id: 6, desc: '📊 Agrupación Básica (autos por marca)',
+        expected: 'SELECT C_Marca, COUNT(*) FROM T_Inventario_CDMX GROUP BY C_Marca',
+        hint: 'SELECT C_Marca, COUNT(*) FROM T_Inventario_CDMX GROUP BY C_Marca;',
+        example: 'SELECT C_Anio, COUNT(*) FROM T_Inventario_CDMX GROUP BY C_Anio;'
+      },
+      {
+        id: 7, desc: '🧑‍💼 Ventas por Vendedor (GROUP BY + SUM)',
+        expected: 'SELECT C_Vendedor, SUM(C_Monto) FROM T_Ventas_CDMX GROUP BY C_Vendedor',
+        hint: 'SELECT C_Vendedor, SUM(C_Monto) FROM T_Ventas_CDMX GROUP BY C_Vendedor;',
+        example: 'SELECT C_Vendedor, COUNT(*) FROM T_Ventas_CDMX GROUP BY C_Vendedor;'
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: Promedio por marca, solo 2025',
+        expected: 'SELECT C_Marca, AVG(C_Precio) FROM T_Inventario_CDMX WHERE C_Anio = 2025 GROUP BY C_Marca',
+        hint: 'SELECT C_Marca, AVG(C_Precio) FROM T_Inventario_CDMX WHERE C_Anio = 2025 GROUP BY C_Marca;',
+        example: 'SELECT C_Marca, AVG(C_Precio) FROM T_Inventario_CDMX WHERE C_Anio = 2024 GROUP BY C_Marca;'
+      },
+      {
+        id: 9, desc: '🕳️ Conteo de Vacíos (COUNT + WHERE IS NULL)',
+        expected: 'SELECT COUNT(*) FROM T_Inventario_CDMX WHERE C_Color IS NULL',
+        hint: 'SELECT COUNT(*) FROM T_Inventario_CDMX WHERE C_Color IS NULL;',
+        example: 'SELECT COUNT(*) FROM T_Inventario_CDMX WHERE C_Anio = 2025;'
+      },
+      {
+        id: 10, desc: '🏢 Resumen de Región (SUM + COUNT por sucursal)',
+        expected: 'SELECT C_Sucursal, SUM(C_Monto), COUNT(*) FROM T_Ventas_CDMX GROUP BY C_Sucursal',
+        hint: 'SELECT C_Sucursal, SUM(C_Monto), COUNT(*) FROM T_Ventas_CDMX GROUP BY C_Sucursal;',
+        example: 'SELECT C_Sucursal, AVG(C_Monto) FROM T_Ventas_CDMX GROUP BY C_Sucursal;'
+      }
+    ],
+    xp: 250, coins: 1800, difficulty: 4, skill: 'ADVANCED',
+    diaryEntry: 'Día 4: CDMX consolidada. Don Carlos vio sus totales cuadrar al centavo y solo asintió. Ana dice que ese gesto equivale a una ovación.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -957,6 +1086,74 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — Don Víctor espera su Top 10
+          </div>`
+      }
+    ]
+  },
+  4: {
+    title: 'Agregaciones: COUNT, SUM, AVG, GROUP BY',
+    slides: [
+      // SLIDE 1 — Contexto / Don Carlos habla
+      {
+        icon: '📉',
+        tag: 'NEXUS SQL — NODO CDMX',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">📉</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Torre Velocity — Santa Fe, CDMX</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">🕴️ DON CARLOS — CFO de Grupo Velocity</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "Analista... a mí no me impresionan los filtros. Tengo miles de registros de ventas,
+              pero no sé <strong>cuánto dinero entró hoy</strong> a la caja de la CDMX."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Necesito totales, promedios y conteos exactos.
+              <strong style="color:var(--accent);">Si no puedes resumir el caos en una sola cifra, no me sirves.</strong> Empieza a sumar."
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — La frialdad de los números
+          </div>`
+      },
+      // SLIDE 2 — Funciones de agregación
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🧮</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El ábaco de agregación</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">COUNT(*)</code> — ¿cuántos registros hay?</p>
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">SUM(C_Monto)</code> — ¿cuánto dinero total?</p>
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">AVG(C_Precio)</code> — ¿cuál es el promedio?</p>
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">MIN / MAX</code> — el más barato y el más caro</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;">SELECT SUM(C_Precio) AS M_Valor_Total<br>FROM T_Inventario_CDMX;</div>
+            <p style="color:var(--muted);font-size:13px;margin-top:10px;">Miles de filas entran → <strong>una sola cifra sale</strong>. Eso es agregar.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Una calculadora gigante
+          </div>`
+      },
+      // SLIDE 3 — GROUP BY y HAVING
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">📊</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Agrupar y filtrar grupos</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">GROUP BY</code> parte la tabla en grupos y agrega <strong>por categoría</strong>:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">SELECT C_Marca, SUM(C_Monto)<br>FROM T_Ventas_CDMX<br>GROUP BY C_Marca<br>HAVING SUM(C_Monto) > 2000000;</div>
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">WHERE</code> filtra <strong>filas</strong> (antes de agrupar).</p>
+            <p><code style="color:var(--primary);">HAVING</code> filtra <strong>grupos</strong> (después de agrupar). Regla de oro de este módulo.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Toda columna del SELECT que no esté agregada, debe estar en el GROUP BY. Sin excepciones." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — La junta de accionistas espera
           </div>`
       }
     ]
@@ -2059,6 +2256,14 @@ const triviaData = {
     correct: 'B',
     explanation: '<strong>ASC</strong> es el orden por defecto: si no dices nada, SQL ordena de menor a mayor (A-Z).',
     coins: 400, xp: 40
+  },
+  4: {
+    npc: 'Don Carlos te observa sin parpadear desde su pantalla de alta resolución',
+    question: 'Si quieres filtrar los resultados de un GROUP BY (por ejemplo, mostrar solo marcas que tengan más de 10 autos), ¿qué palabra clave usas en lugar de WHERE?',
+    options: { A: 'HAVING', B: 'FILTER', C: 'LIMIT' },
+    correct: 'A',
+    explanation: '<strong>HAVING</strong> filtra DESPUÉS de agrupar. WHERE filtra filas antes del GROUP BY; HAVING filtra los grupos ya calculados.',
+    coins: 500, xp: 50
   }
 };
 
@@ -2219,6 +2424,39 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 3',
     victoryBadgeLines: ['⛰️ Insignia: Rey de los Rankings', '👑 Insignia: Salvador de MTY'],
     moduleLabel: 'Módulo 3 — COMPLETO 100%'
+  },
+  4: {
+    bossName: 'BOSS FINAL — DON CARLOS',
+    introTime: '📍 11:55 AM — Torre Velocity, la junta de accionistas empieza en 5 minutos',
+    introText: `"¡Basta de juegos, {NAME}! Necesito un reporte que muestre <strong>por cada marca</strong>:
+      el <strong>total de ventas (SUM)</strong>, el <strong>precio promedio (AVG)</strong>
+      y <strong>cuántas unidades se vendieron (COUNT)</strong>.
+      Pero solo quiero ver las marcas cuyo total de ventas sea
+      <strong>mayor a $2,000,000</strong>. ¡Si el reporte no es exacto, Grupo Velocity se detiene hoy!"`,
+    comboHint: 'Combina: SUM, AVG, COUNT, GROUP BY C_Marca, HAVING SUM(C_Monto) > 2000000 — sobre T_Ventas_CDMX',
+    title: '👹 BOSS FINAL — El Cierre Fiscal de Don Carlos',
+    descShort: 'Por marca: SUM, AVG, COUNT — solo marcas con ventas > $2,000,000 (HAVING)',
+    battleCry: 'Totales por marca. Solo las que pasen de 2 millones. ¡Los accionistas ya están sentados!',
+    checks: [
+      { any: ['sum ('], hint: 'SUM(C_Monto)' },
+      { any: ['avg ('], hint: 'AVG(C_Monto)' },
+      { any: ['count ('], hint: 'COUNT(*)' },
+      { any: ['group by'], extra: 'c_marca', hint: 'GROUP BY C_Marca' },
+      { any: ['having'], extra: '2000000', hint: 'HAVING SUM(...) > 2000000' }
+    ],
+    maxRows: 5,
+    xp: 120, coins: 2500,
+    badges: ['boss4', 'mundo4'],
+    newRank: null,
+    victoryTitle: '¡NODO CDMX CONSOLIDADO!',
+    victoryText: `"Los números cuadraron. Los accionistas aplaudieron el reporte...
+      yo no aplaudo, pero tampoco te desconecté. Eso, analista, es mi máximo elogio.
+      Ana te espera en el siguiente nivel: ahí las tablas dejan de vivir solas
+      y empiezan a hablarse entre ellas."`,
+    victoryNPC: '— Don Carlos, CFO de Grupo Velocity',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 4',
+    victoryBadgeLines: ['🧮 Insignia: Ábaco de Agregación', '🏦 Insignia: Salvador de CDMX'],
+    moduleLabel: 'Módulo 4 — COMPLETO 100%'
   }
 };
 
