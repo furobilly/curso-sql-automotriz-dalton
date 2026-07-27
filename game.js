@@ -180,7 +180,9 @@ const allBadges = [
   { id: 'boss6', name: 'Tejedor de Vínculos', icon: '🔗', desc: 'Completar Boss Final Módulo 6' },
   { id: 'mundo6', name: 'Héroe de Marketing', icon: '🎨', desc: '100% Módulo 6' },
   { id: 'boss7', name: 'Cazador de Fantasmas', icon: '🌑', desc: 'Completar Boss Final Módulo 7' },
-  { id: 'mundo7', name: 'Revelador del Vacío', icon: '🔦', desc: '100% Módulo 7' }
+  { id: 'mundo7', name: 'Revelador del Vacío', icon: '🔦', desc: '100% Módulo 7' },
+  { id: 'boss8', name: 'Pulso de Cirujano', icon: '🛡️', desc: 'Completar Boss Final Módulo 8' },
+  { id: 'mundo8', name: 'Purgador del Void', icon: '⚔️', desc: '100% Módulo 8' }
 ];
 
 // ============================================
@@ -568,9 +570,9 @@ const dbSeed = `
   (11, 'Paola Zúñiga', 'pzuniga@yahoo.com', '5511112233', 'MTY'),
   (12, 'Emilio Navarrete', 'enavarrete@nexcorp.mx', '5512112233', 'SLP'),
   (13, 'Silvia Arredondo', 'sarredondo@gmail.com', '5513998877', 'GDL'),
-  (14, 'Marco Beltrán', 'mbeltran@outlook.com', '5514998877', 'CDMX'),
+  (14, 'Marco Beltrán', 'mbeltran@outlook.com', NULL, 'CDMX'),
   (15, 'Julieta Osorio', 'josorio@yahoo.com', '5515998877', 'GDL'),
-  (16, 'Rodrigo Palma', 'rpalma@gmail.com', '5516998877', 'MTY');
+  (16, 'Rodrigo Palma', 'rpalma@gmail.com', NULL, 'MTY');
 
   CREATE TABLE T_Sucursales (
     C_ID_Sucursal INTEGER PRIMARY KEY,
@@ -648,7 +650,44 @@ const dbSeed = `
   (32, 32, 'Transferencia'),
   (33, 33, 'Credito'),
   (34, 34, 'Contado'),
-  (35, 35, 'Transferencia');`;
+  (35, 35, 'Transferencia');
+
+  -- ============ MÓDULO 8: EL AUDITOR (basura de The Void + tablas DML) ============
+  INSERT INTO T_Inventario VALUES
+  ('TR123',  'Toyota', 'GDL',  'Hilux', 2024, 'Rojo',   999999, 1),  -- Precio equivocado (reto UPDATE)
+  ('VOID01', 'BYD',    'GDL',  'Seal',  2024, 'Negro',  1,      0),  -- Sabotaje: BYD a $1
+  ('VOID02', 'BYD',    'CDMX', 'Seal',  2025, 'Blanco', 1,      0);
+
+  ALTER TABLE T_Inventario ADD COLUMN C_Observaciones TEXT;          -- Para el reto 'Remate'
+
+  INSERT INTO T_Vendedores VALUES (7, 'TheVoid_User', 1);            -- Empleado falso (reto DELETE)
+
+  INSERT INTO T_Ventas VALUES                                        -- Ventas falsas a $1 (Boss)
+  (43, 'BYD', 'GDL',  'Laura Ortiz',    2024, 'Negro',  1, 'VOID01', NULL, '2024-04-01'),
+  (44, 'BYD', 'GDL',  'Laura Ortiz',    2024, 'Negro',  1, 'VOID01', NULL, '2024-04-02'),
+  (45, 'BYD', 'CDMX', 'Miguel Paredes', 2025, 'Blanco', 1, 'VOID02', NULL, '2025-04-03');
+
+  CREATE TABLE T_Logs_Temporales (
+    C_ID_Log INTEGER PRIMARY KEY,
+    C_Descripcion TEXT,
+    C_Fecha_Evento DATE               -- 3 antiguos (< 2025) para el DELETE con filtro
+  );
+  INSERT INTO T_Logs_Temporales VALUES
+  (1, 'Reinicio de nodo GDL',   '2024-06-10'),
+  (2, 'Intrusion detectada',    '2024-09-22'),
+  (3, 'Backup automatico',      '2024-12-30'),
+  (4, 'Sync Firestore OK',      '2025-02-14'),
+  (5, 'Parche de seguridad',    '2025-05-01');
+
+  CREATE TABLE T_Pruebas_Errores (
+    C_ID INTEGER PRIMARY KEY,
+    C_Tipo_Error TEXT                 -- Tabla de pruebas: el Auditor ordena vaciarla
+  );
+  INSERT INTO T_Pruebas_Errores VALUES
+  (1, 'Error de conexion simulado'),
+  (2, 'Timeout de prueba'),
+  (3, 'Registro basura QA');
+`;
 
 // ============================================
 // NARRATIVA INMERSIVA — Módulo 1
@@ -1352,6 +1391,81 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  8: {
+    title: 'La Purga de Datos (El Auditor)',
+    concept: `<strong>📜 Comandos de este ejercicio (DML)</strong><br><br>
+      <code>INSERT INTO tabla VALUES (...)</code> — crear registros<br>
+      <code>UPDATE tabla SET col = valor WHERE ...</code> — corregir<br>
+      <code>DELETE FROM tabla WHERE ...</code> — eliminar<br><br>
+      <em>⚠️ Regla de oro del Auditor: un UPDATE o DELETE sin WHERE es el fin de tu carrera.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: "🆕 Nuevo Ingreso (cliente 17: 'Toño Nexus')",
+        expected: "INSERT INTO T_Clientes VALUES (17, 'Toño Nexus', 'tono@nexcorp.mx', '3312345678', 'GDL')",
+        hint: "INSERT INTO T_Clientes VALUES (17, 'Toño Nexus', 'tono@nexcorp.mx', '3312345678', 'GDL');",
+        example: "INSERT INTO T_Clientes VALUES (18, 'Cliente Demo', 'demo@nexcorp.mx', '3300000000', 'CDMX');"
+      },
+      {
+        id: 2, desc: "💲 Corrección de Precios (VIN 'TR123' → $450,000)",
+        expected: "UPDATE T_Inventario SET C_Precio = 450000 WHERE C_VIN = 'TR123'",
+        hint: "UPDATE T_Inventario SET C_Precio = 450000 WHERE C_VIN = 'TR123';",
+        example: "UPDATE T_Inventario SET C_Color = 'Gris' WHERE C_VIN = 'TR123';"
+      },
+      {
+        id: 3, desc: "🔥 El Gran Despido (borrar a 'TheVoid_User')",
+        expected: "DELETE FROM T_Vendedores WHERE C_Nombre_Vendedor = 'TheVoid_User'",
+        hint: "DELETE FROM T_Vendedores WHERE C_Nombre_Vendedor = 'TheVoid_User';",
+        example: "DELETE FROM T_Pruebas_Errores WHERE C_ID = 99;"
+      },
+      {
+        id: 4, desc: "⚠️ GLITCH: Kia 2023 → 'Remate' (UPDATE con doble filtro)",
+        expected: "UPDATE T_Inventario SET C_Observaciones = 'Remate' WHERE C_Marca = 'Kia' AND C_Anio = 2023",
+        hint: "UPDATE T_Inventario SET C_Observaciones = 'Remate' WHERE C_Marca = 'Kia' AND C_Anio = 2023;",
+        example: "UPDATE T_Inventario SET C_Observaciones = 'Demo' WHERE C_Marca = 'Toyota' AND C_Anio = 2023;"
+      },
+      {
+        id: 5, desc: '📦 Carga Masiva (3 registros en un solo INSERT)',
+        expected: "INSERT INTO T_Pruebas_Errores VALUES (10, 'Prueba1'), (11, 'Prueba2'), (12, 'Prueba3')",
+        hint: "INSERT INTO T_Pruebas_Errores VALUES (10, 'Prueba1'), (11, 'Prueba2'), (12, 'Prueba3');",
+        example: "INSERT INTO T_Logs_Temporales VALUES (10, 'Log A', '2025-06-01'), (11, 'Log B', '2025-06-02');"
+      },
+      {
+        id: 6, desc: "📞 Sincronización (teléfonos NULL → '000-000-0000')",
+        expected: "UPDATE T_Clientes SET C_Telefono = '000-000-0000' WHERE C_Telefono IS NULL",
+        hint: "UPDATE T_Clientes SET C_Telefono = '000-000-0000' WHERE C_Telefono IS NULL;",
+        example: "UPDATE T_Inventario SET C_Color = 'Pendiente' WHERE C_Color IS NULL;"
+      },
+      {
+        id: 7, desc: "🧹 Limpieza Regional (logs anteriores a 2025)",
+        expected: "DELETE FROM T_Logs_Temporales WHERE C_Fecha_Evento < '2025-01-01'",
+        hint: "DELETE FROM T_Logs_Temporales WHERE C_Fecha_Evento < '2025-01-01';",
+        example: "DELETE FROM T_Logs_Temporales WHERE C_Fecha_Evento < '2024-01-01';"
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: +5% a los Lexus (matemática en el SET)',
+        expected: "UPDATE T_Inventario SET C_Precio = C_Precio * 1.05 WHERE C_Marca = 'Lexus'",
+        hint: "UPDATE T_Inventario SET C_Precio = C_Precio * 1.05 WHERE C_Marca = 'Lexus';",
+        example: "UPDATE T_Inventario SET C_Precio = C_Precio * 0.9 WHERE C_Marca = 'Chirey';"
+      },
+      {
+        id: 9, desc: '☢️ Vaciado Seguro (limpiar T_Pruebas_Errores)',
+        expected: 'DELETE FROM T_Pruebas_Errores',
+        hint: 'DELETE FROM T_Pruebas_Errores; -- En SQL Server usarías: TRUNCATE TABLE T_Pruebas_Errores (más rápido, no registra fila por fila)',
+        example: 'DELETE FROM T_Logs_Temporales;'
+      },
+      {
+        id: 10, desc: '🔒 Seguridad Total (¿por qué la FK protegería al cliente 1?)',
+        expected: 'SELECT COUNT(*) FROM T_Ventas WHERE C_ID_Cliente = 1',
+        hint: 'SELECT COUNT(*) FROM T_Ventas WHERE C_ID_Cliente = 1; -- Estas ventas dependen del cliente: una Foreign Key bloquearía su DELETE para no dejar ventas huérfanas',
+        example: 'SELECT COUNT(*) FROM T_Ventas WHERE C_ID_Cliente = 5;'
+      }
+    ],
+    xp: 450, coins: 3000, difficulty: 5, skill: 'ADVANCED',
+    diaryEntry: 'Día 8: Toqué la realidad por primera vez — inserté, corregí y purgué. El Auditor no sonríe, pero retiró las infracciones de mi expediente. La base vuelve a estar limpia.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -1845,6 +1959,74 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — A cazar fantasmas
+          </div>`
+      }
+    ]
+  },
+  8: {
+    title: 'El Poder de la Creación y la Destrucción (DML)',
+    slides: [
+      // SLIDE 1 — Contexto / El Auditor
+      {
+        icon: '🛡️',
+        tag: 'NEXUS SQL — BÚNKER DE SEGURIDAD',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--danger));">🛡️</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--danger);text-transform:uppercase;">Subsuelo de Velocity — acceso restringido</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--danger);margin-bottom:12px;">👁️ EL AUDITOR — solo una lista de infracciones en pantalla</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "He visto tus consultas. Son elegantes, pero la base de datos es un chiquero.
+              El virus inyectó ventas falsas, duplicó empleados y puso precios de $1
+              a las camionetas blindadas."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Leer el desastre es fácil; <strong style="color:var(--danger);">arreglarlo es para maestros</strong>.
+              ¿Tienes el pulso firme?"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — La mirada del vigilante
+          </div>`
+      },
+      // SLIDE 2 — INSERT, UPDATE, DELETE
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">⚡</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">DML: dejar de observar, empezar a tocar</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#00ff41;margin-bottom:12px;">INSERT INTO T_Clientes VALUES (17, 'Ana', ...);&nbsp;<span style="color:#546e7a;">-- crear</span><br>UPDATE T_Inventario SET C_Precio = 450000<br>&nbsp;&nbsp;WHERE C_VIN = 'TR123';&nbsp;<span style="color:#546e7a;">-- corregir</span><br>DELETE FROM T_Vendedores<br>&nbsp;&nbsp;WHERE C_Nombre_Vendedor = 'TheVoid_User';&nbsp;<span style="color:#546e7a;">-- eliminar</span></div>
+            <p style="margin-bottom:8px;">En el <code>SET</code> puedes hacer matemáticas: <code>SET C_Precio = C_Precio * 1.05</code> sube 5% de golpe.</p>
+            <p style="color:var(--muted);font-size:13px;">Estos comandos no regresan filas: regresan <strong>consecuencias</strong>. Verifica siempre con un SELECT después.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Crear, corregir, eliminar
+          </div>`
+      },
+      // SLIDE 3 — La regla del WHERE + TRUNCATE
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">☢️</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--danger);text-transform:uppercase;">La regla que salva carreras</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.08);border:2px solid var(--danger);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;font-size:16px;"><strong>Un UPDATE o DELETE sin WHERE afecta TODAS las filas.</strong> No hay Ctrl+Z en producción.</p>
+            <p style="margin-bottom:8px;">Ritual del profesional antes de ejecutar:</p>
+            <p style="margin-bottom:4px;">1️⃣ Escribe primero el <code>SELECT ... WHERE</code> con el mismo filtro.</p>
+            <p style="margin-bottom:4px;">2️⃣ Verifica que las filas que salen son EXACTAMENTE las que quieres tocar.</p>
+            <p style="margin-bottom:12px;">3️⃣ Solo entonces cámbialo por UPDATE/DELETE.</p>
+            <p style="color:var(--muted);font-size:13px;"><code>TRUNCATE TABLE</code> (SQL Server) vacía una tabla completa al instante — aquí practicamos su equivalente <code>DELETE FROM tabla</code>. El único DELETE sin WHERE que el Auditor permite... porque él lo ordenó.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Hasta hoy fuiste observador. Desde hoy, cada comando tuyo cambia la realidad." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — El Auditor te observa
           </div>`
       }
     ]
@@ -2979,6 +3161,14 @@ const triviaData = {
     correct: 'B',
     explanation: '<strong>10</strong>: el LEFT JOIN conserva TODAS las filas de la izquierda. Las 5 sin coincidencia aparecen con NULL en las columnas de la derecha.',
     coins: 800, xp: 80
+  },
+  8: {
+    npc: 'El Auditor proyecta tu expediente en la pared del Búnker',
+    question: '¿Cuál es la diferencia principal entre DELETE y TRUNCATE?',
+    options: { A: 'DELETE es más rápido', B: 'DELETE puede llevar WHERE para borrar filas específicas; TRUNCATE borra todo siempre', C: 'TRUNCATE solo borra las columnas, no las filas' },
+    correct: 'B',
+    explanation: '<strong>DELETE</strong> acepta WHERE y registra cada fila borrada (reversible en transacción). <strong>TRUNCATE</strong> vacía la tabla completa de golpe, más rápido, sin WHERE. La estructura sobrevive en ambos.',
+    coins: 1000, xp: 100
   }
 };
 
@@ -3274,6 +3464,42 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 7',
     victoryBadgeLines: ['🌑 Insignia: Cazador de Fantasmas', '🔦 Insignia: Revelador del Vacío'],
     moduleLabel: 'Módulo 7 — COMPLETO 100%'
+  },
+  8: {
+    bossName: 'BOSS FINAL — EL AUDITOR',
+    introTime: '📍 00:00 AM — Búnker de Seguridad, alerta roja activa',
+    introText: `"¡Última oportunidad, {NAME}! The Void puso los precios de <strong>'BYD'</strong> en <strong>$1.00</strong>
+      e inyectó ventas falsas. Harás dos cosas <strong>en una sola sesión</strong>:
+      1) <strong>Elimina</strong> todas las ventas hechas a $1.00.
+      2) <strong>Actualiza</strong> el inventario 'BYD' a <strong>$550,000</strong>,
+      pero <strong>solo</strong> los modelos 'Seal'.
+      ¡Si borras una venta real, estás fuera!"`,
+    comboHint: "Dos sentencias juntas: DELETE FROM T_Ventas WHERE C_Monto = 1; y UPDATE T_Inventario SET ... WHERE C_Marca = 'BYD' AND C_Modelo = 'Seal';",
+    title: '👹 BOSS FINAL — La Gran Purga del Auditor',
+    descShort: "DELETE de ventas a $1 + UPDATE de BYD Seal a $550,000 — en una sola ejecución",
+    battleCry: 'Purga las ventas falsas. Restaura los Seal. Un solo error y tu acceso desaparece.',
+    checks: [
+      { any: ['delete from'], extra: 't_ventas', hint: 'DELETE FROM T_Ventas' },
+      { any: ['c_monto = 1 ', 'c_monto = 1;', 'c_monto=1'], hint: 'WHERE C_Monto = 1 (¡solo las falsas!)' },
+      { any: ['update'], extra: 't_inventario', hint: 'UPDATE T_Inventario' },
+      { any: ['550000'], hint: 'SET C_Precio = 550000' },
+      { any: ["'byd'"], hint: "C_Marca = 'BYD'" },
+      { any: ["'seal'"], hint: "AND C_Modelo = 'Seal'" }
+    ],
+    maxRows: 99,
+    allowNoRows: true,
+    xp: 250, coins: 5000,
+    badges: ['boss8', 'mundo8'],
+    newRank: null,
+    victoryTitle: '¡LA PURGA HA SIDO EJECUTADA!',
+    victoryText: `"Tres ventas falsas eliminadas. Ni una real tocada.
+      Los Seal restaurados a su valor exacto.
+      He auditado a cientos de analistas... casi todos destruyen algo en este nivel.
+      Tú no. Tu expediente queda... limpio. No te acostumbres al elogio."`,
+    victoryNPC: '— El Auditor, Control Interno',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 8',
+    victoryBadgeLines: ['🛡️ Insignia: Pulso de Cirujano', '⚔️ Insignia: Purgador del Void'],
+    moduleLabel: 'Módulo 8 — COMPLETO 100%'
   }
 };
 
@@ -3330,7 +3556,7 @@ function checkBossSolution(userQuery, results) {
     const extraOk = !c.extra || u.includes(c.extra);
     return !(anyOk && extraOk);
   });
-  const rowsOk = results && results[0] && results[0].values.length > 0 && results[0].values.length <= b.maxRows;
+  const rowsOk = b.allowNoRows ? true : (results && results[0] && results[0].values.length > 0 && results[0].values.length <= b.maxRows);
   if (failed.length === 0 && rowsOk) {
     completeBoss(cId);
   } else {
