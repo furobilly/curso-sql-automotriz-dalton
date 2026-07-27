@@ -184,7 +184,9 @@ const allBadges = [
   { id: 'boss8', name: 'Pulso de Cirujano', icon: '🛡️', desc: 'Completar Boss Final Módulo 8' },
   { id: 'mundo8', name: 'Purgador del Void', icon: '⚔️', desc: '100% Módulo 8' },
   { id: 'boss9', name: 'Arquitecto del Núcleo', icon: '🏗️', desc: 'Completar Boss Final Módulo 9' },
-  { id: 'mundo9', name: 'Señor de las Vistas', icon: '🪟', desc: '100% Módulo 9' }
+  { id: 'mundo9', name: 'Señor de las Vistas', icon: '🪟', desc: '100% Módulo 9' },
+  { id: 'boss10', name: 'Vencedor del CEO', icon: '👑', desc: 'Derrotar a THE BOSS del Módulo 10' },
+  { id: 'mundo10', name: 'Liberador del NEXUS', icon: '💠', desc: 'Completar la aventura principal' }
 ];
 
 // ============================================
@@ -1543,6 +1545,82 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  10: {
+    title: 'El Trono de Datos (El CEO)',
+    concept: `<strong>📜 Armas legendarias de este ejercicio</strong><br><br>
+      <code>WITH nombre AS (SELECT ...)</code> — CTE: bloques legibles<br>
+      <code>RANK() / ROW_NUMBER() OVER (ORDER BY ...)</code> — rankings<br>
+      <code>OVER (PARTITION BY col)</code> — comparar contra el grupo SIN GROUP BY<br>
+      <code>SUM(...) OVER (ORDER BY fecha)</code> — acumulados<br><br>
+      <em>El CEO no quiere tablas. Quiere inteligencia.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '🥇 El Ranking de Oro (RANK sobre las 5 mayores ventas)',
+        expected: 'SELECT C_Vendedor, C_Monto, RANK() OVER (ORDER BY C_Monto DESC) AS M_Ranking FROM T_Ventas LIMIT 5',
+        hint: 'SELECT C_Vendedor, C_Monto, RANK() OVER (ORDER BY C_Monto DESC) AS M_Ranking FROM T_Ventas LIMIT 5;',
+        example: 'SELECT C_Modelo, C_Precio, RANK() OVER (ORDER BY C_Precio DESC) AS M_Ranking FROM T_Inventario LIMIT 5;'
+      },
+      {
+        id: 2, desc: '📐 Organización con CTE (ventas 2025, luego solo CDMX)',
+        expected: "WITH CTE_Ventas_2025 AS (SELECT * FROM T_Ventas WHERE C_Anio = 2025) SELECT * FROM CTE_Ventas_2025 WHERE C_Sucursal = 'CDMX'",
+        hint: "WITH CTE_Ventas_2025 AS (SELECT * FROM T_Ventas WHERE C_Anio = 2025) SELECT * FROM CTE_Ventas_2025 WHERE C_Sucursal = 'CDMX';",
+        example: "WITH CTE_Caros AS (SELECT * FROM T_Inventario WHERE C_Precio > 800000) SELECT * FROM CTE_Caros WHERE C_Marca = 'Lexus';"
+      },
+      {
+        id: 3, desc: '⚖️ Comparativa de Precios (promedio de SU marca al lado)',
+        expected: 'SELECT C_Modelo, C_Precio, AVG(C_Precio) OVER (PARTITION BY C_Marca) AS M_Promedio_Marca FROM T_Inventario',
+        hint: 'SELECT C_Modelo, C_Precio, AVG(C_Precio) OVER (PARTITION BY C_Marca) AS M_Promedio_Marca FROM T_Inventario;',
+        example: 'SELECT C_Vendedor, C_Monto, AVG(C_Monto) OVER (PARTITION BY C_Vendedor) AS M_Promedio_Vendedor FROM T_Ventas;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH FINAL: Última venta de cada cliente (ROW_NUMBER)',
+        expected: 'WITH CTE_Numeradas AS (SELECT C_ID_Cliente, C_Fecha, C_Monto, ROW_NUMBER() OVER (PARTITION BY C_ID_Cliente ORDER BY C_Fecha DESC) AS M_Num FROM T_Ventas) SELECT * FROM CTE_Numeradas WHERE M_Num = 1',
+        hint: 'WITH CTE_Numeradas AS (SELECT C_ID_Cliente, C_Fecha, C_Monto, ROW_NUMBER() OVER (PARTITION BY C_ID_Cliente ORDER BY C_Fecha DESC) AS M_Num FROM T_Ventas) SELECT * FROM CTE_Numeradas WHERE M_Num = 1; -- El patrón deduplicador más usado en los SPs reales',
+        example: 'WITH CTE_N AS (SELECT C_Marca, C_Precio, ROW_NUMBER() OVER (PARTITION BY C_Marca ORDER BY C_Precio DESC) AS M_Num FROM T_Inventario) SELECT * FROM CTE_N WHERE M_Num = 1;'
+      },
+      {
+        id: 5, desc: '📈 Acumulado Histórico (SUM OVER por fecha)',
+        expected: 'SELECT C_Fecha, C_Monto, SUM(C_Monto) OVER (ORDER BY C_Fecha) AS M_Acumulado FROM T_Ventas',
+        hint: 'SELECT C_Fecha, C_Monto, SUM(C_Monto) OVER (ORDER BY C_Fecha) AS M_Acumulado FROM T_Ventas;',
+        example: 'SELECT C_Fecha, C_Monto, COUNT(*) OVER (ORDER BY C_Fecha) AS M_Ventas_Acumuladas FROM T_Ventas;'
+      },
+      {
+        id: 6, desc: '🥧 Análisis de Participación (% del total de su marca)',
+        expected: 'SELECT C_Marca, C_Monto, C_Monto * 100.0 / SUM(C_Monto) OVER (PARTITION BY C_Marca) AS M_Porcentaje FROM T_Ventas',
+        hint: 'SELECT C_Marca, C_Monto, C_Monto * 100.0 / SUM(C_Monto) OVER (PARTITION BY C_Marca) AS M_Porcentaje FROM T_Ventas; -- El 100.0 con decimal fuerza división real, no entera',
+        example: 'SELECT C_Sucursal, C_Monto, C_Monto * 100.0 / SUM(C_Monto) OVER (PARTITION BY C_Sucursal) AS M_Porcentaje FROM T_Ventas;'
+      },
+      {
+        id: 7, desc: '🕳️ Detección de Brechas (más de 6 meses sin comprar)',
+        expected: "SELECT C_ID_Cliente, MAX(C_Fecha) AS M_Ultima_Compra FROM T_Ventas GROUP BY C_ID_Cliente HAVING MAX(C_Fecha) < date('2025-12-31', '-6 months')",
+        hint: "SELECT C_ID_Cliente, MAX(C_Fecha) AS M_Ultima_Compra FROM T_Ventas GROUP BY C_ID_Cliente HAVING MAX(C_Fecha) < date('2025-12-31', '-6 months'); -- En SQL Server: DATEADD(MONTH, -6, GETDATE())",
+        example: "SELECT C_ID_Cliente, MAX(C_Fecha) AS M_Ultima FROM T_Ventas GROUP BY C_ID_Cliente HAVING MAX(C_Fecha) < date('2025-12-31', '-12 months');"
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: 3 CTEs en una salida (inventario+ventas+clientes)',
+        expected: 'WITH CTE_Inventario AS (SELECT C_Marca, COUNT(*) AS M_Autos FROM T_Inventario GROUP BY C_Marca), CTE_Ventas AS (SELECT C_Marca, SUM(C_Monto) AS M_Total FROM T_Ventas GROUP BY C_Marca), CTE_Clientes AS (SELECT C_Marca, COUNT(DISTINCT C_ID_Cliente) AS M_Clientes FROM T_Ventas GROUP BY C_Marca) SELECT CTE_Inventario.C_Marca, M_Autos, M_Total, M_Clientes FROM CTE_Inventario INNER JOIN CTE_Ventas ON CTE_Inventario.C_Marca = CTE_Ventas.C_Marca INNER JOIN CTE_Clientes ON CTE_Inventario.C_Marca = CTE_Clientes.C_Marca',
+        hint: 'WITH CTE_Inventario AS (SELECT C_Marca, COUNT(*) AS M_Autos FROM T_Inventario GROUP BY C_Marca), CTE_Ventas AS (SELECT C_Marca, SUM(C_Monto) AS M_Total FROM T_Ventas GROUP BY C_Marca), CTE_Clientes AS (SELECT C_Marca, COUNT(DISTINCT C_ID_Cliente) AS M_Clientes FROM T_Ventas GROUP BY C_Marca) SELECT CTE_Inventario.C_Marca, M_Autos, M_Total, M_Clientes FROM CTE_Inventario INNER JOIN CTE_Ventas ON CTE_Inventario.C_Marca = CTE_Ventas.C_Marca INNER JOIN CTE_Clientes ON CTE_Inventario.C_Marca = CTE_Clientes.C_Marca; -- Varias CTEs se separan con coma tras un solo WITH',
+        example: 'WITH CTE_A AS (SELECT C_Marca, COUNT(*) AS M_N FROM T_Inventario GROUP BY C_Marca), CTE_B AS (SELECT C_Marca, AVG(C_Precio) AS M_P FROM T_Inventario GROUP BY C_Marca) SELECT CTE_A.C_Marca, M_N, M_P FROM CTE_A INNER JOIN CTE_B ON CTE_A.C_Marca = CTE_B.C_Marca;'
+      },
+      {
+        id: 9, desc: '🎖️ Vendedores Consistentes (PARTITION BY sucursal)',
+        expected: 'SELECT C_Vendedor, C_Sucursal, C_Monto, AVG(C_Monto) OVER (PARTITION BY C_Sucursal) AS M_Promedio_Sucursal FROM T_Ventas',
+        hint: 'SELECT C_Vendedor, C_Sucursal, C_Monto, AVG(C_Monto) OVER (PARTITION BY C_Sucursal) AS M_Promedio_Sucursal FROM T_Ventas; -- Cada venta se compara con el promedio de SU sucursal, sin colapsar filas',
+        example: 'SELECT C_Vendedor, C_Marca, C_Monto, MAX(C_Monto) OVER (PARTITION BY C_Marca) AS M_Maximo_Marca FROM T_Ventas;'
+      },
+      {
+        id: 10, desc: "🔥 La Prueba de Fuego (CASE dentro de SUM, por mes)",
+        expected: "SELECT strftime('%m', C_Fecha) AS M_Mes, SUM(CASE WHEN C_Monto > 800000 THEN 1 ELSE 0 END) AS M_Premium, SUM(CASE WHEN C_Monto <= 800000 THEN 1 ELSE 0 END) AS M_Economicas FROM T_Ventas GROUP BY strftime('%m', C_Fecha)",
+        hint: "SELECT strftime('%m', C_Fecha) AS M_Mes, SUM(CASE WHEN C_Monto > 800000 THEN 1 ELSE 0 END) AS M_Premium, SUM(CASE WHEN C_Monto <= 800000 THEN 1 ELSE 0 END) AS M_Economicas FROM T_Ventas GROUP BY strftime('%m', C_Fecha); -- En SQL Server: MONTH(C_Fecha). El truco: CASE regresa 1/0 y SUM los cuenta",
+        example: "SELECT C_Sucursal, SUM(CASE WHEN C_Anio = 2025 THEN 1 ELSE 0 END) AS M_2025, SUM(CASE WHEN C_Anio = 2024 THEN 1 ELSE 0 END) AS M_2024 FROM T_Ventas GROUP BY C_Sucursal;"
+      }
+    ],
+    xp: 600, coins: 5000, difficulty: 5, skill: 'ADVANCED',
+    diaryEntry: 'Día 10: Frente al CEO, en el piso 100, escribí consultas que analizan el tiempo y el espacio. Rankings, acumulados, particiones. Ya no leo datos: leo historias completas.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -2173,6 +2251,73 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — Los planos están listos
+          </div>`
+      }
+    ]
+  },
+  10: {
+    title: 'Las Armas Legendarias: CTEs y Window Functions',
+    slides: [
+      // SLIDE 1 — Contexto / El CEO
+      {
+        icon: '👑',
+        tag: 'NEXUS SQL — PISO 100',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--accent));">👑</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;">Oficina del Director General — Torre Velocity</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--accent);margin-bottom:12px;">🕴️ EL CEO — de espaldas, mirando la ciudad</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "El analista que salvó a mis gerentes, purificó mis datos y construyó mi arquitectura.
+              Impresionante. Pero hoy es el día del listado en la Bolsa.
+              Los inversores no quieren tablas simples. Quieren <strong>inteligencia</strong>."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Si el reporte tiene un solo error de lógica, el grupo caerá.
+              <strong style="color:var(--accent);">El destino de miles de empleados está en tu última consulta.</strong>"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El juicio final
+          </div>`
+      },
+      // SLIDE 2 — CTEs
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">📐</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">CTE: tablas temporales con estilo</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">WITH</code> nombra bloques lógicos ANTES de la consulta principal — mini-planos antes del rascacielos:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#00ff41;margin-bottom:12px;">WITH CTE_Ventas_2025 AS (<br>&nbsp;&nbsp;SELECT * FROM T_Ventas WHERE C_Anio = 2025<br>)<br>SELECT * FROM CTE_Ventas_2025<br>WHERE C_Sucursal = 'CDMX';</div>
+            <p style="margin-bottom:8px;">Varias CTEs se encadenan con coma tras un solo <code>WITH</code> — y luego se unen entre sí con JOINs, como tablas normales.</p>
+            <p style="color:var(--muted);font-size:13px;">Los SPs de 500 líneas de Dalton se vuelven legibles con este patrón. Es la diferencia entre heredar código y heredar un mapa.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Organizar antes de construir
+          </div>`
+      },
+      // SLIDE 3 — Window Functions
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🪄</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Window Functions: mirar al grupo sin colapsarlo</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;">Un GROUP BY <strong>colapsa</strong> filas. Una window function las <strong>conserva</strong> y agrega una columna que mira al grupo:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#00ff41;margin-bottom:12px;">RANK() OVER (ORDER BY C_Monto DESC)&nbsp;<span style="color:#546e7a;">-- posición</span><br>ROW_NUMBER() OVER (PARTITION BY C_ID_Cliente<br>&nbsp;&nbsp;ORDER BY C_Fecha DESC)&nbsp;<span style="color:#546e7a;">-- deduplicar</span><br>AVG(C_Precio) OVER (PARTITION BY C_Marca)&nbsp;<span style="color:#546e7a;">-- vs su marca</span><br>SUM(C_Monto) OVER (ORDER BY C_Fecha)&nbsp;<span style="color:#546e7a;">-- acumulado</span></div>
+            <p style="margin-bottom:8px;"><code>PARTITION BY</code> = "reinicia el cálculo por cada grupo". <code>ORDER BY</code> dentro del OVER = "en este orden".</p>
+            <p style="color:var(--muted);font-size:13px;">RANK() deja huecos ante empates (1,1,3); ROW_NUMBER() nunca (1,2,3). DENSE_RANK() no deja huecos (1,1,2).</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Ya no solo consultas, Toño. Ahora analizas el tiempo y el espacio." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — El último duelo
           </div>`
       }
     ]
@@ -3323,6 +3468,14 @@ const triviaData = {
     correct: 'B',
     explanation: 'Una vista <strong>no guarda datos</strong>: es una ventana a la tabla real. Si la vista es simple (una tabla, sin agregaciones), un DELETE a través de ella <strong>borra en la tabla original</strong>. Por eso las vistas también son un tema de seguridad.',
     coins: 1500, xp: 150
+  },
+  10: {
+    npc: 'El CEO habla sin voltearse, mirando la ciudad desde el piso 100',
+    question: '¿Qué ventaja tiene usar una CTE (WITH) sobre una subconsulta tradicional?',
+    options: { A: 'Es obligatoria para que el código funcione', B: 'Hace el código mucho más legible y fácil de mantener', C: 'SQL las procesa más rápido siempre' },
+    correct: 'B',
+    explanation: 'La CTE es <strong>organización</strong>: nombra bloques lógicos y los apila arriba, como mini-planos antes del rascacielos. El motor suele ejecutarlas igual que una subconsulta — la ganancia es para el humano que mantiene el código.',
+    coins: 2000, xp: 200
   }
 };
 
@@ -3690,6 +3843,43 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 9',
     victoryBadgeLines: ['🏗️ Insignia: Arquitecto del Núcleo', '🪟 Insignia: Señor de las Vistas'],
     moduleLabel: 'Módulo 9 — COMPLETO 100%'
+  },
+  10: {
+    bossName: 'THE BOSS — EL CEO',
+    introTime: '📍 08:59 AM — Piso 100, día del listado en la Bolsa de Valores',
+    introText: `"Es ahora, {NAME}. Genera el <strong>Dashboard Maestro</strong>:
+      una sola consulta con una <strong>CTE</strong> que pre-calcule los totales por marca
+      (uniendo Ventas, Inventario, Clientes y Vendedores),
+      una <strong>Window Function RANK()</strong> que asigne posición por ganancias,
+      y muestra solo el <strong>Top 3 de marcas</strong> con su total y su ranking nacional.
+      Si el reporte tiene un solo error de lógica, el grupo caerá.
+      <strong>El destino de miles de empleados está en tu última consulta.</strong>"`,
+    comboHint: 'WITH CTE_Totales AS (SELECT I.C_Marca, SUM(V.C_Monto) ... 3 INNER JOIN ... GROUP BY) SELECT ..., RANK() OVER (ORDER BY M_Total DESC) ... LIMIT 3',
+    title: '👹 THE BOSS — El Reporte NEXUS Supremo',
+    descShort: 'CTE con 4 tablas unidas + RANK() OVER + Top 3 de marcas por ganancias',
+    battleCry: 'Una consulta. Todo lo que aprendiste. El sistema NEXUS se libera hoy o cae para siempre.',
+    checks: [
+      { any: ['with '], hint: 'WITH nombre AS (...) — la CTE' },
+      { any: ['inner join', 'join'], hint: 'JOINs entre las tablas dentro de la CTE' },
+      { any: ['group by'], hint: 'GROUP BY C_Marca para los totales' },
+      { any: ['rank ('], hint: 'RANK() para el ranking' },
+      { any: ['over ('], hint: 'OVER (ORDER BY ... DESC)' },
+      { any: ['limit 3', 'top 3'], hint: 'solo el Top 3' }
+    ],
+    maxRows: 3,
+    xp: 1000, coins: 10000,
+    badges: ['boss10', 'mundo10'],
+    newRank: 'Arquitecto Maestro Nexus',
+    victoryTitle: '🏆 ¡EL SISTEMA NEXUS HA SIDO LIBERADO!',
+    victoryText: `"El reporte subió a la Bolsa sin un solo error. Las 8 marcas operan al 100%.
+      'The Void' ha sido comprimido en un archivo de respaldo... para siempre.
+      Empezaste restaurando un nodo en Guadalajara. Hoy salvaste al grupo entero.
+      Ana tenía razón desde el Día 1: no contratamos un analista. Contratamos un Arquitecto.
+      El título es tuyo: <strong>Arquitecto Maestro Nexus</strong>."`,
+    victoryNPC: '— El CEO, Grupo Velocity',
+    victoryRewardsTitle: '👑 RECOMPENSAS FINALES',
+    victoryBadgeLines: ['👑 Insignia: Vencedor del CEO', '💠 Insignia: Liberador del NEXUS'],
+    moduleLabel: '🎓 AVENTURA PRINCIPAL COMPLETADA — 10/10 módulos'
   }
 };
 
