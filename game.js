@@ -178,7 +178,9 @@ const allBadges = [
   { id: 'boss5', name: 'Separador de Trigo y Paja', icon: '🌾', desc: 'Completar Boss Final Módulo 5' },
   { id: 'mundo5', name: 'Consolidador Nacional', icon: '🇲🇽', desc: '100% Módulo 5' },
   { id: 'boss6', name: 'Tejedor de Vínculos', icon: '🔗', desc: 'Completar Boss Final Módulo 6' },
-  { id: 'mundo6', name: 'Héroe de Marketing', icon: '🎨', desc: '100% Módulo 6' }
+  { id: 'mundo6', name: 'Héroe de Marketing', icon: '🎨', desc: '100% Módulo 6' },
+  { id: 'boss7', name: 'Cazador de Fantasmas', icon: '🌑', desc: 'Completar Boss Final Módulo 7' },
+  { id: 'mundo7', name: 'Revelador del Vacío', icon: '🔦', desc: '100% Módulo 7' }
 ];
 
 // ============================================
@@ -548,21 +550,27 @@ const dbSeed = `
   CREATE TABLE T_Clientes (
     C_ID_Cliente INTEGER PRIMARY KEY,
     C_Nombre_Completo TEXT,
-    C_Correo TEXT
+    C_Correo TEXT,
+    C_Telefono TEXT,
+    C_Ciudad_Registro TEXT           -- CDMX/GDL/MTY/SLP
   );
   INSERT INTO T_Clientes VALUES
-  (1, 'Valeria Montes', 'valeria.m@gmail.com'),
-  (2, 'Héctor Bravo', 'hbravo@outlook.com'),
-  (3, 'Renata Ochoa', 'renata.o@nexcorp.mx'),
-  (4, 'Iván Solís', 'ivan.solis@yahoo.com'),
-  (5, 'Camila Duarte', 'cduarte@gmail.com'),
-  (6, 'Óscar Peña', 'opena@hotmail.com'),
-  (7, 'Ximena Rangel', 'xrangel@nexcorp.mx'),
-  (8, 'Tomás Iglesias', 'tiglesias@gmail.com'),
-  (9, 'Regina Fuentes', 'rfuentes@outlook.com'),
-  (10, 'Bruno Cervantes', 'bcervantes@gmail.com'),
-  (11, 'Paola Zúñiga', 'pzuniga@yahoo.com'),
-  (12, 'Emilio Navarrete', 'enavarrete@nexcorp.mx');
+  (1, 'Valeria Montes', 'valeria.m@gmail.com', '5501112233', 'CDMX'),
+  (2, 'Héctor Bravo', 'hbravo@outlook.com', '5502112233', 'GDL'),
+  (3, 'Renata Ochoa', 'renata.o@nexcorp.mx', '5503112233', 'MTY'),
+  (4, 'Iván Solís', 'ivan.solis@yahoo.com', '5504112233', 'SLP'),
+  (5, 'Camila Duarte', 'cduarte@gmail.com', '5505112233', 'CDMX'),
+  (6, 'Óscar Peña', 'opena@hotmail.com', '5506112233', 'GDL'),
+  (7, 'Ximena Rangel', 'xrangel@nexcorp.mx', '5507112233', 'MTY'),
+  (8, 'Tomás Iglesias', 'tiglesias@gmail.com', '5508112233', 'SLP'),
+  (9, 'Regina Fuentes', 'rfuentes@outlook.com', '5509112233', 'CDMX'),
+  (10, 'Bruno Cervantes', 'bcervantes@gmail.com', '5510112233', 'GDL'),
+  (11, 'Paola Zúñiga', 'pzuniga@yahoo.com', '5511112233', 'MTY'),
+  (12, 'Emilio Navarrete', 'enavarrete@nexcorp.mx', '5512112233', 'SLP'),
+  (13, 'Silvia Arredondo', 'sarredondo@gmail.com', '5513998877', 'GDL'),
+  (14, 'Marco Beltrán', 'mbeltran@outlook.com', '5514998877', 'CDMX'),
+  (15, 'Julieta Osorio', 'josorio@yahoo.com', '5515998877', 'GDL'),
+  (16, 'Rodrigo Palma', 'rpalma@gmail.com', '5516998877', 'MTY');
 
   CREATE TABLE T_Sucursales (
     C_ID_Sucursal INTEGER PRIMARY KEY,
@@ -585,7 +593,62 @@ const dbSeed = `
   (2, 'Miguel Paredes', 3),
   (3, 'Pedro Nava', 2),
   (4, 'Karina Soto', 4),
-  (5, 'Julio Ramos', 1);`;
+  (5, 'Julio Ramos', 1),
+  (6, 'Andrés Leal', 3);          -- Sin ventas este mes (reto LEFT JOIN)
+
+  -- ============ MÓDULO 7: catálogo y pagos (huecos intencionales) ============
+  CREATE TABLE T_Modelos (
+    C_ID_Modelo INTEGER PRIMARY KEY,
+    C_Modelo TEXT,                   -- 2 modelos de catálogo SIN stock (Supra, Telluride)
+    C_Marca TEXT
+  );
+  INSERT INTO T_Modelos VALUES
+  (1, 'Corolla', 'Toyota'), (2, 'RAV4', 'Toyota'), (3, 'Hilux', 'Toyota'),
+  (4, 'CR-V', 'Honda'), (5, 'City', 'Honda'), (6, 'Rio', 'Kia'),
+  (7, 'Seal', 'BYD'), (8, 'RX500', 'Lexus'), (9, 'Tiggo2', 'Chirey'),
+  (10, 'Supra', 'Toyota'), (11, 'Telluride', 'Kia');
+
+  CREATE TABLE T_Pagos (
+    C_ID_Pago INTEGER PRIMARY KEY,
+    C_ID_Venta INTEGER,              -- FK a T_Ventas; las ventas 36-40 NO tienen pago
+    C_Metodo_Pago TEXT
+  );
+  INSERT INTO T_Pagos VALUES
+  (1, 1, 'Contado'),
+  (2, 2, 'Transferencia'),
+  (3, 3, 'Credito'),
+  (4, 4, 'Contado'),
+  (5, 5, 'Transferencia'),
+  (6, 6, 'Credito'),
+  (7, 7, 'Contado'),
+  (8, 8, 'Transferencia'),
+  (9, 9, 'Credito'),
+  (10, 10, 'Contado'),
+  (11, 11, 'Transferencia'),
+  (12, 12, 'Credito'),
+  (13, 13, 'Contado'),
+  (14, 14, 'Transferencia'),
+  (15, 15, 'Credito'),
+  (16, 16, 'Contado'),
+  (17, 17, 'Transferencia'),
+  (18, 18, 'Credito'),
+  (19, 19, 'Contado'),
+  (20, 20, 'Transferencia'),
+  (21, 21, 'Credito'),
+  (22, 22, 'Contado'),
+  (23, 23, 'Transferencia'),
+  (24, 24, 'Credito'),
+  (25, 25, 'Contado'),
+  (26, 26, 'Transferencia'),
+  (27, 27, 'Credito'),
+  (28, 28, 'Contado'),
+  (29, 29, 'Transferencia'),
+  (30, 30, 'Credito'),
+  (31, 31, 'Contado'),
+  (32, 32, 'Transferencia'),
+  (33, 33, 'Credito'),
+  (34, 34, 'Contado'),
+  (35, 35, 'Transferencia');`;
 
 // ============================================
 // NARRATIVA INMERSIVA — Módulo 1
@@ -1214,6 +1277,81 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  7: {
+    title: 'El Lado Oscuro de los Datos (Marketing II)',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>LEFT JOIN</code> — trae TODO de la izquierda; sin coincidencia → NULL<br>
+      <code>WHERE derecha.col IS NULL</code> — encuentra los "fantasmas"<br>
+      <code>ON a = b AND condición</code> — condición extra en la unión<br><br>
+      <em>Tip: a veces lo más valioso es lo que NO está en la otra tabla.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '🌗 Inclusión de Clientes (LEFT JOIN completo)',
+        expected: 'SELECT * FROM T_Clientes LEFT JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente',
+        hint: 'SELECT * FROM T_Clientes LEFT JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente;',
+        example: 'SELECT * FROM T_Vendedores LEFT JOIN T_Ventas ON T_Vendedores.C_Nombre_Vendedor = T_Ventas.C_Vendedor;'
+      },
+      {
+        id: 2, desc: '👻 Detectar el Vacío (clientes que nunca compraron)',
+        expected: 'SELECT * FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente WHERE V.C_ID_Venta IS NULL',
+        hint: 'SELECT * FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente WHERE V.C_ID_Venta IS NULL;',
+        example: 'SELECT C.C_Nombre_Completo FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente WHERE V.C_ID_Venta IS NULL;'
+      },
+      {
+        id: 3, desc: '🚗 Inventario Estancado (todos los autos, vendidos o no)',
+        expected: 'SELECT * FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN',
+        hint: 'SELECT * FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN;',
+        example: 'SELECT I.C_Modelo, V.C_Fecha FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: ¿Cuántos autos sin vender? (COUNT + IS NULL)',
+        expected: 'SELECT COUNT(*) FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN WHERE V.C_ID_Venta IS NULL',
+        hint: 'SELECT COUNT(*) FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN WHERE V.C_ID_Venta IS NULL;',
+        example: 'SELECT COUNT(*) FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente WHERE V.C_ID_Venta IS NULL;'
+      },
+      {
+        id: 5, desc: '😔 Vendedores sin Suerte (sin ventas este mes)',
+        expected: 'SELECT C_Nombre_Vendedor FROM T_Vendedores AS VE LEFT JOIN T_Ventas AS V ON VE.C_Nombre_Vendedor = V.C_Vendedor WHERE V.C_ID_Venta IS NULL',
+        hint: 'SELECT C_Nombre_Vendedor FROM T_Vendedores AS VE LEFT JOIN T_Ventas AS V ON VE.C_Nombre_Vendedor = V.C_Vendedor WHERE V.C_ID_Venta IS NULL;',
+        example: 'SELECT VE.C_Nombre_Vendedor, COUNT(V.C_ID_Venta) FROM T_Vendedores AS VE LEFT JOIN T_Ventas AS V ON VE.C_Nombre_Vendedor = V.C_Vendedor GROUP BY VE.C_Nombre_Vendedor;'
+      },
+      {
+        id: 6, desc: '📞 Campaña de Reactivación (GDL sin compras 2025)',
+        expected: "SELECT C_Nombre_Completo, C_Telefono FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente AND V.C_Anio = 2025 WHERE C.C_Ciudad_Registro = 'GDL' AND V.C_ID_Venta IS NULL",
+        hint: "SELECT C_Nombre_Completo, C_Telefono FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente AND V.C_Anio = 2025 WHERE C.C_Ciudad_Registro = 'GDL' AND V.C_ID_Venta IS NULL; -- La condición del año va en el ON, no en el WHERE",
+        example: "SELECT C_Nombre_Completo, C_Telefono FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente AND V.C_Anio = 2024 WHERE C.C_Ciudad_Registro = 'MTY' AND V.C_ID_Venta IS NULL;"
+      },
+      {
+        id: 7, desc: '📖 Modelos Olvidados (en catálogo pero sin stock)',
+        expected: 'SELECT M.C_Modelo FROM T_Modelos AS M LEFT JOIN T_Inventario AS I ON M.C_Modelo = I.C_Modelo WHERE I.C_VIN IS NULL',
+        hint: 'SELECT M.C_Modelo FROM T_Modelos AS M LEFT JOIN T_Inventario AS I ON M.C_Modelo = I.C_Modelo WHERE I.C_VIN IS NULL;',
+        example: 'SELECT M.C_Modelo, COUNT(I.C_VIN) FROM T_Modelos AS M LEFT JOIN T_Inventario AS I ON M.C_Modelo = I.C_Modelo GROUP BY M.C_Modelo;'
+      },
+      {
+        id: 8, desc: '⚠️ ERROR DE NODO: Compraron pero no pagaron (3 tablas)',
+        expected: 'SELECT C.C_Nombre_Completo FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente LEFT JOIN T_Pagos AS P ON V.C_ID_Venta = P.C_ID_Venta WHERE P.C_ID_Pago IS NULL',
+        hint: 'SELECT C.C_Nombre_Completo FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente LEFT JOIN T_Pagos AS P ON V.C_ID_Venta = P.C_ID_Venta WHERE P.C_ID_Pago IS NULL;',
+        example: 'SELECT C.C_Nombre_Completo, V.C_Monto FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente LEFT JOIN T_Pagos AS P ON V.C_ID_Venta = P.C_ID_Venta WHERE P.C_ID_Pago IS NULL;'
+      },
+      {
+        id: 9, desc: '🔢 Contar lo Inexistente (no vendidos por marca)',
+        expected: 'SELECT I.C_Marca, COUNT(*) FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN WHERE V.C_ID_Venta IS NULL GROUP BY I.C_Marca',
+        hint: 'SELECT I.C_Marca, COUNT(*) FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN WHERE V.C_ID_Venta IS NULL GROUP BY I.C_Marca;',
+        example: 'SELECT I.C_Sucursal, COUNT(*) FROM T_Inventario AS I LEFT JOIN T_Ventas AS V ON I.C_VIN = V.C_VIN WHERE V.C_ID_Venta IS NULL GROUP BY I.C_Sucursal;'
+      },
+      {
+        id: 10, desc: '🕵️ La Gran Auditoría (clientes sin compra por ciudad)',
+        expected: 'SELECT C.C_Ciudad_Registro, COUNT(*) FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente WHERE V.C_ID_Venta IS NULL GROUP BY C.C_Ciudad_Registro',
+        hint: 'SELECT C.C_Ciudad_Registro, COUNT(*) FROM T_Clientes AS C LEFT JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente WHERE V.C_ID_Venta IS NULL GROUP BY C.C_Ciudad_Registro;',
+        example: 'SELECT C.C_Ciudad_Registro, COUNT(*) FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente GROUP BY C.C_Ciudad_Registro;'
+      }
+    ],
+    xp: 400, coins: 2500, difficulty: 5, skill: 'ADVANCED',
+    diaryEntry: 'Día 7: Encontré a los fantasmas — clientes sin compras, autos sin dueño, ventas sin pago. Mariana ya tiene su campaña de reconquista. Lo que The Void ocultó, un LEFT JOIN lo revela.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -1641,6 +1779,72 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — La campaña espera
+          </div>`
+      }
+    ]
+  },
+  7: {
+    title: 'La Inclusión Total: LEFT JOIN e IS NULL',
+    slides: [
+      // SLIDE 1 — Contexto / Mariana y los fantasmas
+      {
+        icon: '🌑',
+        tag: 'NEXUS SQL — SERVIDORES DE FIDELIZACIÓN',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">🌑</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Servidores de Fidelización de Clientes</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">👩‍🎨 MARIANA — con la lista del Buen Fin en la mano</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "El INNER JOIN solo me muestra a los clientes que <strong>sí</strong> compraron.
+              Para mi campaña de 'Recuperación' necesito lo contrario:
+              los que están en mi base pero <strong>no tienen ninguna venta registrada</strong>."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "Si no los encuentro, <strong style="color:var(--accent);">estamos perdiendo miles de clientes potenciales.</strong>"
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — Los clientes fantasma
+          </div>`
+      },
+      // SLIDE 2 — LEFT JOIN
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🌗</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">El lado oscuro de las relaciones</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">LEFT JOIN</code> — trae <strong>TODO</strong> de la tabla izquierda y solo lo que coincida de la derecha.</p>
+            <p style="margin-bottom:12px;">Sin coincidencia → las columnas de la derecha salen <strong>NULL</strong>. Ese NULL no es un error: <strong>es la pista</strong>.</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;">SELECT C.C_Nombre_Completo<br>FROM T_Clientes AS C<br>LEFT JOIN T_Ventas AS V<br>&nbsp;&nbsp;ON C.C_ID_Cliente = V.C_ID_Cliente<br>WHERE V.C_ID_Venta IS NULL;&nbsp;<span style="color:#546e7a;">-- los fantasmas</span></div>
+            <p style="color:var(--muted);font-size:13px;margin-top:10px;">RIGHT JOIN existe, pero casi nadie lo usa: basta con voltear las tablas del LEFT. (En SQLite ni siquiera está en versiones viejas.)</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — El patrón LEFT + IS NULL
+          </div>`
+      },
+      // SLIDE 3 — ON con condición extra
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🎛️</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Condiciones dentro del ON</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;">Detalle de nivel Arquitecto: en un LEFT JOIN, filtrar la tabla derecha <strong>en el ON</strong> no es lo mismo que en el WHERE:</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">LEFT JOIN T_Ventas AS V<br>&nbsp;&nbsp;ON C.C_ID_Cliente = V.C_ID_Cliente<br>&nbsp;&nbsp;<strong>AND V.C_Anio = 2025</strong>&nbsp;<span style="color:#546e7a;">-- filtra ANTES de unir</span><br>WHERE V.C_ID_Venta IS NULL;</div>
+            <p style="margin-bottom:8px;">• En el <code>ON</code>: "únelo solo con sus ventas 2025" → los clientes sin ventas 2025 sobreviven con NULL.</p>
+            <p>• En el <code>WHERE</code>: mataría las filas NULL y el LEFT se convertiría en un INNER disfrazado. Error clásico en los SPs de Dalton.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Lo que no está en la otra tabla también cuenta una historia." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — A cazar fantasmas
           </div>`
       }
     ]
@@ -2767,6 +2971,14 @@ const triviaData = {
     correct: 'B',
     explanation: '<strong>INNER JOIN</strong> es el punto de encuentro: solo trae filas que coinciden en las dos tablas. LEFT trae todo de la izquierda aunque no coincida; CROSS combina todo con todo.',
     coins: 700, xp: 70
+  },
+  7: {
+    npc: 'Mariana señala una lista de 5,000 registros del Buen Fin que no compraron',
+    question: 'Si en un LEFT JOIN la tabla de la izquierda tiene 10 filas y la de la derecha tiene 5 que coinciden, ¿cuántas filas verás en el resultado final?',
+    options: { A: '5', B: '10', C: '15' },
+    correct: 'B',
+    explanation: '<strong>10</strong>: el LEFT JOIN conserva TODAS las filas de la izquierda. Las 5 sin coincidencia aparecen con NULL en las columnas de la derecha.',
+    coins: 800, xp: 80
   }
 };
 
@@ -3029,6 +3241,39 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 6',
     victoryBadgeLines: ['🔗 Insignia: Tejedor de Vínculos', '🎨 Insignia: Héroe de Marketing'],
     moduleLabel: 'Módulo 6 — COMPLETO 100%'
+  },
+  7: {
+    bossName: 'BOSS FINAL — MARIANA (RECONQUISTA)',
+    introTime: '📍 10:30 AM — El Director General exige respuestas sobre Kia',
+    introText: `"¡{NAME}, el Director quiere saber por qué el inventario <strong>'Kia'</strong> no se mueve!
+      Necesito un reporte con <strong>todos los autos Kia</strong> del inventario;
+      para los vendidos, muestra la <strong>fecha de venta</strong> y el <strong>nombre del cliente</strong>.
+      Y lo más importante: los que NO se han vendido deben aparecer con la leyenda
+      <strong>'DISPONIBLE'</strong> (usa un CASE)."`,
+    comboHint: "Combina: LEFT JOIN inventario→ventas→clientes, CASE WHEN ... IS NULL THEN 'DISPONIBLE', WHERE marca 'Kia'",
+    title: '👹 BOSS FINAL — La Reconquista de Mariana',
+    descShort: "Todos los Kia: fecha y cliente si se vendió, 'DISPONIBLE' si no (LEFT JOIN + CASE)",
+    battleCry: "Todos los Kia. Vendidos con cliente, libres con 'DISPONIBLE'. ¡El Director está en la sala!",
+    checks: [
+      { any: ['left join'], hint: 'LEFT JOIN (no INNER: deben salir TODOS los Kia)' },
+      { any: ["'kia'"], hint: "WHERE marca = 'Kia'" },
+      { any: ['case when'], hint: 'CASE WHEN para la leyenda' },
+      { any: ["'disponible'"], hint: "etiqueta 'DISPONIBLE'" },
+      { any: ['is null'], hint: 'detectar los no vendidos con IS NULL' }
+    ],
+    maxRows: 18,
+    xp: 200, coins: 4000,
+    badges: ['boss7', 'mundo7'],
+    newRank: null,
+    victoryTitle: '¡LOS FANTASMAS HAN SIDO REVELADOS!',
+    victoryText: `"El Director vio los 13 Kia estancados con su leyenda 'DISPONIBLE'
+      y aprobó la campaña de descuentos en el acto.
+      Encontraste lo invisible: el INNER JOIN muestra lo que existe,
+      pero tú aprendiste a ver lo que falta. Esa es la marca de un Arquitecto."`,
+    victoryNPC: '— Mariana, Directora de Marketing',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 7',
+    victoryBadgeLines: ['🌑 Insignia: Cazador de Fantasmas', '🔦 Insignia: Revelador del Vacío'],
+    moduleLabel: 'Módulo 7 — COMPLETO 100%'
   }
 };
 
