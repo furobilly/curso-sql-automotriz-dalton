@@ -174,7 +174,9 @@ const allBadges = [
   { id: 'boss3', name: 'Rey de los Rankings', icon: '⛰️', desc: 'Completar Boss Final Módulo 3' },
   { id: 'mundo3', name: 'Salvador de MTY', icon: '👑', desc: '100% Módulo 3' },
   { id: 'boss4', name: 'Ábaco de Agregación', icon: '🧮', desc: 'Completar Boss Final Módulo 4' },
-  { id: 'mundo4', name: 'Salvador de CDMX', icon: '🏦', desc: '100% Módulo 4' }
+  { id: 'mundo4', name: 'Salvador de CDMX', icon: '🏦', desc: '100% Módulo 4' },
+  { id: 'boss5', name: 'Separador de Trigo y Paja', icon: '🌾', desc: 'Completar Boss Final Módulo 5' },
+  { id: 'mundo5', name: 'Consolidador Nacional', icon: '🇲🇽', desc: '100% Módulo 5' }
 ];
 
 // ============================================
@@ -382,6 +384,161 @@ const dbSeed = `
   (10, 'CX010BD', 'BYD',    'Laura Ortiz',    'Santa Fe', '2025-03-25',  330000),
   (11, 'CX011HN', 'Honda',  'Miguel Paredes', 'Polanco',  '2025-03-27',  380000),
   (12, 'CX012HN', 'Honda',  'Julio Ramos',    'Coyoacan', '2025-03-29',  420000);
+  -- ============ MÓDULO 5: NACIONAL (Don Carlos - GROUP BY múltiple + HAVING) ============
+  CREATE TABLE T_Inventario (
+    C_VIN TEXT PRIMARY KEY,
+    C_Marca TEXT, C_Sucursal TEXT, C_Modelo TEXT,
+    C_Anio INTEGER, C_Color TEXT, C_Precio INTEGER, C_Stock INTEGER
+  );
+  INSERT INTO T_Inventario VALUES
+  ('NX001', 'Toyota', 'CDMX', 'Corolla', 2024, 'Blanco', 850000, 2),
+  ('NX002', 'Toyota', 'CDMX', 'RAV4', 2025, 'Negro', 800000, 3),
+  ('NX003', 'Toyota', 'CDMX', 'Hilux', 2023, 'Gris', 760000, 1),
+  ('NX004', 'Toyota', 'CDMX', 'Camry', 2024, 'Rojo', 720000, 4),
+  ('NX005', 'Toyota', 'CDMX', 'Corolla', 2025, 'Azul', 700000, 2),
+  ('NX006', 'Toyota', 'CDMX', 'RAV4', 2023, 'Blanco', 680000, 3),
+  ('NX007', 'Toyota', 'CDMX', 'Hilux', 2024, 'Negro', 620000, 1),
+  ('NX008', 'Toyota', 'CDMX', 'Camry', 2025, 'Gris', 580000, 4),
+  ('NX009', 'Toyota', 'CDMX', 'Corolla', 2023, 'Rojo', 490000, 2),
+  ('NX010', 'Toyota', 'CDMX', 'RAV4', 2024, 'Azul', 300000, 3),
+  ('NX011', 'Toyota', 'GDL', 'Corolla', 2024, 'Blanco', 820000, 2),
+  ('NX012', 'Toyota', 'GDL', 'RAV4', 2025, 'Negro', 780000, 3),
+  ('NX013', 'Toyota', 'GDL', 'Hilux', 2023, 'Gris', 740000, 1),
+  ('NX014', 'Toyota', 'GDL', 'Camry', 2024, 'Rojo', 690000, 4),
+  ('NX015', 'Toyota', 'GDL', 'Corolla', 2025, 'Azul', 650000, 2),
+  ('NX016', 'Toyota', 'GDL', 'RAV4', 2023, 'Blanco', 600000, 3),
+  ('NX017', 'Toyota', 'GDL', 'Hilux', 2024, 'Negro', 560000, 1),
+  ('NX018', 'Toyota', 'GDL', 'Camry', 2025, 'Gris', 520000, 4),
+  ('NX019', 'Toyota', 'GDL', 'Corolla', 2023, 'Rojo', 450000, 2),
+  ('NX020', 'Toyota', 'GDL', 'RAV4', 2024, 'Azul', 380000, 3),
+  ('NX021', 'Toyota', 'MTY', 'Corolla', 2024, 'Blanco', 750000, 2),
+  ('NX022', 'Toyota', 'MTY', 'RAV4', 2025, 'Negro', 700000, 3),
+  ('NX023', 'Toyota', 'MTY', 'Corolla', 2023, 'Gris', 640000, 1),
+  ('NX024', 'Toyota', 'MTY', 'RAV4', 2024, 'Rojo', 540000, 4),
+  ('NX025', 'Toyota', 'SLP', 'Corolla', 2024, 'Blanco', 520000, 2),
+  ('NX026', 'Toyota', 'SLP', 'Corolla', 2025, 'Negro', 480000, 3),
+  ('NX027', 'Toyota', 'SLP', 'Corolla', 2023, 'Gris', 430000, 1),
+  ('NX028', 'Toyota', 'SLP', 'Corolla', 2024, 'Rojo', 390000, 4),
+  ('NX029', 'Honda', 'CDMX', 'CR-V', 2024, 'Blanco', 710000, 2),
+  ('NX030', 'Honda', 'CDMX', 'City', 2025, 'Negro', 650000, 3),
+  ('NX031', 'Honda', 'CDMX', 'Civic', 2023, 'Gris', 600000, 1),
+  ('NX032', 'Honda', 'CDMX', 'CR-V', 2024, 'Rojo', 560000, 4),
+  ('NX033', 'Honda', 'CDMX', 'City', 2025, 'Azul', 520000, 2),
+  ('NX034', 'Honda', 'CDMX', 'Civic', 2023, 'Blanco', 480000, 3),
+  ('NX035', 'Honda', 'CDMX', 'CR-V', 2024, 'Negro', 430000, 1),
+  ('NX036', 'Honda', 'CDMX', 'City', 2025, 'Gris', 395000, 4),
+  ('NX037', 'Honda', 'GDL', 'CR-V', 2024, 'Blanco', 700000, 2),
+  ('NX038', 'Honda', 'GDL', 'City', 2025, 'Negro', 640000, 3),
+  ('NX039', 'Honda', 'GDL', 'Civic', 2023, 'Gris', 590000, 1),
+  ('NX040', 'Honda', 'GDL', 'CR-V', 2024, 'Rojo', 550000, 4),
+  ('NX041', 'Honda', 'GDL', 'City', 2025, 'Azul', 510000, 2),
+  ('NX042', 'Honda', 'GDL', 'Civic', 2023, 'Blanco', 470000, 3),
+  ('NX043', 'Honda', 'GDL', 'CR-V', 2024, 'Negro', 420000, 1),
+  ('NX044', 'Honda', 'GDL', 'City', 2025, 'Gris', 380000, 4),
+  ('NX045', 'Honda', 'SLP', 'CR-V', 2024, 'Blanco', 720000, 2),
+  ('NX046', 'Honda', 'SLP', 'City', 2025, 'Negro', 640000, 3),
+  ('NX047', 'Honda', 'SLP', 'CR-V', 2023, 'Gris', 560000, 1),
+  ('NX048', 'Honda', 'SLP', 'City', 2024, 'Rojo', 520000, 4),
+  ('NX049', 'Honda', 'SLP', 'CR-V', 2025, 'Azul', 480000, 2),
+  ('NX050', 'Honda', 'SLP', 'City', 2023, 'Blanco', 440000, 3),
+  ('NX051', 'Honda', 'SLP', 'CR-V', 2024, 'Negro', 400000, 1),
+  ('NX052', 'Honda', 'SLP', 'City', 2025, 'Gris', 360000, 4),
+  ('NX053', 'Kia', 'MTY', 'EV9', 2024, 'Blanco', 980000, 2),
+  ('NX054', 'Kia', 'MTY', 'Sportage', 2025, 'Negro', 690000, 3),
+  ('NX055', 'Kia', 'MTY', 'Rio', 2023, 'Gris', 590000, 1),
+  ('NX056', 'Kia', 'MTY', 'EV9', 2024, 'Rojo', 560000, 4),
+  ('NX057', 'Kia', 'MTY', 'Sportage', 2025, 'Azul', 495000, 2),
+  ('NX058', 'Kia', 'MTY', 'Rio', 2023, 'Blanco', 460000, 3),
+  ('NX059', 'Kia', 'MTY', 'EV9', 2024, 'Negro', 430000, 1),
+  ('NX060', 'Kia', 'MTY', 'Sportage', 2025, 'Gris', 400000, 4),
+  ('NX061', 'Kia', 'MTY', 'Rio', 2023, 'Rojo', 350000, 2),
+  ('NX062', 'Kia', 'SLP', 'Rio', 2024, 'Blanco', 430000, 2),
+  ('NX063', 'Kia', 'SLP', 'Rio', 2025, 'Negro', 410000, 3),
+  ('NX064', 'Kia', 'SLP', 'Rio', 2023, 'Gris', 390000, 1),
+  ('NX065', 'Kia', 'SLP', 'Rio', 2024, 'Rojo', 370000, 4),
+  ('NX066', 'Kia', 'SLP', 'Rio', 2025, 'Azul', 350000, 2),
+  ('NX067', 'Kia', 'SLP', 'Rio', 2023, 'Blanco', 340000, 3),
+  ('NX068', 'Kia', 'SLP', 'Rio', 2024, 'Negro', 330000, 1),
+  ('NX069', 'Kia', 'SLP', 'Rio', 2025, 'Gris', 320000, 4),
+  ('NX070', 'Kia', 'SLP', 'Rio', 2023, 'Rojo', 310000, 2),
+  ('NX071', 'BYD', 'GDL', 'Seal', 2024, 'Blanco', 830000, 2),
+  ('NX072', 'BYD', 'GDL', 'Dolphin', 2025, 'Negro', 700000, 3),
+  ('NX073', 'BYD', 'GDL', 'Seal', 2023, 'Gris', 640000, 1),
+  ('NX074', 'BYD', 'GDL', 'Dolphin', 2024, 'Rojo', 560000, 4),
+  ('NX075', 'BYD', 'GDL', 'Seal', 2025, 'Azul', 520000, 2),
+  ('NX076', 'BYD', 'GDL', 'Dolphin', 2023, 'Blanco', 470000, 3),
+  ('NX077', 'BYD', 'GDL', 'Seal', 2024, 'Negro', 390000, 1),
+  ('NX078', 'BYD', 'GDL', 'Dolphin', 2025, 'Gris', 330000, 4),
+  ('NX079', 'BYD', 'CDMX', 'Tang', 2024, 'Blanco', 820000, 2),
+  ('NX080', 'BYD', 'CDMX', 'Han', 2025, 'Negro', 760000, 3),
+  ('NX081', 'BYD', 'CDMX', 'Tang', 2023, 'Gris', 690000, 1),
+  ('NX082', 'BYD', 'CDMX', 'Han', 2024, 'Rojo', 560000, 4),
+  ('NX083', 'BYD', 'CDMX', 'Tang', 2025, 'Azul', 520000, 2),
+  ('NX084', 'BYD', 'CDMX', 'Han', 2023, 'Blanco', 430000, 3),
+  ('NX085', 'BYD', 'CDMX', 'Tang', 2024, 'Negro', 380000, 1),
+  ('NX086', 'Lexus', 'CDMX', 'RX500', 2024, 'Blanco', 1800000, 1),
+  ('NX087', 'Lexus', 'CDMX', 'NX350', 2025, 'Negro', 1450000, 0),
+  ('NX088', 'Lexus', 'CDMX', 'RX500', 2023, 'Gris', 990000, 0),
+  ('NX089', 'Lexus', 'CDMX', 'NX350', 2024, 'Rojo', 890000, 0),
+  ('NX090', 'Lexus', 'MTY', 'LX600', 2024, 'Blanco', 2100000, 1),
+  ('NX091', 'Lexus', 'MTY', 'RX500', 2025, 'Negro', 1500000, 0),
+  ('NX092', 'Lexus', 'MTY', 'LX600', 2023, 'Gris', 1200000, 0),
+  ('NX093', 'Lexus', 'MTY', 'RX500', 2024, 'Rojo', 980000, 0),
+  ('NX094', 'Chirey', 'SLP', 'Tiggo2', 2024, 'Blanco', 280000, 2),
+  ('NX095', 'Chirey', 'SLP', 'Tiggo2', 2025, 'Negro', 270000, 3),
+  ('NX096', 'Chirey', 'SLP', 'Tiggo2', 2023, 'Gris', 260000, 1),
+  ('NX097', 'Chirey', 'SLP', 'Tiggo2', 2024, 'Rojo', 250000, 4),
+  ('NX098', 'Chirey', 'SLP', 'Tiggo2', 2025, 'Azul', 240000, 2),
+  ('NX099', 'Chirey', 'SLP', 'Tiggo2', 2023, 'Blanco', 230000, 3);
+
+  CREATE TABLE T_Ventas (
+    C_ID_Venta INTEGER PRIMARY KEY,
+    C_Marca TEXT, C_Sucursal TEXT, C_Vendedor TEXT,
+    C_Anio INTEGER, C_Color TEXT, C_Monto INTEGER
+  );
+  INSERT INTO T_Ventas VALUES
+  (1, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Blanco', 850000),
+  (2, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Blanco', 780000),
+  (3, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Rojo', 760000),
+  (4, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Azul', 720000),
+  (5, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Negro', 700000),
+  (6, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Gris', 680000),
+  (7, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Rojo', 620000),
+  (8, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Azul', 490000),
+  (9, 'Lexus', 'MTY', 'Miguel Paredes', 2024, 'Negro', 2100000),
+  (10, 'Lexus', 'MTY', 'Miguel Paredes', 2025, 'Blanco', 1800000),
+  (11, 'Lexus', 'MTY', 'Miguel Paredes', 2024, 'Rojo', 1450000),
+  (12, 'Lexus', 'MTY', 'Miguel Paredes', 2025, 'Azul', 850000),
+  (13, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Negro', 800000),
+  (14, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Gris', 750000),
+  (15, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Rojo', 700000),
+  (16, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Azul', 650000),
+  (17, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Negro', 600000),
+  (18, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Gris', 580000),
+  (19, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Blanco', 420000),
+  (20, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Blanco', 300000),
+  (21, 'Toyota', 'GDL', 'Pedro Nava', 2023, 'Negro', 500000),
+  (22, 'Honda', 'SLP', 'Karina Soto', 2024, 'Negro', 720000),
+  (23, 'Honda', 'SLP', 'Karina Soto', 2025, 'Gris', 640000),
+  (24, 'Honda', 'SLP', 'Karina Soto', 2024, 'Rojo', 520000),
+  (25, 'Honda', 'SLP', 'Karina Soto', 2025, 'Blanco', 380000),
+  (26, 'Honda', 'CDMX', 'Julio Ramos', 2024, 'Negro', 710000),
+  (27, 'Honda', 'CDMX', 'Julio Ramos', 2025, 'Gris', 540000),
+  (28, 'Honda', 'CDMX', 'Julio Ramos', 2024, 'Rojo', 420000),
+  (29, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Negro', 560000),
+  (30, 'BYD', 'GDL', 'Laura Ortiz', 2025, 'Gris', 520000),
+  (31, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Rojo', 430000),
+  (32, 'BYD', 'GDL', 'Laura Ortiz', 2025, 'Azul', 390000),
+  (33, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Negro', 330000),
+  (34, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Negro', 980000),
+  (35, 'Kia', 'MTY', 'Miguel Paredes', 2025, 'Gris', 690000),
+  (36, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Rojo', 560000),
+  (37, 'Kia', 'MTY', 'Miguel Paredes', 2025, 'Azul', 495000),
+  (38, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Negro', 430000),
+  (39, 'Chirey', 'SLP', 'Julio Ramos', 2024, 'Negro', 260000),
+  (40, 'Chirey', 'SLP', 'Julio Ramos', 2025, 'Gris', 240000),
+  (41, 'Chirey', 'SLP', 'Julio Ramos', 2024, 'Rojo', 220000),
+  (42, 'Chirey', 'SLP', 'Julio Ramos', 2025, 'Azul', 210000);
 `;
 
 // ============================================
@@ -860,6 +1017,82 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  5: {
+    title: 'El Filtro del Consejo (Nacional)',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>GROUP BY col1, col2</code> — agrupa por DOS categorías a la vez<br>
+      <code>WHERE</code> — filtra <strong>filas</strong> ANTES de agrupar<br>
+      <code>HAVING</code> — filtra <strong>grupos</strong> DESPUÉS de agrupar<br>
+      <code>ROUND(AVG(...))</code> — redondea el promedio<br><br>
+      <em>Tip: Don Carlos quiere separar el trigo de la paja. Tablas nacionales: T_Inventario y T_Ventas.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '🗺️ Agrupación Doble (marca y sucursal)',
+        expected: 'SELECT C_Marca, C_Sucursal, COUNT(*) FROM T_Inventario GROUP BY C_Marca, C_Sucursal',
+        hint: 'SELECT C_Marca, C_Sucursal, COUNT(*) FROM T_Inventario GROUP BY C_Marca, C_Sucursal;',
+        example: 'SELECT C_Sucursal, C_Anio, COUNT(*) FROM T_Inventario GROUP BY C_Sucursal, C_Anio;'
+      },
+      {
+        id: 2, desc: '📦 El Filtro de Volumen (más de 20 unidades)',
+        expected: 'SELECT C_Marca, COUNT(*) FROM T_Inventario GROUP BY C_Marca HAVING COUNT(*) > 20',
+        hint: 'SELECT C_Marca, COUNT(*) FROM T_Inventario GROUP BY C_Marca HAVING COUNT(*) > 20;',
+        example: 'SELECT C_Sucursal, COUNT(*) FROM T_Inventario GROUP BY C_Sucursal HAVING COUNT(*) > 25;'
+      },
+      {
+        id: 3, desc: '⭐ Vendedores Estrella (más de $3,000,000)',
+        expected: 'SELECT C_Vendedor, SUM(C_Monto) FROM T_Ventas GROUP BY C_Vendedor HAVING SUM(C_Monto) > 3000000',
+        hint: 'SELECT C_Vendedor, SUM(C_Monto) FROM T_Ventas GROUP BY C_Vendedor HAVING SUM(C_Monto) > 3000000;',
+        example: 'SELECT C_Vendedor, COUNT(*) FROM T_Ventas GROUP BY C_Vendedor HAVING COUNT(*) > 5;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: Promedio por marca > $400,000',
+        expected: 'SELECT C_Marca, AVG(C_Monto) FROM T_Ventas GROUP BY C_Marca HAVING AVG(C_Monto) > 400000',
+        hint: 'SELECT C_Marca, AVG(C_Monto) FROM T_Ventas GROUP BY C_Marca HAVING AVG(C_Monto) > 400000;',
+        example: 'SELECT C_Sucursal, AVG(C_Monto) FROM T_Ventas GROUP BY C_Sucursal HAVING AVG(C_Monto) > 500000;'
+      },
+      {
+        id: 5, desc: '💎 Sucursales de Élite (MAX > $1,500,000)',
+        expected: 'SELECT C_Sucursal, MAX(C_Precio) FROM T_Inventario GROUP BY C_Sucursal HAVING MAX(C_Precio) > 1500000',
+        hint: 'SELECT C_Sucursal, MAX(C_Precio) FROM T_Inventario GROUP BY C_Sucursal HAVING MAX(C_Precio) > 1500000;',
+        example: 'SELECT C_Sucursal, MIN(C_Precio) FROM T_Inventario GROUP BY C_Sucursal HAVING MIN(C_Precio) < 300000;'
+      },
+      {
+        id: 6, desc: '🚗 Marcas Económicas (promedio < $300,000)',
+        expected: 'SELECT C_Marca, AVG(C_Precio) FROM T_Inventario GROUP BY C_Marca HAVING AVG(C_Precio) < 300000',
+        hint: 'SELECT C_Marca, AVG(C_Precio) FROM T_Inventario GROUP BY C_Marca HAVING AVG(C_Precio) < 300000;',
+        example: 'SELECT C_Marca, AVG(C_Precio) FROM T_Inventario GROUP BY C_Marca HAVING AVG(C_Precio) > 1000000;'
+      },
+      {
+        id: 7, desc: '🔢 Conteo Regional (más de 5 modelos distintos)',
+        expected: 'SELECT C_Sucursal, COUNT(DISTINCT C_Modelo) FROM T_Inventario GROUP BY C_Sucursal HAVING COUNT(DISTINCT C_Modelo) > 5',
+        hint: 'SELECT C_Sucursal, COUNT(DISTINCT C_Modelo) FROM T_Inventario GROUP BY C_Sucursal HAVING COUNT(DISTINCT C_Modelo) > 5;',
+        example: 'SELECT C_Sucursal, COUNT(DISTINCT C_Marca) FROM T_Inventario GROUP BY C_Sucursal HAVING COUNT(DISTINCT C_Marca) > 3;'
+      },
+      {
+        id: 8, desc: "⚠️ ERROR DE NODO: WHERE Blanco → HAVING > $1,000,000",
+        expected: "SELECT C_Marca, SUM(C_Monto) FROM T_Ventas WHERE C_Color = 'Blanco' GROUP BY C_Marca HAVING SUM(C_Monto) > 1000000",
+        hint: "SELECT C_Marca, SUM(C_Monto) FROM T_Ventas WHERE C_Color = 'Blanco' GROUP BY C_Marca HAVING SUM(C_Monto) > 1000000;",
+        example: "SELECT C_Marca, SUM(C_Monto) FROM T_Ventas WHERE C_Color = 'Negro' GROUP BY C_Marca HAVING SUM(C_Monto) > 500000;"
+      },
+      {
+        id: 9, desc: '📉 Análisis de Inventario (stock total < 3, resurtir)',
+        expected: 'SELECT C_Marca, SUM(C_Stock) FROM T_Inventario GROUP BY C_Marca HAVING SUM(C_Stock) < 3',
+        hint: 'SELECT C_Marca, SUM(C_Stock) FROM T_Inventario GROUP BY C_Marca HAVING SUM(C_Stock) < 3;',
+        example: 'SELECT C_Marca, SUM(C_Stock) FROM T_Inventario GROUP BY C_Marca HAVING SUM(C_Stock) > 20;'
+      },
+      {
+        id: 10, desc: '🧹 La Gran Limpieza (ROUND, sin Toyota, prom > $500,000)',
+        expected: "SELECT C_Marca, ROUND(AVG(C_Precio)) FROM T_Inventario WHERE C_Marca != 'Toyota' GROUP BY C_Marca HAVING AVG(C_Precio) > 500000",
+        hint: "SELECT C_Marca, ROUND(AVG(C_Precio)) FROM T_Inventario WHERE C_Marca != 'Toyota' GROUP BY C_Marca HAVING AVG(C_Precio) > 500000;",
+        example: "SELECT C_Marca, ROUND(AVG(C_Precio)) FROM T_Inventario WHERE C_Marca != 'Lexus' GROUP BY C_Marca HAVING AVG(C_Precio) < 500000;"
+      }
+    ],
+    xp: 300, coins: 2000, difficulty: 4, skill: 'ADVANCED',
+    diaryEntry: 'Día 5: El reporte nacional pasó el consejo. Don Carlos guardó el documento sin tachaduras rojas — primera vez en la historia de Grupo Velocity, según Ana.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -1154,6 +1387,72 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — La junta de accionistas espera
+          </div>`
+      }
+    ]
+  },
+  5: {
+    title: 'El Colador de Grupos: WHERE vs HAVING',
+    slides: [
+      // SLIDE 1 — Contexto / Don Carlos con el reporte tachado
+      {
+        icon: '📊',
+        tag: 'NEXUS SQL — CONSOLIDACIÓN NACIONAL',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">📊</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Sala de Juntas del Consejo — CDMX</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">🕴️ DON CARLOS — reporte lleno de tachaduras rojas</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "El reporte nacional es un desastre. Tengo cientos de marcas y sucursales pequeñas
+              que solo ensucian el análisis. No me interesan agencias que venden 2 autos al mes."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "<strong style="color:var(--accent);">Separa el trigo de la paja.</strong>
+              Demuéstrame que sabes dónde está el verdadero valor del grupo."
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El ultimátum del CFO
+          </div>`
+      },
+      // SLIDE 2 — WHERE vs HAVING
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">⚖️</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">La confusión que separa a JR de SR</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">WHERE</code> filtra <strong>FILAS, antes</strong> de agrupar → "solo autos rojos"</p>
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">HAVING</code> filtra <strong>GRUPOS, después</strong> de agrupar → "solo marcas que sumen más de 1 millón"</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;">SELECT C_Marca, SUM(C_Monto)<br>FROM T_Ventas<br>WHERE C_Color = 'Blanco'&nbsp;&nbsp;<span style="color:#546e7a;">-- primero filas</span><br>GROUP BY C_Marca<br>HAVING SUM(C_Monto) > 1000000;&nbsp;<span style="color:#546e7a;">-- luego grupos</span></div>
+            <p style="color:var(--muted);font-size:13px;margin-top:10px;">Orden real de ejecución: <strong>FROM → WHERE → GROUP BY → HAVING → SELECT</strong>.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — Filas primero, grupos después
+          </div>`
+      },
+      // SLIDE 3 — Agrupación múltiple
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🗺️</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Agrupar por dos dimensiones</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">GROUP BY C_Marca, C_Sucursal</code> crea un grupo por <strong>cada combinación</strong>: Toyota-GDL, Toyota-CDMX, Kia-MTY...</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">SELECT C_Sucursal, C_Marca, COUNT(*)<br>FROM T_Inventario<br>GROUP BY C_Sucursal, C_Marca;</div>
+            <p style="margin-bottom:8px;">Este módulo usa las tablas <strong>nacionales</strong>: <code>T_Inventario</code> (99 autos) y <code>T_Ventas</code> (42 ventas) — datos a escala real.</p>
+            <p style="color:var(--muted);font-size:13px;">Y recuerda la convención NEXUS: los resultados calculados llevan alias <code>M_</code>.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "El virus intenta camuflar pérdidas dentro de los grandes totales. HAVING es tu lupa." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — El consejo está sentado
           </div>`
       }
     ]
@@ -2264,6 +2563,14 @@ const triviaData = {
     correct: 'A',
     explanation: '<strong>HAVING</strong> filtra DESPUÉS de agrupar. WHERE filtra filas antes del GROUP BY; HAVING filtra los grupos ya calculados.',
     coins: 500, xp: 50
+  },
+  5: {
+    npc: 'Don Carlos desliza el reporte tachado en rojo sobre la mesa',
+    question: '¿Cuál es el orden correcto de ejecución en una consulta SQL?',
+    options: { A: 'SELECT → FROM → WHERE → GROUP BY → HAVING', B: 'FROM → WHERE → GROUP BY → HAVING → SELECT', C: 'SELECT → HAVING → GROUP BY → WHERE' },
+    correct: 'B',
+    explanation: 'SQL ejecuta <strong>FROM → WHERE → GROUP BY → HAVING → SELECT</strong>. Se escribe SELECT primero, pero se ejecuta casi al final. Por eso WHERE no puede usar alias del SELECT.',
+    coins: 600, xp: 60
   }
 };
 
@@ -2457,6 +2764,40 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 4',
     victoryBadgeLines: ['🧮 Insignia: Ábaco de Agregación', '🏦 Insignia: Salvador de CDMX'],
     moduleLabel: 'Módulo 4 — COMPLETO 100%'
+  },
+  5: {
+    bossName: 'BOSS FINAL — DON CARLOS (CONSEJO)',
+    introTime: '📍 09:00 AM — Sala de Juntas del Consejo, la inversión pende de un hilo',
+    introText: `"¡Es el momento, {NAME}! Quiero ver por cada <strong>Sucursal y Marca</strong>:
+      el <strong>total de ventas (SUM)</strong> y <strong>cuántos autos se vendieron (COUNT)</strong>.
+      Pero atención: solo incluye autos del <strong>año 2024 en adelante</strong>,
+      y en el resultado final solo los grupos con más de
+      <strong>$5,000,000</strong> en ventas. ¡Si el dato falla, la inversión se retira!"`,
+    comboHint: 'Combina: WHERE C_Anio >= 2024, GROUP BY C_Sucursal, C_Marca, HAVING SUM(C_Monto) > 5000000 — sobre T_Ventas',
+    title: '👹 BOSS FINAL — El Reporte Nacional de Accionistas',
+    descShort: 'Por sucursal y marca: SUM + COUNT, solo 2024+, solo grupos > $5,000,000',
+    battleCry: 'Sucursal y marca. Solo 2024 en adelante. Solo grupos de más de 5 millones. ¡La inversión se decide HOY!',
+    checks: [
+      { any: ['where'], extra: 'c_anio', hint: 'WHERE C_Anio >= 2024' },
+      { any: ['group by'], extra: 'c_sucursal', hint: 'GROUP BY con C_Sucursal' },
+      { any: ['c_marca'], hint: 'agrupar también por C_Marca' },
+      { any: ['sum ('], hint: 'SUM(C_Monto)' },
+      { any: ['count ('], hint: 'COUNT(*)' },
+      { any: ['having'], extra: '5000000', hint: 'HAVING SUM(...) > 5000000' }
+    ],
+    maxRows: 4,
+    xp: 150, coins: 3000,
+    badges: ['boss5', 'mundo5'],
+    newRank: null,
+    victoryTitle: '¡CONSOLIDACIÓN NACIONAL COMPLETA!',
+    victoryText: `"Los accionistas firmaron. La inversión se queda.
+      ¿Notaste la trampa? GDL-Toyota parecía superar los 5 millones...
+      hasta que tu WHERE excluyó la venta de 2023. Eso es criterio, no suerte.
+      Ana tiene razón: estás listo para que las tablas empiecen a hablarse entre ellas."`,
+    victoryNPC: '— Don Carlos, CFO de Grupo Velocity',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 5',
+    victoryBadgeLines: ['🌾 Insignia: Separador de Trigo y Paja', '🇲🇽 Insignia: Consolidador Nacional'],
+    moduleLabel: 'Módulo 5 — COMPLETO 100%'
   }
 };
 
