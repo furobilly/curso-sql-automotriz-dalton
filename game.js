@@ -176,7 +176,9 @@ const allBadges = [
   { id: 'boss4', name: 'Ábaco de Agregación', icon: '🧮', desc: 'Completar Boss Final Módulo 4' },
   { id: 'mundo4', name: 'Salvador de CDMX', icon: '🏦', desc: '100% Módulo 4' },
   { id: 'boss5', name: 'Separador de Trigo y Paja', icon: '🌾', desc: 'Completar Boss Final Módulo 5' },
-  { id: 'mundo5', name: 'Consolidador Nacional', icon: '🇲🇽', desc: '100% Módulo 5' }
+  { id: 'mundo5', name: 'Consolidador Nacional', icon: '🇲🇽', desc: '100% Módulo 5' },
+  { id: 'boss6', name: 'Tejedor de Vínculos', icon: '🔗', desc: 'Completar Boss Final Módulo 6' },
+  { id: 'mundo6', name: 'Héroe de Marketing', icon: '🎨', desc: '100% Módulo 6' }
 ];
 
 // ============================================
@@ -384,7 +386,7 @@ const dbSeed = `
   (10, 'CX010BD', 'BYD',    'Laura Ortiz',    'Santa Fe', '2025-03-25',  330000),
   (11, 'CX011HN', 'Honda',  'Miguel Paredes', 'Polanco',  '2025-03-27',  380000),
   (12, 'CX012HN', 'Honda',  'Julio Ramos',    'Coyoacan', '2025-03-29',  420000);
-  -- ============ MÓDULO 5: NACIONAL (Don Carlos - GROUP BY múltiple + HAVING) ============
+  -- ============ MÓDULOS 5-6: NACIONAL (agregaciones + JOINs) ============
   CREATE TABLE T_Inventario (
     C_VIN TEXT PRIMARY KEY,
     C_Marca TEXT, C_Sucursal TEXT, C_Modelo TEXT,
@@ -494,52 +496,96 @@ const dbSeed = `
   CREATE TABLE T_Ventas (
     C_ID_Venta INTEGER PRIMARY KEY,
     C_Marca TEXT, C_Sucursal TEXT, C_Vendedor TEXT,
-    C_Anio INTEGER, C_Color TEXT, C_Monto INTEGER
+    C_Anio INTEGER, C_Color TEXT, C_Monto INTEGER,
+    C_VIN TEXT,                      -- FK a T_Inventario (el "cable" que cortó The Void)
+    C_ID_Cliente INTEGER,            -- FK a T_Clientes (2 NULL: vínculos borrados)
+    C_Fecha DATE
   );
   INSERT INTO T_Ventas VALUES
-  (1, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Blanco', 850000),
-  (2, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Blanco', 780000),
-  (3, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Rojo', 760000),
-  (4, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Azul', 720000),
-  (5, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Negro', 700000),
-  (6, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Gris', 680000),
-  (7, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Rojo', 620000),
-  (8, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Azul', 490000),
-  (9, 'Lexus', 'MTY', 'Miguel Paredes', 2024, 'Negro', 2100000),
-  (10, 'Lexus', 'MTY', 'Miguel Paredes', 2025, 'Blanco', 1800000),
-  (11, 'Lexus', 'MTY', 'Miguel Paredes', 2024, 'Rojo', 1450000),
-  (12, 'Lexus', 'MTY', 'Miguel Paredes', 2025, 'Azul', 850000),
-  (13, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Negro', 800000),
-  (14, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Gris', 750000),
-  (15, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Rojo', 700000),
-  (16, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Azul', 650000),
-  (17, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Negro', 600000),
-  (18, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Gris', 580000),
-  (19, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Blanco', 420000),
-  (20, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Blanco', 300000),
-  (21, 'Toyota', 'GDL', 'Pedro Nava', 2023, 'Negro', 500000),
-  (22, 'Honda', 'SLP', 'Karina Soto', 2024, 'Negro', 720000),
-  (23, 'Honda', 'SLP', 'Karina Soto', 2025, 'Gris', 640000),
-  (24, 'Honda', 'SLP', 'Karina Soto', 2024, 'Rojo', 520000),
-  (25, 'Honda', 'SLP', 'Karina Soto', 2025, 'Blanco', 380000),
-  (26, 'Honda', 'CDMX', 'Julio Ramos', 2024, 'Negro', 710000),
-  (27, 'Honda', 'CDMX', 'Julio Ramos', 2025, 'Gris', 540000),
-  (28, 'Honda', 'CDMX', 'Julio Ramos', 2024, 'Rojo', 420000),
-  (29, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Negro', 560000),
-  (30, 'BYD', 'GDL', 'Laura Ortiz', 2025, 'Gris', 520000),
-  (31, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Rojo', 430000),
-  (32, 'BYD', 'GDL', 'Laura Ortiz', 2025, 'Azul', 390000),
-  (33, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Negro', 330000),
-  (34, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Negro', 980000),
-  (35, 'Kia', 'MTY', 'Miguel Paredes', 2025, 'Gris', 690000),
-  (36, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Rojo', 560000),
-  (37, 'Kia', 'MTY', 'Miguel Paredes', 2025, 'Azul', 495000),
-  (38, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Negro', 430000),
-  (39, 'Chirey', 'SLP', 'Julio Ramos', 2024, 'Negro', 260000),
-  (40, 'Chirey', 'SLP', 'Julio Ramos', 2025, 'Gris', 240000),
-  (41, 'Chirey', 'SLP', 'Julio Ramos', 2024, 'Rojo', 220000),
-  (42, 'Chirey', 'SLP', 'Julio Ramos', 2025, 'Azul', 210000);
-`;
+  (1, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Blanco', 850000, 'NX001', 1, '2024-01-15'),
+  (2, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Blanco', 780000, 'NX002', 2, '2025-02-15'),
+  (3, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Rojo', 760000, 'NX003', 3, '2024-03-15'),
+  (4, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Azul', 720000, 'NX004', 4, '2025-04-15'),
+  (5, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Negro', 700000, 'NX005', 5, '2024-05-15'),
+  (6, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Gris', 680000, 'NX006', 6, '2025-06-15'),
+  (7, 'Toyota', 'CDMX', 'Laura Ortiz', 2024, 'Rojo', 620000, 'NX007', 7, '2024-07-15'),
+  (8, 'Toyota', 'CDMX', 'Laura Ortiz', 2025, 'Azul', 490000, 'NX008', 8, '2025-08-15'),
+  (9, 'Lexus', 'MTY', 'Miguel Paredes', 2024, 'Negro', 2100000, 'NX090', 9, '2024-01-15'),
+  (10, 'Lexus', 'MTY', 'Miguel Paredes', 2025, 'Blanco', 1800000, 'NX091', 10, '2025-02-15'),
+  (11, 'Lexus', 'MTY', 'Miguel Paredes', 2024, 'Rojo', 1450000, 'NX092', 11, '2024-03-15'),
+  (12, 'Lexus', 'MTY', 'Miguel Paredes', 2025, 'Azul', 850000, 'NX093', 12, '2025-04-15'),
+  (13, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Negro', 800000, 'NX011', 1, '2024-01-15'),
+  (14, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Gris', 750000, 'NX012', 2, '2025-02-15'),
+  (15, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Rojo', 700000, 'NX013', 3, '2024-03-15'),
+  (16, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Azul', 650000, 'NX014', 4, '2025-04-15'),
+  (17, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Negro', 600000, 'NX015', 5, '2024-05-15'),
+  (18, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Gris', 580000, 'NX016', 6, '2025-06-15'),
+  (19, 'Toyota', 'GDL', 'Pedro Nava', 2024, 'Blanco', 420000, 'NX017', 7, '2024-07-15'),
+  (20, 'Toyota', 'GDL', 'Pedro Nava', 2025, 'Blanco', 300000, 'NX018', 8, '2025-08-15'),
+  (21, 'Toyota', 'GDL', 'Pedro Nava', 2023, 'Negro', 500000, 'NX019', 9, '2023-09-15'),
+  (22, 'Honda', 'SLP', 'Karina Soto', 2024, 'Negro', 720000, 'NX045', 10, '2024-01-15'),
+  (23, 'Honda', 'SLP', 'Karina Soto', 2025, 'Gris', 640000, 'NX046', 11, '2025-02-15'),
+  (24, 'Honda', 'SLP', 'Karina Soto', 2024, 'Rojo', 520000, 'NX047', 12, '2024-03-15'),
+  (25, 'Honda', 'SLP', 'Karina Soto', 2025, 'Blanco', 380000, 'NX048', 1, '2025-04-15'),
+  (26, 'Honda', 'CDMX', 'Julio Ramos', 2024, 'Negro', 710000, 'NX029', 2, '2024-01-15'),
+  (27, 'Honda', 'CDMX', 'Julio Ramos', 2025, 'Gris', 540000, 'NX030', 3, '2025-02-15'),
+  (28, 'Honda', 'CDMX', 'Julio Ramos', 2024, 'Rojo', 420000, 'NX031', 4, '2024-03-15'),
+  (29, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Negro', 560000, 'NX071', 5, '2024-01-15'),
+  (30, 'BYD', 'GDL', 'Laura Ortiz', 2025, 'Gris', 520000, 'NX072', 6, '2025-02-15'),
+  (31, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Rojo', 430000, 'NX073', 7, '2024-03-15'),
+  (32, 'BYD', 'GDL', 'Laura Ortiz', 2025, 'Azul', 390000, 'NX074', 8, '2025-04-15'),
+  (33, 'BYD', 'GDL', 'Laura Ortiz', 2024, 'Negro', 330000, 'NX075', 9, '2024-05-15'),
+  (34, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Negro', 980000, 'NX053', 10, '2024-01-15'),
+  (35, 'Kia', 'MTY', 'Miguel Paredes', 2025, 'Gris', 690000, 'NX054', 11, '2025-02-15'),
+  (36, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Rojo', 560000, 'NX055', 12, '2024-03-15'),
+  (37, 'Kia', 'MTY', 'Miguel Paredes', 2025, 'Azul', 495000, 'NX056', 1, '2025-04-15'),
+  (38, 'Kia', 'MTY', 'Miguel Paredes', 2024, 'Negro', 430000, 'NX057', 2, '2024-05-15'),
+  (39, 'Chirey', 'SLP', 'Julio Ramos', 2024, 'Negro', 260000, 'NX094', 3, '2024-01-15'),
+  (40, 'Chirey', 'SLP', 'Julio Ramos', 2025, 'Gris', 240000, 'NX095', 4, '2025-02-15'),
+  (41, 'Chirey', 'SLP', 'Julio Ramos', 2024, 'Rojo', 220000, 'NX096', NULL, '2024-03-15'),
+  (42, 'Chirey', 'SLP', 'Julio Ramos', 2025, 'Azul', 210000, 'NX097', NULL, '2025-04-15');
+
+  CREATE TABLE T_Clientes (
+    C_ID_Cliente INTEGER PRIMARY KEY,
+    C_Nombre_Completo TEXT,
+    C_Correo TEXT
+  );
+  INSERT INTO T_Clientes VALUES
+  (1, 'Valeria Montes', 'valeria.m@gmail.com'),
+  (2, 'Héctor Bravo', 'hbravo@outlook.com'),
+  (3, 'Renata Ochoa', 'renata.o@nexcorp.mx'),
+  (4, 'Iván Solís', 'ivan.solis@yahoo.com'),
+  (5, 'Camila Duarte', 'cduarte@gmail.com'),
+  (6, 'Óscar Peña', 'opena@hotmail.com'),
+  (7, 'Ximena Rangel', 'xrangel@nexcorp.mx'),
+  (8, 'Tomás Iglesias', 'tiglesias@gmail.com'),
+  (9, 'Regina Fuentes', 'rfuentes@outlook.com'),
+  (10, 'Bruno Cervantes', 'bcervantes@gmail.com'),
+  (11, 'Paola Zúñiga', 'pzuniga@yahoo.com'),
+  (12, 'Emilio Navarrete', 'enavarrete@nexcorp.mx');
+
+  CREATE TABLE T_Sucursales (
+    C_ID_Sucursal INTEGER PRIMARY KEY,
+    C_Nombre_Sucursal TEXT,
+    C_Ciudad TEXT
+  );
+  INSERT INTO T_Sucursales VALUES
+  (1, 'AXIOM Centro', 'Ciudad de México'),
+  (2, 'AXIOM Occidente', 'Guadalajara'),
+  (3, 'AXIOM Norte', 'Monterrey'),
+  (4, 'AXIOM Bajío', 'San Luis Potosí');
+
+  CREATE TABLE T_Vendedores (
+    C_ID_Vendedor INTEGER PRIMARY KEY,
+    C_Nombre_Vendedor TEXT,
+    C_ID_Sucursal INTEGER            -- FK a T_Sucursales
+  );
+  INSERT INTO T_Vendedores VALUES
+  (1, 'Laura Ortiz', 1),
+  (2, 'Miguel Paredes', 3),
+  (3, 'Pedro Nava', 2),
+  (4, 'Karina Soto', 4),
+  (5, 'Julio Ramos', 1);`;
 
 // ============================================
 // NARRATIVA INMERSIVA — Módulo 1
@@ -1093,6 +1139,81 @@ const challenges = {
     hasTutorial: true,
     hasTrivia: true,
     hasBoss: true
+  },
+  6: {
+    title: 'El Bosque de los Vínculos (Marketing)',
+    concept: `<strong>📜 Comandos de este ejercicio</strong><br><br>
+      <code>INNER JOIN tabla ON llave = llave</code> — une tablas por su "cable"<br>
+      <code>FROM T_Ventas AS V</code> — alias corto de tabla<br>
+      <code>V.C_Columna</code> — columna calificada (evita ambigüedad)<br><br>
+      <em>Tip: solo trae registros que coinciden en AMBAS tablas. La llave (ON) suele ser un ID.</em>`,
+    subExercises: [
+      {
+        id: 1, desc: '🔗 La Primera Unión (ventas + clientes GDL)',
+        expected: 'SELECT C_Nombre_Completo, C_ID_Venta FROM T_Ventas_GDL INNER JOIN T_Clientes_GDL ON T_Ventas_GDL.C_ID_Cliente = T_Clientes_GDL.C_ID_Cliente',
+        hint: 'SELECT C_Nombre_Completo, C_ID_Venta FROM T_Ventas_GDL INNER JOIN T_Clientes_GDL ON T_Ventas_GDL.C_ID_Cliente = T_Clientes_GDL.C_ID_Cliente;',
+        example: 'SELECT C_Correo, C_ID_Venta FROM T_Ventas_GDL INNER JOIN T_Clientes_GDL ON T_Ventas_GDL.C_ID_Cliente = T_Clientes_GDL.C_ID_Cliente;'
+      },
+      {
+        id: 2, desc: '🚗 Detalle de Compra (ventas + inventario nacional)',
+        expected: 'SELECT C_ID_Venta, C_Modelo FROM T_Ventas INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN',
+        hint: 'SELECT C_ID_Venta, C_Modelo FROM T_Ventas INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN;',
+        example: 'SELECT C_ID_Venta, C_Modelo, C_Monto FROM T_Ventas INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN;'
+      },
+      {
+        id: 3, desc: '🎯 Triple Alianza (cliente + modelo + fecha)',
+        expected: 'SELECT C_Nombre_Completo, C_Modelo, C_Fecha FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN',
+        hint: 'SELECT C_Nombre_Completo, C_Modelo, C_Fecha FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN;',
+        example: 'SELECT C_Nombre_Completo, C_Modelo, C_Monto FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN;'
+      },
+      {
+        id: 4, desc: '⚠️ GLITCH: Ventas con cliente válido (COUNT + JOIN)',
+        expected: 'SELECT COUNT(*) FROM T_Ventas INNER JOIN T_Clientes ON T_Ventas.C_ID_Cliente = T_Clientes.C_ID_Cliente',
+        hint: 'SELECT COUNT(*) FROM T_Ventas INNER JOIN T_Clientes ON T_Ventas.C_ID_Cliente = T_Clientes.C_ID_Cliente;',
+        example: 'SELECT COUNT(*) FROM T_Ventas INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN;'
+      },
+      {
+        id: 5, desc: '🔋 Filtro Combinado (clientes que compraron BYD)',
+        expected: "SELECT C_Nombre_Completo FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente WHERE C_Marca = 'BYD'",
+        hint: "SELECT C_Nombre_Completo FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente WHERE C_Marca = 'BYD';",
+        example: "SELECT C_Nombre_Completo FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente WHERE C_Marca = 'Lexus';"
+      },
+      {
+        id: 6, desc: '🏢 Vendedores y Sucursales (empleado + ciudad)',
+        expected: 'SELECT C_Nombre_Vendedor, C_Ciudad FROM T_Vendedores INNER JOIN T_Sucursales ON T_Vendedores.C_ID_Sucursal = T_Sucursales.C_ID_Sucursal',
+        hint: 'SELECT C_Nombre_Vendedor, C_Ciudad FROM T_Vendedores INNER JOIN T_Sucursales ON T_Vendedores.C_ID_Sucursal = T_Sucursales.C_ID_Sucursal;',
+        example: 'SELECT C_Nombre_Vendedor, C_Nombre_Sucursal FROM T_Vendedores INNER JOIN T_Sucursales ON T_Vendedores.C_ID_Sucursal = T_Sucursales.C_ID_Sucursal;'
+      },
+      {
+        id: 7, desc: '💳 Gasto por Cliente (JOIN + SUM + GROUP BY)',
+        expected: 'SELECT C_Nombre_Completo, SUM(C_Monto) FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente GROUP BY C_Nombre_Completo',
+        hint: 'SELECT C_Nombre_Completo, SUM(C_Monto) FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente GROUP BY C_Nombre_Completo;',
+        example: 'SELECT C_Nombre_Completo, COUNT(*) FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente GROUP BY C_Nombre_Completo;'
+      },
+      {
+        id: 8, desc: "⚠️ ERROR DE NODO: Modelos SLP color Blanco (alias V/I)",
+        expected: "SELECT I.C_Modelo FROM T_Ventas AS V INNER JOIN T_Inventario AS I ON V.C_VIN = I.C_VIN WHERE V.C_Sucursal = 'SLP' AND V.C_Color = 'Blanco'",
+        hint: "SELECT I.C_Modelo FROM T_Ventas AS V INNER JOIN T_Inventario AS I ON V.C_VIN = I.C_VIN WHERE V.C_Sucursal = 'SLP' AND V.C_Color = 'Blanco'; -- V.C_Color califica la columna: ambas tablas tienen C_Color",
+        example: "SELECT I.C_Modelo FROM T_Ventas AS V INNER JOIN T_Inventario AS I ON V.C_VIN = I.C_VIN WHERE V.C_Sucursal = 'GDL' AND V.C_Color = 'Blanco';"
+      },
+      {
+        id: 9, desc: '✂️ Alias Maestros (C para clientes, V para ventas)',
+        expected: 'SELECT C.C_Nombre_Completo, V.C_Monto FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente',
+        hint: 'SELECT C.C_Nombre_Completo, V.C_Monto FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente;',
+        example: 'SELECT C.C_Correo, V.C_Fecha FROM T_Clientes AS C INNER JOIN T_Ventas AS V ON C.C_ID_Cliente = V.C_ID_Cliente;'
+      },
+      {
+        id: 10, desc: '📧 La Gran Lista de Marketing (compradores 2025)',
+        expected: 'SELECT C_Nombre_Completo, C_Correo, C_Modelo FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN WHERE T_Ventas.C_Anio = 2025',
+        hint: 'SELECT C_Nombre_Completo, C_Correo, C_Modelo FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN WHERE T_Ventas.C_Anio = 2025; -- T_Ventas.C_Anio: el año también existe en inventario',
+        example: 'SELECT C_Nombre_Completo, C_Correo, C_Modelo FROM T_Clientes INNER JOIN T_Ventas ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente INNER JOIN T_Inventario ON T_Ventas.C_VIN = T_Inventario.C_VIN WHERE T_Ventas.C_Anio = 2024;'
+      }
+    ],
+    xp: 350, coins: 2200, difficulty: 5, skill: 'ADVANCED',
+    diaryEntry: 'Día 6: Reconecté los cables que The Void cortó. Mariana lanzó su campaña a tiempo y los clientes volvieron a tener nombre, correo y auto. Las tablas ya se hablan entre ellas.',
+    hasTutorial: true,
+    hasTrivia: true,
+    hasBoss: true
   }
 };
 
@@ -1453,6 +1574,73 @@ FROM T_Inventario_GDL;</pre>
           </div>
           <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
             Slide 3 de 3 — El consejo está sentado
+          </div>`
+      }
+    ]
+  },
+  6: {
+    title: 'El Pegamento Universal: INNER JOIN',
+    slides: [
+      // SLIDE 1 — Contexto / Mariana habla
+      {
+        icon: '🎨',
+        tag: 'NEXUS SQL — INTELIGENCIA DE MERCADO',
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:56px;margin-bottom:8px;filter:drop-shadow(0 0 20px var(--primary));">🎨</div>
+            <div style="font-family:var(--font-display);font-size:11px;letter-spacing:3px;color:var(--primary);text-transform:uppercase;">Departamento de Marketing — CDMX</div>
+          </div>
+          <div style="background:rgba(255,160,0,0.06);border:1px solid rgba(255,160,0,0.3);border-radius:12px;padding:20px;">
+            <div style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;color:var(--primary);margin-bottom:12px;">👩‍🎨 MARIANA — Directora de Marketing</div>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;">
+              "El virus separó nuestra base de clientes de las unidades vendidas.
+              Mis tablas de 'Clientes' no dicen qué auto compraron,
+              y mis 'Ventas' solo tienen números de serie."
+            </p>
+            <p style="font-style:italic;line-height:1.9;color:var(--text);font-size:15px;margin-top:10px;">
+              "¡Es como tener los nombres de los invitados pero no sus direcciones!
+              <strong style="color:var(--accent);">Vuelve a unir estos mundos</strong> o mi presupuesto se va a la basura."
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:16px;color:var(--muted);font-size:13px;">
+            Slide 1 de 3 — El rompecabezas de Mariana
+          </div>`
+      },
+      // SLIDE 2 — INNER JOIN + ON
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">🔗</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">La habilidad que separa aficionados de profesionales</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:8px;"><code style="color:var(--primary);">INNER JOIN</code> — el punto de encuentro: solo trae filas que coinciden en <strong>ambas</strong> tablas.</p>
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">ON</code> — la <strong>llave</strong>, el cable que conecta. Normalmente un ID.</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;">SELECT C_Nombre_Completo, C_Monto<br>FROM T_Clientes<br>INNER JOIN T_Ventas<br>&nbsp;&nbsp;ON T_Clientes.C_ID_Cliente = T_Ventas.C_ID_Cliente;</div>
+            <p style="color:var(--muted);font-size:13px;margin-top:10px;">Por eso una base "relacional" se llama así: las tablas se <strong>relacionan</strong> mediante llaves. En tu trabajo real, los SPs de Dalton están llenos de estos JOINs.</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 2 de 3 — El cable que The Void cortó
+          </div>`
+      },
+      // SLIDE 3 — Alias y ambigüedad
+      {
+        content: `
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:42px;margin-bottom:8px;">✂️</div>
+            <div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;">Alias: código limpio y sin ambigüedad</div>
+          </div>
+          <div style="background:rgba(255,109,0,0.08);border:2px solid var(--accent);border-radius:12px;padding:20px;margin-bottom:16px;">
+            <p style="margin-bottom:12px;"><code style="color:var(--primary);">FROM T_Ventas AS V</code> — abrevia el nombre. Luego escribes <code>V.C_Monto</code>.</p>
+            <div style="background:#0d1117;border-radius:8px;padding:12px;font-family:monospace;font-size:13px;color:#00ff41;margin-bottom:12px;">SELECT I.C_Modelo, V.C_Monto<br>FROM T_Ventas AS V<br>INNER JOIN T_Inventario AS I<br>&nbsp;&nbsp;ON V.C_VIN = I.C_VIN<br>WHERE V.C_Color = 'Blanco';</div>
+            <p style="margin-bottom:8px;">⚠️ Si <strong>ambas tablas</strong> tienen una columna (ej. <code>C_Color</code>, <code>C_Anio</code>), DEBES calificarla: <code>V.C_Color</code>. Si no, SQL lanza error de <em>ambigüedad</em>.</p>
+            <p style="color:var(--muted);font-size:13px;">Un JOIN puede encadenarse: 3 tablas = 2 JOINs. Cliente → Venta → Auto.</p>
+          </div>
+          <div style="background:rgba(0,217,255,0.06);border:1px solid rgba(0,217,255,0.3);border-radius:10px;padding:12px;margin-top:14px;text-align:center;">
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">💬 "Dos ventas perdieron su cliente. El INNER JOIN las va a ignorar — y eso también es información." — Ing. Ana</p>
+          </div>
+          <div style="text-align:center;margin-top:12px;color:var(--muted);font-size:13px;">
+            Slide 3 de 3 — La campaña espera
           </div>`
       }
     ]
@@ -2571,6 +2759,14 @@ const triviaData = {
     correct: 'B',
     explanation: 'SQL ejecuta <strong>FROM → WHERE → GROUP BY → HAVING → SELECT</strong>. Se escribe SELECT primero, pero se ejecuta casi al final. Por eso WHERE no puede usar alias del SELECT.',
     coins: 600, xp: 60
+  },
+  6: {
+    npc: 'Mariana señala dos pantallas: clientes en una, ventas en la otra',
+    question: 'Si quieres unir dos tablas y solo te interesan los registros que tienen coincidencia en AMBAS, ¿qué tipo de JOIN debes usar?',
+    options: { A: 'LEFT JOIN', B: 'INNER JOIN', C: 'CROSS JOIN' },
+    correct: 'B',
+    explanation: '<strong>INNER JOIN</strong> es el punto de encuentro: solo trae filas que coinciden en las dos tablas. LEFT trae todo de la izquierda aunque no coincida; CROSS combina todo con todo.',
+    coins: 700, xp: 70
   }
 };
 
@@ -2798,6 +2994,41 @@ const bossData = {
     victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 5',
     victoryBadgeLines: ['🌾 Insignia: Separador de Trigo y Paja', '🇲🇽 Insignia: Consolidador Nacional'],
     moduleLabel: 'Módulo 5 — COMPLETO 100%'
+  },
+  6: {
+    bossName: 'BOSS FINAL — MARIANA',
+    introTime: '📍 04:58 PM — La campaña sale en 2 minutos',
+    introText: `"¡{NAME}, la campaña sale en 2 minutos! Necesito la lista de los
+      <strong>10 clientes que más han gastado</strong> en la historia de la empresa.
+      Quiero su <strong>Nombre Completo, su Correo y el Total de su compra (SUM)</strong>.
+      Une T_Clientes con T_Ventas, <strong>agrupa por cliente</strong>
+      y <strong>ordena de mayor a menor</strong>. ¡Corre!"`,
+    comboHint: 'Combina: INNER JOIN ... ON, GROUP BY C_Nombre_Completo, C_Correo, ORDER BY SUM(C_Monto) DESC, LIMIT 10',
+    title: '👹 BOSS FINAL — El Lanzamiento VIP de Mariana',
+    descShort: 'Top 10 clientes por gasto total: nombre + correo + SUM, JOIN + GROUP BY + ORDER DESC',
+    battleCry: 'Top 10 clientes VIP. Nombre, correo y total. ¡La campaña no espera a nadie!',
+    checks: [
+      { any: ['inner join'], hint: 'INNER JOIN entre T_Clientes y T_Ventas' },
+      { any: [' on '], hint: 'ON con la llave C_ID_Cliente' },
+      { any: ['sum ('], hint: 'SUM(C_Monto)' },
+      { any: ['group by'], hint: 'GROUP BY por cliente' },
+      { any: ['c_correo'], hint: 'incluir C_Correo' },
+      { any: ['order by'], extra: 'desc', hint: 'ORDER BY ... DESC' },
+      { any: ['limit 10', 'top 10'], hint: 'LIMIT 10' }
+    ],
+    maxRows: 10,
+    xp: 180, coins: 3500,
+    badges: ['boss6', 'mundo6'],
+    newRank: null,
+    victoryTitle: '¡LOS VÍNCULOS HAN SIDO RESTAURADOS!',
+    victoryText: `"¡La campaña salió al aire con los 10 VIP correctos!
+      Acabas de hacer lo que The Void creyó imposible: volver a unir los mundos.
+      Clientes, ventas e inventario vuelven a ser una sola historia.
+      Ana dice que lo que viene es territorio avanzado... yo digo que ya estás listo."`,
+    victoryNPC: '— Mariana, Directora de Marketing',
+    victoryRewardsTitle: '🏆 RECOMPENSAS DEL MÓDULO 6',
+    victoryBadgeLines: ['🔗 Insignia: Tejedor de Vínculos', '🎨 Insignia: Héroe de Marketing'],
+    moduleLabel: 'Módulo 6 — COMPLETO 100%'
   }
 };
 
