@@ -3298,7 +3298,7 @@ function renderChallenges() {
     const completed = window.gameState.completedSubExercises[i] || [];
     // Candado: el módulo N se desbloquea al completar los 10 ejercicios del N-1
     const prevDone = (window.gameState.completedSubExercises[i - 1] || []).length === 10;
-    const isLocked = i > 1 && !prevDone;
+    const isLocked = i > 1 && !prevDone && !window.isAdminUser();
     if (isLocked) {
       const lockDiv = document.createElement('div');
       lockDiv.className = 'challenge-item';
@@ -4397,4 +4397,162 @@ window.showBadges = function() {
 window.closeModal = function(id) {
   sounds.click();
   document.getElementById(id).classList.remove('active');
+};
+
+// ============================================
+// PANEL ADMIN (solo usuario Admin — pruebas y gestión de usuarios)
+// ============================================
+window.isAdminUser = function() {
+  try {
+    const users = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+    const u = users[window.currentUserIndex];
+    return !!(u && u.id === 'admin_master' && u.isAdmin);
+  } catch(e) { return false; }
+};
+
+// Botón flotante — aparece solo si el admin está logueado
+setInterval(() => {
+  const existing = document.getElementById('adminFab');
+  const should = window.isAdminUser() && !document.getElementById('authScreen');
+  if (should && !existing) {
+    const b = document.createElement('button');
+    b.id = 'adminFab';
+    b.textContent = '🛠️ ADMIN';
+    b.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9000;padding:10px 16px;background:var(--danger,#ff1744);color:#fff;border:none;border-radius:10px;font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.5);';
+    b.onclick = () => window.adminOpenPanel();
+    document.body.appendChild(b);
+  } else if (!should && existing) {
+    existing.remove();
+  }
+}, 1500);
+
+window.adminOpenPanel = function(tab) {
+  if (!window.isAdminUser()) return;
+  tab = tab || 'pruebas';
+  const content = document.getElementById('modalGenericContent');
+  const tabBtn = (id, label) => `<button onclick="adminOpenPanel('${id}')" style="flex:1;padding:10px;border:none;cursor:pointer;font-family:var(--font-display);font-size:12px;font-weight:700;border-radius:8px 8px 0 0;background:${tab===id?'var(--primary)':'transparent'};color:${tab===id?'var(--bg)':'var(--muted)'};">${label}</button>`;
+  let body = '';
+  if (tab === 'pruebas') {
+    const btn = (fn, icon, label, desc) => `
+      <button onclick="${fn}" style="display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text-hi);">
+        <strong>${icon} ${label}</strong><br><span style="font-size:11px;color:var(--muted);">${desc}</span>
+      </button>`;
+    body = `
+      ${btn('adminAddCoins(1000)', '🪙', '+1,000 monedas', 'Para probar la tienda sin jugar horas')}
+      ${btn('adminAddXP(500)', '⚡', '+500 XP', 'Para probar rangos y avatares por nivel')}
+      ${btn('adminCompleteModule()', '✅', 'Completar módulo actual', 'Marca los 10 ejercicios como hechos → prueba recompensas y desbloqueo')}
+      ${btn('adminJumpBoss()', '👹', 'Ir al BOSS del módulo actual', 'Abre la pelea final directamente')}
+      ${btn('adminForceTrivia()', '🎲', 'Forzar trivia del módulo actual', 'Reabre la trivia aunque ya se haya contestado')}
+      ${btn('adminResetSelf()', '🧨', 'Resetear MI progreso (Admin)', 'Vuelve al Admin a cero — no toca a otros usuarios')}
+    `;
+  } else {
+    body = `<div id="adminUserList" style="min-height:80px;"><p style="color:var(--muted);text-align:center;padding:20px;">📡 Cargando usuarios de la nube...</p></div>`;
+    setTimeout(() => adminLoadUsers(), 50);
+  }
+  content.innerHTML = `
+    <h2 style="margin-bottom:12px;">🛠️ Panel de Administración</h2>
+    <div style="display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      ${tabBtn('pruebas', '🧪 PRUEBAS')}
+      ${tabBtn('usuarios', '👥 USUARIOS')}
+    </div>
+    ${body}
+    <button onclick="closeModal('modalGeneric')" style="width:100%;padding:10px;margin-top:6px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;">Cerrar</button>`;
+  document.getElementById('modalGeneric').classList.add('active');
+};
+
+window.adminAddCoins = function(n) {
+  window.gameState.coins += n;
+  saveGameState(); updateStats();
+  if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 60 });
+};
+
+window.adminAddXP = function(n) {
+  window.gameState.xp += n;
+  saveGameState(); updateStats(); if (typeof updateProgressBar === 'function') updateProgressBar();
+};
+
+window.adminCompleteModule = function() {
+  const cId = window.gameState.currentChallenge;
+  const ch = challenges[cId];
+  if (!ch) return;
+  window.gameState.completedSubExercises[cId] = ch.subExercises.map(s => s.id);
+  if (!window.gameState.completedChallenges.includes(cId)) window.gameState.completedChallenges.push(cId);
+  window.gameState.xp += ch.xp; window.gameState.coins += ch.coins;
+  saveGameState(); renderChallenges(); updateStats();
+  if (typeof updateProgressBar === 'function') updateProgressBar();
+  if (typeof updateSkillBars === 'function') updateSkillBars();
+  closeModal('modalGeneric');
+};
+
+window.adminJumpBoss = function() {
+  closeModal('modalGeneric');
+  const cId = window.gameState.currentChallenge;
+  if (challenges[cId]?.hasBoss && typeof window.showBossFight === 'function') window.showBossFight(cId);
+};
+
+window.adminForceTrivia = function() {
+  closeModal('modalGeneric');
+  window.gameState.triviaAnswered = false;
+  const cId = window.gameState.currentChallenge;
+  if (challenges[cId]?.hasTrivia && typeof showTrivia === 'function') showTrivia(cId);
+};
+
+window.adminResetSelf = function() {
+  if (!confirm('¿Seguro? Esto borra TODO el progreso del usuario Admin.')) return;
+  Object.assign(window.gameState, {
+    xp: 0, coins: 0, streak: 0,
+    currentChallenge: 1, currentSubExercise: 1, currentDay: 1,
+    completedChallenges: [], completedSubExercises: {},
+    unlockedBadges: [], unlockedItems: [], equippedItems: {},
+    diary: [], skills: { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 },
+    expandedChallenges: [], tutorialsSeen: [], triviaAnswered: false
+  });
+  saveGameState(); renderChallenges(); updateStats();
+  if (typeof updateProgressBar === 'function') updateProgressBar();
+  if (typeof updateSkillBars === 'function') updateSkillBars();
+  closeModal('modalGeneric');
+};
+
+// ── Gestión de usuarios (nube) ──
+window.adminLoadUsers = async function() {
+  const box = document.getElementById('adminUserList');
+  if (!box) return;
+  await window.waitForFirebase(3000);
+  if (!window._loadUserList) { box.innerHTML = '<p style="color:var(--danger);">Sin conexión a Firebase.</p>'; return; }
+  const list = await window._loadUserList();
+  if (!list.length) { box.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px;">No hay usuarios en la nube todavía.</p>'; return; }
+  const rows = await Promise.all(list.map(async u => {
+    const gs = window._loadUserById ? await window._loadUserById(u.id) : null;
+    const mods = gs ? Object.keys(gs.completedSubExercises || {}).filter(k => (gs.completedSubExercises[k] || []).length === 10).length : 0;
+    return `
+      <div style="padding:10px 12px;margin-bottom:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong style="color:var(--primary);">${u.nick || '(sin nombre)'}</strong>
+          <span style="font-size:11px;color:var(--muted);">${u.id}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin:4px 0;">
+          ⚡ ${gs?.xp ?? '?'} XP · 🪙 ${gs?.coins ?? '?'} · 📦 ${mods}/11 módulos · Última visita: ${gs?.lastVisit ? gs.lastVisit.slice(0,10) : '—'}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="adminDoResetPin('${u.id}')" style="flex:1;padding:7px;background:transparent;border:1px solid var(--primary);border-radius:8px;color:var(--primary);cursor:pointer;font-size:11px;">🔑 Resetear PIN</button>
+          <button onclick="adminDoDeleteUser('${u.id}','${(u.nick||'').replace(/'/g,'')}')" style="flex:1;padding:7px;background:transparent;border:1px solid var(--danger,#ff1744);border-radius:8px;color:var(--danger,#ff1744);cursor:pointer;font-size:11px;">🗑️ Borrar</button>
+        </div>
+      </div>`;
+  }));
+  box.innerHTML = rows.join('');
+};
+
+window.adminDoResetPin = async function(userId) {
+  if (!confirm('El PIN quedará vacío: la próxima vez que ese usuario entre, creará un PIN nuevo. ¿Continuar?')) return;
+  const ok = await window._adminResetPin(userId);
+  alert(ok ? '✅ PIN reseteado.' : '❌ No se pudo resetear.');
+  adminLoadUsers();
+};
+
+window.adminDoDeleteUser = async function(userId, nick) {
+  if (!confirm('⚠️ Esto BORRA PERMANENTEMENTE a "' + nick + '" y todo su progreso de la nube. No se puede deshacer. ¿Continuar?')) return;
+  if (!confirm('Última confirmación: ¿borrar a "' + nick + '"?')) return;
+  const ok = await window._adminDeleteUser(userId);
+  alert(ok ? '✅ Usuario borrado.' : '❌ No se pudo borrar.');
+  adminLoadUsers();
 };
