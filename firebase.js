@@ -40,7 +40,7 @@ const pinIcons = [
   script.textContent = `
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import {
-      getFirestore, doc, setDoc, getDoc, getDocs, collection
+      getFirestore, doc, setDoc, getDoc, getDocs, collection, deleteDoc
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const app = initializeApp(${JSON.stringify(firebaseConfig)});
@@ -118,6 +118,43 @@ const pinIcons = [
       } catch(e) { return null; }
     };
 
+    // ── ADMIN: lista completa de usuarios de la nube ──
+    window._loadUserList = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'nexus_meta', 'users'));
+        if (!snap.exists()) return [];
+        return JSON.parse(snap.data().list || '[]');
+      } catch(e) { return []; }
+    };
+
+    // ── ADMIN: resetear PIN de un usuario (queda vacío; al entrar creará uno nuevo) ──
+    window._adminResetPin = async (userId) => {
+      try {
+        const list = await window._loadUserList();
+        const u = list.find(x => x.id === userId);
+        if (u) { u.pinHash = ''; await setDoc(doc(db, 'nexus_meta', 'users'), { list: JSON.stringify(list), updated: new Date().toISOString() }); }
+        const snap = await getDoc(doc(db, 'nexus_usuarios', userId));
+        if (snap.exists()) {
+          const data = snap.data();
+          const gs = data.gameState ? JSON.parse(data.gameState) : {};
+          gs.pinHash = '';
+          await setDoc(doc(db, 'nexus_usuarios', userId), { gameState: JSON.stringify(gs), pinHash: '', lastSync: new Date().toISOString() });
+        }
+        return true;
+      } catch(e) { return false; }
+    };
+
+    // ── ADMIN: borrar usuario (lista + su documento de progreso) ──
+    window._adminDeleteUser = async (userId) => {
+      try {
+        const list = await window._loadUserList();
+        const filtered = list.filter(x => x.id !== userId);
+        await setDoc(doc(db, 'nexus_meta', 'users'), { list: JSON.stringify(filtered), updated: new Date().toISOString() });
+        await deleteDoc(doc(db, 'nexus_usuarios', userId));
+        return true;
+      } catch(e) { return false; }
+    };
+
     // Señal: Firebase listo
     window._firebaseReady = true;
     document.dispatchEvent(new Event('firebaseReady'));
@@ -151,6 +188,13 @@ window.hashPin = async function(pinArray) {
     .join('')
     .slice(0, 20);
 };
+
+// ============================================
+// USUARIO ADMIN (fijo en código — PIN de 6 dígitos, solo guardamos su hash)
+// ============================================
+const ADMIN_NICK = 'admin';
+const ADMIN_ID = 'admin_master';
+const ADMIN_PIN_HASH = '3de28e800b3953e009af'; // hash SHA-256 del PIN admin + salt (el PIN nunca se escribe aquí)
 
 // ============================================
 // PANTALLA DE LOGIN / REGISTRO
@@ -331,6 +375,13 @@ window.doLogin = async function() {
   if (!nick) return;
 
   const content = document.getElementById('authContent');
+
+  // Ruta especial: usuario administrador (PIN de 6 dígitos)
+  if (nick.toLowerCase() === ADMIN_NICK) {
+    showPinEntry(null, 'admin');
+    return;
+  }
+
   content.innerHTML = `<p style="color:var(--muted);text-align:center;padding:20px;">🔍 Buscando operador...</p>`;
 
   // Buscar local primero
@@ -369,9 +420,11 @@ window.selectLocalUser = function(index) {
 // ── Mostrar PIN de entrada ──
 window.showPinEntry = function(localIndex, source, cloudUser) {
   const content = document.getElementById('authContent');
-  window._pendingAuth = { localIndex, source, cloudUser, enteredPin: [] };
+  const pinLen = source === 'admin' ? 6 : 4;
+  window._pendingAuth = { localIndex, source, cloudUser, enteredPin: [], pinLen };
 
-  const name = source === 'local'
+  const name = source === 'admin' ? 'Admin'
+    : source === 'local'
     ? JSON.parse(localStorage.getItem('nexusSQL_users') || '[]')[localIndex]?.playerName
     : cloudUser?.nick;
 
@@ -380,11 +433,11 @@ window.showPinEntry = function(localIndex, source, cloudUser) {
       <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">
         Bienvenido, <strong style="color:var(--primary)">${name}</strong>
       </p>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Ingresa tu PIN de 4 dígitos:</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Ingresa tu PIN de ${pinLen} dígitos:</p>
 
       <div id="pinDisplay" style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;">
-        ${[0,1,2,3].map(i => `
-          <div style="width:48px;height:56px;border-radius:10px;border:2px solid var(--border);
+        ${Array.from({length: pinLen}, (_, i) => i).map(i => `
+          <div style="width:${pinLen === 6 ? 40 : 48}px;height:56px;border-radius:10px;border:2px solid var(--border);
                       background:var(--bg2);display:flex;align-items:center;justify-content:center;
                       font-size:24px;font-family:var(--font-display);color:var(--primary);
                       font-weight:700;" id="pinSlot${i}">·</div>`).join('')}
@@ -424,7 +477,8 @@ window.showPinEntry = function(localIndex, source, cloudUser) {
 // ── Ingresar dígito al PIN ──
 window.enterPinDigit = async function(digit) {
   const auth = window._pendingAuth;
-  if (!auth || auth.enteredPin.length >= 4) return;
+  const maxLen = auth?.pinLen || 4;
+  if (!auth || auth.enteredPin.length >= maxLen) return;
 
   auth.enteredPin.push(digit);
   const slot = document.getElementById('pinSlot' + (auth.enteredPin.length - 1));
@@ -433,7 +487,7 @@ window.enterPinDigit = async function(digit) {
     slot.style.borderColor = 'var(--primary)';
   }
 
-  if (auth.enteredPin.length === 4) {
+  if (auth.enteredPin.length === maxLen) {
     setTimeout(() => verifyPin(), 200);
   }
 };
@@ -453,6 +507,51 @@ window.verifyPin = async function() {
   const auth = window._pendingAuth;
 
   const enteredHash = await window.hashPin(auth.enteredPin);
+  const slotCount = auth.pinLen || 4;
+
+  // ── Rama ADMIN: comparar contra hash fijo en código ──
+  if (auth.source === 'admin') {
+    if (enteredHash === ADMIN_PIN_HASH) {
+      const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+      let idx = localUsers.findIndex(u => u.id === ADMIN_ID);
+      if (idx < 0) {
+        // Primera vez: crear perfil admin (guarda progreso normal, como cualquier usuario)
+        localUsers.push({
+          id: ADMIN_ID, playerName: 'Admin', pinHash: ADMIN_PIN_HASH, isAdmin: true,
+          avatar: 0, xp: 0, coins: 0, streak: 0,
+          lastVisit: new Date().toISOString(),
+          currentChallenge: 1, currentSubExercise: 1, currentDay: 1,
+          completedChallenges: [], completedSubExercises: {},
+          unlockedBadges: [], unlockedItems: [], equippedItems: {},
+          reputation: { ana: 0, roberto: 0 },
+          diary: [], skills: { SELECT: 0, WHERE: 0, ORDER: 0, ADVANCED: 0 },
+          expandedChallenges: [], tutorialsSeen: [],
+          theme: 'dark', soundEnabled: true, triviaAnswered: false,
+          rank: 'Analista JR', kitBenefits: null, hintsRemaining: 99, attemptLimit: 99,
+          isNewUser: false
+        });
+        localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
+        idx = localUsers.length - 1;
+      } else {
+        localUsers[idx].isAdmin = true; // asegurar bandera
+        localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
+      }
+      await loginSuccess({ source: 'local', localIndex: idx }, localUsers[idx], idx);
+    } else {
+      auth.enteredPin = [];
+      for (let i = 0; i < slotCount; i++) {
+        const slot = document.getElementById('pinSlot' + i);
+        if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--danger)'; }
+      }
+      setTimeout(() => {
+        for (let i = 0; i < slotCount; i++) {
+          const slot = document.getElementById('pinSlot' + i);
+          if (slot) slot.style.borderColor = 'var(--border)';
+        }
+      }, 600);
+    }
+    return;
+  }
 
   let user = null;
   let localIndex = auth.localIndex;
@@ -478,12 +577,12 @@ window.verifyPin = async function() {
     await loginSuccess(auth, user, localIndex);
   } else {
     auth.enteredPin = [];
-    [0,1,2,3].forEach(i => {
+    Array.from({length: slotCount}, (_, i) => i).forEach(i => {
       const slot = document.getElementById('pinSlot' + i);
       if (slot) { slot.textContent = '·'; slot.style.borderColor = 'var(--border)'; slot.style.color = 'var(--danger)'; }
     });
     setTimeout(() => {
-      [0,1,2,3].forEach(i => {
+      Array.from({length: slotCount}, (_, i) => i).forEach(i => {
         const slot = document.getElementById('pinSlot' + i);
         if (slot) slot.style.color = 'var(--primary)';
       });
@@ -585,6 +684,11 @@ window.startPinSetup = function(mode) {
 
   if (!name || name.length < 3) {
     if (nameInput) nameInput.style.borderColor = 'var(--danger)';
+    return;
+  }
+
+  if (name.toLowerCase() === ADMIN_NICK) {
+    if (nameInput) { nameInput.style.borderColor = 'var(--danger)'; nameInput.value = ''; nameInput.placeholder = 'Ese nombre está reservado'; }
     return;
   }
 
