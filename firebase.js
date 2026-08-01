@@ -389,6 +389,10 @@ window.doLogin = async function() {
   const localMatch = localUsers.findIndex(u => u.playerName?.toLowerCase() === nick.toLowerCase());
 
   if (localMatch >= 0) {
+    if (localUsers[localMatch]?.id === ADMIN_ID || localUsers[localMatch]?.isAdmin) {
+      showPinEntry(null, 'admin');
+      return;
+    }
     showPinEntry(localMatch, 'local');
     return;
   }
