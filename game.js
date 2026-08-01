@@ -4410,21 +4410,27 @@ window.isAdminUser = function() {
   } catch(e) { return false; }
 };
 
-// Botón flotante — aparece solo si el admin está logueado
-setInterval(() => {
-  const existing = document.getElementById('adminFab');
+// Botón flotante — persistente aunque el juego repinte la pantalla
+function ensureAdminFab() {
   const should = window.isAdminUser() && !document.getElementById('authScreen');
-  if (should && !existing) {
-    const b = document.createElement('button');
-    b.id = 'adminFab';
-    b.textContent = '🛠️ ADMIN';
-    b.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9000;padding:10px 16px;background:var(--danger,#ff1744);color:#fff;border:none;border-radius:10px;font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.5);';
-    b.onclick = () => window.adminOpenPanel();
-    document.body.appendChild(b);
-  } else if (!should && existing) {
-    existing.remove();
+  let fab = document.getElementById('adminFab');
+  if (should && !fab) {
+    fab = document.createElement('button');
+    fab.id = 'adminFab';
+    fab.textContent = '🛠️ ADMIN';
+    fab.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:99999;padding:10px 16px;background:var(--danger,#ff1744);color:#fff;border:none;border-radius:10px;font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.5);';
+    fab.onclick = () => window.adminOpenPanel();
+    document.body.appendChild(fab);
+  } else if (!should && fab) {
+    fab.remove();
   }
-}, 1500);
+}
+setInterval(ensureAdminFab, 800);
+// Reinsertar también cada vez que el DOM del body cambie (repintados del juego)
+try {
+  const _fabObserver = new MutationObserver(() => ensureAdminFab());
+  _fabObserver.observe(document.body, { childList: true, subtree: false });
+} catch(e) {}
 
 window.adminOpenPanel = function(tab) {
   if (!window.isAdminUser()) return;
