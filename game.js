@@ -2800,6 +2800,7 @@ function loadUserProfile(index) {
   const u = window.userProfiles[index];
   Object.assign(window.gameState, {
     id: u.id || null,
+    isAdmin: u.isAdmin || false,   // ← conservar la marca de administrador
     pinHash: u.pinHash || null,    // ← necesario para que Firebase lo guarde
     playerName: u.playerName, avatar: u.avatar, xp: u.xp, coins: u.coins,
     streak: u.streak || 0, currentChallenge: u.currentChallenge || 1,
@@ -4406,7 +4407,8 @@ window.isAdminUser = function() {
   try {
     const users = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
     const u = users[window.currentUserIndex];
-    return !!(u && u.id === 'admin_master' && u.isAdmin);
+    if (!u) return false;
+    return u.id === 'admin_master' || u.isAdmin === true || (u.playerName || '').toLowerCase() === 'admin';
   } catch(e) { return false; }
 };
 
