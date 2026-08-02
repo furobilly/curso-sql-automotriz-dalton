@@ -4474,6 +4474,10 @@ window.adminCompleteModule = function() {
   window.gameState.completedSubExercises[cId] = ch.subExercises.map(s => s.id);
   if (!window.gameState.completedChallenges.includes(cId)) window.gameState.completedChallenges.push(cId);
   window.gameState.xp += ch.xp; window.gameState.coins += ch.coins;
+  // Subir la habilidad asociada al módulo (10 sub-ejercicios × +10 = +100, tope 100)
+  if (ch.skill && window.gameState.skills[ch.skill] != null) {
+    window.gameState.skills[ch.skill] = Math.min(100, window.gameState.skills[ch.skill] + 100);
+  }
   saveGameState(); renderChallenges(); updateStats();
   if (typeof updateProgressBar === 'function') updateProgressBar();
   if (typeof updateSkillBars === 'function') updateSkillBars();
