@@ -418,6 +418,13 @@ window.doLogin = async function() {
 
 // ── Seleccionar usuario local ──
 window.selectLocalUser = function(index) {
+  const localUsers = JSON.parse(localStorage.getItem('nexusSQL_users') || '[]');
+  const u = localUsers[index];
+  // Si el perfil seleccionado es el administrador, exigir PIN de 6 dígitos
+  if (u && (u.id === ADMIN_ID || u.isAdmin === true || (u.playerName || '').toLowerCase() === 'admin')) {
+    showPinEntry(null, 'admin');
+    return;
+  }
   showPinEntry(index, 'local');
 };
 
