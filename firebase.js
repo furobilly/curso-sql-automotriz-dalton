@@ -537,7 +537,8 @@ window.verifyPin = async function() {
         localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
         idx = localUsers.length - 1;
       } else {
-        localUsers[idx].isAdmin = true; // asegurar bandera
+        localUsers[idx].id = ADMIN_ID;      // reafirmar id
+        localUsers[idx].isAdmin = true;      // asegurar bandera
         localStorage.setItem('nexusSQL_users', JSON.stringify(localUsers));
       }
       await loginSuccess({ source: 'local', localIndex: idx }, localUsers[idx], idx);
